@@ -6,6 +6,7 @@
 <title>Notícias em Cordel — gerador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/folheto.css">
 <style>
   :root {
     --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35;
@@ -78,32 +79,10 @@
   .cand .versos-c { font: 13px/1.5 "Courier Prime", monospace; margin-top: 3px; }
   .cand .versos-c + .versos-c { margin-top: 8px; }
   .sub-est { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin-top: 8px; }
-  .folheto .estrofe-c + .estrofe-c { margin-top: 1em; }
   del { color: var(--vermelho); } ins { color: var(--verde); text-decoration: none; }
   details summary { cursor: pointer; font-size: 12px; color: var(--tinta-2); }
   pre { white-space: pre-wrap; font-size: 12px; background: #fbf6ea; padding: 8px; border: 1px solid var(--linha); overflow-x: auto; }
 
-  /* ---------------- o folheto, no estilo "Notícias em Cordel" ---------------- */
-  .folheto {
-    background: var(--folha); color: var(--tinta); padding: 7px; border: 3px solid var(--tinta);
-    box-shadow: 6px 6px 0 #15121055; max-width: 420px; margin: 0 auto;
-  }
-  .folheto .moldura { border: 1.5px solid var(--tinta); padding: 18px 20px 14px; }
-  .folheto .cab { font: 700 34px/1 "Oswald", sans-serif; text-transform: uppercase; text-align: center; letter-spacing: .5px; }
-  .folheto .sub { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0 4px;
-                  font: 700 10.5px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; text-align: center; }
-  .folheto .div { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
-  .folheto .div::before, .folheto .div::after { content: ""; flex: 1; border-top: 2px solid var(--tinta); }
-  .folheto .estrela { font-size: 18px; line-height: 1; }
-  .seta { width: 22px; height: 10px; flex: none; }
-  .folheto .manchete { font: 700 22px/1.15 "Oswald", sans-serif; text-transform: uppercase; text-align: center; margin: 6px 0 8px; min-height: 1em; }
-  .folheto .xilo { aspect-ratio: 3 / 2; background: #ddd5c3; border: 2px solid var(--tinta); display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; overflow: hidden; }
-  .folheto .xilo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1) contrast(1.15); }
-  .folheto .xilo span { font-family: "Special Elite", monospace; font-size: 12px; color: var(--tinta-2); padding: 16px; text-align: center; }
-  .folheto .versos { font: 14.5px/1.55 "Courier Prime", "Courier New", monospace; margin: 16px 4px 10px; min-height: 9.3em; }
-  .folheto .rodape { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .folheto .rodape::before, .folheto .rodape::after { content: ""; flex: 1; border-top: 2px solid var(--tinta); }
-  .fonte { text-align: center; font: 11px "Courier Prime", monospace; color: var(--tinta-2); margin-top: 8px; overflow-wrap: anywhere; }
 
   .veredito { max-width: 420px; margin: 18px auto 0; text-align: center; display: none; }
   .selo { display: inline-block; font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px;
@@ -177,6 +156,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<script src="/static/folheto.js"></script>
 <script>
 const EXEMPLOS = [
   "Startup de Recife coloca robô com IA para vender frutas numa feira livre. O robô conversa com os clientes, sugere receitas e faz troco, mas se confundiu com o preço da macaxeira e acabou dando desconto de 90% por uma tarde inteira.",
@@ -356,22 +336,7 @@ function tratar(ev) {
 
 async function baixar(nome) {
   $("baixar").disabled = true;
-  // o PNG original (~2,5 MB) deixa o html-to-image lento (~30 s); uma cópia
-  // reduzida em JPEG, só durante a exportação, faz o mesmo em ~2 s
-  const img = document.querySelector("#xilo img"), orig = img?.src;
-  try {
-    if (img) {
-      const c = document.createElement("canvas");
-      c.width = 1200; c.height = Math.round(1200 * img.naturalHeight / img.naturalWidth);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      img.src = c.toDataURL("image/jpeg", 0.9); await img.decode();
-    }
-    const url = await htmlToImage.toPng($("folheto"), { pixelRatio: 2, backgroundColor: "#f4efe3" });
-    const a = document.createElement("a"); a.href = url; a.download = `${nome}-folheto.png`; a.click();
-  } finally {
-    if (img) img.src = orig;
-    $("baixar").disabled = false;
-  }
+  try { await baixarFolheto($("folheto"), nome); } finally { $("baixar").disabled = false; }
 }
 
 $("gerar").onclick = async () => {

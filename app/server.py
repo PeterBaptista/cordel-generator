@@ -35,6 +35,7 @@ async def exigir_senha(request: Request, call_next):
             return Response(status_code=401,
                             headers={"WWW-Authenticate": 'Basic realm="Noticias em Cordel"'})
     return await call_next(request)
+app.mount("/static", StaticFiles(directory=RAIZ / "app" / "static"), name="static")
 for nome, pasta in PASTAS.items():
     pasta.mkdir(parents=True, exist_ok=True)
     app.mount(f"/{nome}", StaticFiles(directory=pasta), name=nome)

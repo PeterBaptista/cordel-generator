@@ -34,19 +34,19 @@
   .item { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 
   /* cartaz em miniatura, o mesmo desenho do gerador */
-  .folheto { background: var(--folha); border: 3px solid var(--tinta); padding: 5px; box-shadow: 5px 5px 0 #15121055; }
-  .folheto .moldura { border: 1.5px solid var(--tinta); padding: 12px 14px 10px; }
-  .folheto .cab { font: 700 20px/1 "Oswald", sans-serif; text-transform: uppercase; text-align: center; }
-  .folheto .div { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
-  .folheto .div::before, .folheto .div::after { content: ""; flex: 1; border-top: 1.5px solid var(--tinta); }
-  .folheto .manchete { font: 700 16px/1.15 "Oswald", sans-serif; text-transform: uppercase; text-align: center; }
-  .folheto .xilo { aspect-ratio: 3 / 2; border: 1.5px solid var(--tinta); background: #ddd5c3; overflow: hidden;
+  .mini { background: var(--folha); border: 3px solid var(--tinta); padding: 5px; box-shadow: 5px 5px 0 #15121055; }
+  .mini .moldura { border: 1.5px solid var(--tinta); padding: 12px 14px 10px; }
+  .mini .cab { font: 700 20px/1 "Oswald", sans-serif; text-transform: uppercase; text-align: center; }
+  .mini .div { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+  .mini .div::before, .mini .div::after { content: ""; flex: 1; border-top: 1.5px solid var(--tinta); }
+  .mini .manchete { font: 700 16px/1.15 "Oswald", sans-serif; text-transform: uppercase; text-align: center; }
+  .mini .xilo { aspect-ratio: 3 / 2; border: 1.5px solid var(--tinta); background: #ddd5c3; overflow: hidden;
                    display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; margin-top: 6px; }
-  .folheto .xilo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1) contrast(1.15); }
-  .folheto .xilo span { font: 12px "Special Elite", monospace; color: var(--tinta-3); }
-  .folheto .versos { font: 13px/1.5 "Courier Prime", monospace; margin: 10px 2px 4px; }
-  .folheto .estrofe + .estrofe { margin-top: .8em; }
-  .folheto .versos.recolhido .estrofe:nth-child(n+3) { display: none; }
+  .mini .xilo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1) contrast(1.15); }
+  .mini .xilo span { font: 12px "Special Elite", monospace; color: var(--tinta-3); }
+  .mini .versos { font: 13px/1.5 "Courier Prime", monospace; margin: 10px 2px 4px; }
+  .mini .estrofe + .estrofe { margin-top: .8em; }
+  .mini .versos.recolhido .estrofe:nth-child(n+3) { display: none; }
   .mais { font: 12px "Courier Prime", monospace; background: none; border: 0; color: var(--vermelho); cursor: pointer; padding: 0 2px; text-decoration: underline; }
 
   .selo { display: inline-block; font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px;
@@ -63,11 +63,14 @@
   .ficha .deduzida { font-size: 11.5px; font-style: italic; color: var(--tinta-3); margin-top: 6px; }
   .ficha .links { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 8px; font: 12.5px "Special Elite", monospace; }
   .ficha .links a { color: var(--tinta); }
+  .baixar { font: 12.5px "Special Elite", monospace; background: none; border: 0; padding: 0; color: var(--tinta); text-decoration: underline; cursor: pointer; }
+  .baixar:disabled { color: var(--tinta-3); cursor: wait; }
   .refazer { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; padding: 5px 10px; cursor: pointer;
              background: var(--tinta); color: var(--papel); border: 2px solid var(--tinta); box-shadow: 3px 3px 0 var(--vermelho); margin-left: auto; }
   .refazer:hover { transform: translate(-1px, -1px); }
   .vazio { text-align: center; color: var(--tinta-2); padding: 40px 0; grid-column: 1 / -1; }
 </style>
+<link rel="stylesheet" href="/static/folheto.css">
 </head>
 <body>
 <header>
@@ -88,11 +91,14 @@
   <section class="grade" id="grade"><div class="vazio">carregando…</div></section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<script src="/static/folheto.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const usd = (v) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(v);
 const quando = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
 const NOMES = { low: "baixo", medium: "médio", high: "alto" };
 const modelo = (id) => (id || "—").replace("openai:", "");
 // só estes campos voltam para o gerador (os mesmos que o servidor aceita)
@@ -121,7 +127,7 @@ function cartao(i, idx) {
   const estrofes = i.estrofes.map((vs) => `<div class="estrofe">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("");
   const longo = i.estrofes.length > 2;
   return `<article class="item">
-    <div class="folheto"><div class="moldura">
+    <div class="mini"><div class="moldura">
       <div class="cab">Notícias em Cordel</div>
       <div class="div">✸</div>
       <div class="manchete">${esc(i.manchete)}</div>
@@ -139,6 +145,7 @@ function cartao(i, idx) {
         ${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">notícia</a>` : ""}
         ${a.texto ? `<a href="/${esc(a.texto)}" target="_blank">texto</a>` : ""}
         <a href="/${esc(a.caderno)}" target="_blank">caderno</a>
+        <button class="baixar" data-i="${idx}" title="o cartaz em tamanho cheio, como no gerador">baixar PNG</button>
         <button class="refazer" data-i="${idx}" title="abre o gerador com estes parâmetros">gerar de novo</button>
       </div>
     </div>
@@ -155,6 +162,17 @@ function render() {
   document.querySelectorAll(".mais").forEach((b) => b.onclick = () => {
     const v = $(b.dataset.v); const rec = v.classList.toggle("recolhido");
     b.textContent = rec ? `mostrar as ${v.children.length} estrofes` : "recolher";
+  });
+  document.querySelectorAll(".baixar").forEach((b) => b.onclick = async () => {
+    const i = ITENS[b.dataset.i];
+    b.disabled = true; b.textContent = "gerando PNG…";
+    try {
+      await baixarFolhetoDe({
+        manchete: i.manchete, estrofes: i.estrofes,
+        imagem: i.arquivos.imagem ? `/${i.arquivos.imagem}` : null,
+        fonte: i.url ? (i.fonte || dominio(i.url)) : null,
+      }, i.id);
+    } finally { b.disabled = false; b.textContent = "baixar PNG"; }
   });
   document.querySelectorAll(".refazer").forEach((b) => b.onclick = () => {
     const c = ITENS[b.dataset.i].config;
