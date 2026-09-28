@@ -80,6 +80,11 @@ em que ordem.
 O `escandir.py` verifica arquivos com várias estrofes (separadas por linha em branco)
 e lê o esquema de uma linha `# esquema: AABCCB` no arquivo, ou de `--esquema`.
 
+Em `/historico` ficam todas as sextilhas geradas (as que entraram e as de descarte),
+cada uma no cartaz com a ficha dos parâmetros que a produziram: modelo, raciocínio,
+candidatas, tipo de sextilha, estrofes, encadeamento, xilogravura, correções e custo.
+Dá para filtrar e reabrir o gerador com os mesmos parâmetros.
+
 Em `/logs` fica o custo de cada geração, estimado pelos tokens do caderno: por etapa,
 com o `response_id` para abrir a chamada no painel da OpenAI.
 

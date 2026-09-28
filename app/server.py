@@ -2,6 +2,8 @@
 
 import base64
 import json
+import re
+from datetime import datetime
 import os
 import secrets
 import traceback
@@ -60,15 +62,54 @@ def logs_pagina():
     return FileResponse(RAIZ / "app" / "static" / "logs.html")
 
 
+def _cadernos():
+    """Os cadernos de bordo, do mais novo ao mais antigo."""
+    for f in sorted(PASTAS["caderno"].glob("*.json"), reverse=True):
+        try:
+            yield f, json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+
+
+def _config(log: dict) -> tuple[dict, bool]:
+    """Os parâmetros da geração. Cadernos anteriores aos seletores não os guardavam:
+    aí deduz das chamadas registradas e avisa (segundo valor = deduzida)."""
+    if log.get("config"):
+        # configs de antes dos tipos de sextilha: só existia 1 estrofe aberta e livre
+        return {"forma": "aberta", "estrofes": 1, "encadeamento": "livre", **log["config"]}, False
+    chamadas = log.get("chamadas", [])
+    texto = next((c for c in chamadas if "image_generation" not in c.get("modelo", "")), {})
+    xilo = next((c for c in chamadas if "image_generation" in c.get("modelo", "")), None)
+    qualidade = None
+    if xilo:
+        m = re.search(r"image_generation\([^,)]+, (\w+)\)", xilo["modelo"])
+        qualidade = m.group(1) if m else "medium"  # antes do seletor, era sempre medium
+    return {"texto": texto.get("modelo"), "raciocinio": texto.get("reasoning_effort"),
+            "candidatas": len(log.get("candidatas") or []) or 1, "imagem_qualidade": qualidade,
+            "forma": "aberta", "estrofes": 1, "encadeamento": "livre",
+            "com_imagem": xilo is not None}, True
+
+
+def _hora(iso: str | None) -> str | None:
+    """Cadernos antigos guardavam a hora sem fuso, no relógio da máquina que os
+    escreveu (esta mesma): completa com o fuso daqui para o navegador converter."""
+    if not iso:
+        return None
+    try:
+        return datetime.fromisoformat(iso).astimezone().isoformat(timespec="seconds")
+    except ValueError:
+        return iso
+
+
+def _arquivos(f, log: dict) -> dict:
+    return {**(log.get("arquivos") or {}), "caderno": f"caderno/{f.name}"}
+
+
 @app.get("/api/logs")
 def logs():
     """Uma linha por geração, com o custo recalculado a partir dos tokens do caderno."""
     geracoes = []
-    for f in sorted(PASTAS["caderno"].glob("*.json"), reverse=True):
-        try:
-            log = json.loads(f.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
+    for f, log in _cadernos():
         custo = custos.resumo(log)
         chamadas = []
         for c, cc in zip(log.get("chamadas", []), custo["chamadas"]):
@@ -80,12 +121,9 @@ def logs():
                 "custo": cc["total"], "imagem_medida": cc["imagem_medida"],
                 "segundos": c.get("segundos"), "response_id": c.get("response_id"),
             })
-        arquivos = log.get("arquivos") or {}
-        # cadernos anteriores aos seletores não guardavam a config: deduz das chamadas
-        texto = next((c for c in log.get("chamadas", []) if "image_generation" not in c.get("modelo", "")), {})
-        config = log.get("config") or {"texto": texto.get("modelo"), "raciocinio": texto.get("reasoning_effort")}
+        config, _ = _config(log)
         geracoes.append({
-            "id": f.stem, "inicio": log.get("inicio"), "fim": log.get("fim"),
+            "id": f.stem, "inicio": _hora(log.get("inicio")), "fim": _hora(log.get("fim")),
             "config": config,
             "manchete": (log.get("fato") or {}).get("titulo") or f.stem,
             "url": log.get("url"), "entra": log.get("entra"),
@@ -94,9 +132,40 @@ def logs():
             "texto": custo["texto"], "imagem": custo["imagem"], "total": custo["total"],
             "imagem_medida": custo["imagem_medida"], "tem_imagem": custo["tem_imagem"],
             "chamadas": chamadas,
-            "arquivos": {**arquivos, "caderno": f"caderno/{f.name}"},
+            "arquivos": _arquivos(f, log),
         })
     return {"geracoes": geracoes, "precos_conferidos_em": "28/09/2026"}
+
+
+@app.get("/historico")
+def historico_pagina():
+    return FileResponse(RAIZ / "app" / "static" / "historico.html")
+
+
+@app.get("/api/historico")
+def historico():
+    """As sextilhas geradas, com os parâmetros que as produziram."""
+    itens = []
+    for f, log in _cadernos():
+        config, deduzida = _config(log)
+        fato = log.get("fato") or {}
+        # antes das várias estrofes, o caderno guardava uma lista plana de versos
+        estrofes = log.get("estrofes_finais") or ([log["versos_finais"]] if log.get("versos_finais") else [])
+        escolhida = (log.get("escolhida") or {}).get("indice")
+        candidatas = log.get("candidatas") or []
+        itens.append({
+            "id": f.stem, "inicio": _hora(log.get("inicio")),
+            "manchete": fato.get("titulo") or f.stem, "fato": fato.get("fato"),
+            "url": log.get("url"), "fonte": log.get("fonte"), "origem": log.get("origem"),
+            "config": config, "config_deduzida": deduzida,
+            "estrofes": estrofes, "entra": log.get("entra"), "motivo": log.get("motivo"),
+            "rodadas": log.get("rodadas_de_correcao"), "duvidas": log.get("duvidas_para_o_grupo") or [],
+            "angulo": candidatas[escolhida]["angulo"] if escolhida is not None and escolhida < len(candidatas) else None,
+            "justificativa": (log.get("escolhida") or {}).get("justificativa"),
+            "custo": custos.resumo(log)["total"],
+            "arquivos": _arquivos(f, log),
+        })
+    return {"itens": itens}
 
 
 @app.get("/api/config")

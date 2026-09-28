@@ -342,7 +342,7 @@ async def run_cordel(
 ) -> AsyncIterator[dict]:
     cfg = (cfg or Config()).validar()
     noticia, url = noticia.strip(), url.strip()
-    log: dict = {"inicio": datetime.now().isoformat(timespec="seconds"),
+    log: dict = {"inicio": _agora(),
                  "url": url or None, "config": {**asdict(cfg), "com_imagem": com_imagem},
                  "chamadas": [], "rodadas": []}
     chamadas = log["chamadas"]
@@ -497,7 +497,7 @@ async def run_cordel(
 
     duvidas = [{"estrofe": e, "n": l["n"], "duvida": l["duvidas"]}
                for e, m in enumerate(mp["medidas"], 1) for l in m["linhas"] if l["duvidas"]]
-    log.update(fim=datetime.now().isoformat(timespec="seconds"), entra=entra,
+    log.update(fim=_agora(), entra=entra,
                motivo=motivo, estrofes_finais=estrofes, duvidas_para_o_grupo=duvidas,
                rodadas_de_correcao=rodada, arquivos=arquivos)
     custo = custos.resumo(log)
@@ -513,6 +513,12 @@ async def run_cordel(
 
 
 # ------------------------------------------------------------------- util
+def _agora() -> str:
+    """Hora com fuso (ex.: +00:00 no Railway), para o navegador converter para o
+    horário de quem está vendo. Sem fuso, o navegador leria como hora local."""
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
 def _uso(u) -> dict | None:
     if u is None:
         return None

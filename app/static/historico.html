@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Histórico de folhetos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35; --tinta-3: #7a6d5f;
+    --vermelho: #a3301f; --verde: #2f5d3a; --linha: #15121026;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papel); color: var(--tinta);
+    font-family: "Libre Baskerville", Georgia, serif; font-size: 15px; line-height: 1.5;
+    background-image: radial-gradient(#1b161210 1px, transparent 1px); background-size: 4px 4px;
+  }
+  header { border-bottom: 3px double var(--tinta); padding: 18px 16px 12px; text-align: center; }
+  header h1 { font: 700 clamp(26px, 5vw, 40px)/1.1 "Oswald", sans-serif; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-style: italic; color: var(--tinta-2); font-size: 14px; }
+  nav { margin-top: 8px; font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+  nav a { color: var(--tinta); margin: 0 8px; }
+  nav a[aria-current] { color: var(--vermelho); text-decoration: none; }
+  main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  .filtros { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; margin-bottom: 18px; }
+  .filtros label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--tinta-2); }
+  .filtros select { font: 14px "Libre Baskerville", serif; color: var(--tinta); background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 5px 6px; }
+  .contagem { font: 13px "Courier Prime", monospace; color: var(--tinta-2); margin-left: auto; }
+
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px; align-items: start; }
+  .item { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+  /* cartaz em miniatura, o mesmo desenho do gerador */
+  .folheto { background: var(--folha); border: 3px solid var(--tinta); padding: 5px; box-shadow: 5px 5px 0 #15121055; }
+  .folheto .moldura { border: 1.5px solid var(--tinta); padding: 12px 14px 10px; }
+  .folheto .cab { font: 700 20px/1 "Oswald", sans-serif; text-transform: uppercase; text-align: center; }
+  .folheto .div { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+  .folheto .div::before, .folheto .div::after { content: ""; flex: 1; border-top: 1.5px solid var(--tinta); }
+  .folheto .manchete { font: 700 16px/1.15 "Oswald", sans-serif; text-transform: uppercase; text-align: center; }
+  .folheto .xilo { aspect-ratio: 3 / 2; border: 1.5px solid var(--tinta); background: #ddd5c3; overflow: hidden;
+                   display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; margin-top: 6px; }
+  .folheto .xilo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1) contrast(1.15); }
+  .folheto .xilo span { font: 12px "Special Elite", monospace; color: var(--tinta-3); }
+  .folheto .versos { font: 13px/1.5 "Courier Prime", monospace; margin: 10px 2px 4px; }
+  .folheto .estrofe + .estrofe { margin-top: .8em; }
+  .folheto .versos.recolhido .estrofe:nth-child(n+3) { display: none; }
+  .mais { font: 12px "Courier Prime", monospace; background: none; border: 0; color: var(--vermelho); cursor: pointer; padding: 0 2px; text-decoration: underline; }
+
+  .selo { display: inline-block; font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px;
+          padding: 1px 8px; border: 2px solid currentColor; }
+  .selo.entra { color: var(--verde); } .selo.descarte { color: var(--vermelho); }
+  .motivo { font-size: 12.5px; color: var(--vermelho); margin-top: 4px; }
+
+  .ficha { background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 10px 12px; font-size: 13px; }
+  .ficha .topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .ficha .quando { font: 12px "Courier Prime", monospace; color: var(--tinta-2); }
+  .ficha dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; margin: 0; }
+  .ficha dt { color: var(--tinta-2); white-space: nowrap; }
+  .ficha dd { margin: 0; font-family: "Courier Prime", monospace; overflow-wrap: anywhere; }
+  .ficha .deduzida { font-size: 11.5px; font-style: italic; color: var(--tinta-3); margin-top: 6px; }
+  .ficha .links { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 8px; font: 12.5px "Special Elite", monospace; }
+  .ficha .links a { color: var(--tinta); }
+  .refazer { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; padding: 5px 10px; cursor: pointer;
+             background: var(--tinta); color: var(--papel); border: 2px solid var(--tinta); box-shadow: 3px 3px 0 var(--vermelho); margin-left: auto; }
+  .refazer:hover { transform: translate(-1px, -1px); }
+  .vazio { text-align: center; color: var(--tinta-2); padding: 40px 0; grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Histórico</h1>
+  <p>As sextilhas geradas e os parâmetros que as produziram</p>
+  <nav><a href="/">Gerador</a> · <a href="/historico" aria-current="page">Histórico</a> · <a href="/logs">Logs</a></nav>
+</header>
+
+<main>
+  <div class="filtros">
+    <label>Resultado
+      <select id="f-resultado"><option value="">todos</option><option value="entra">entraram</option><option value="descarte">descarte</option></select>
+    </label>
+    <label>Tipo de sextilha <select id="f-forma"><option value="">todos</option></select></label>
+    <label>Modelo <select id="f-modelo"><option value="">todos</option></select></label>
+    <span class="contagem" id="contagem"></span>
+  </div>
+  <section class="grade" id="grade"><div class="vazio">carregando…</div></section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const usd = (v) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(v);
+const quando = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+const NOMES = { low: "baixo", medium: "médio", high: "alto" };
+const modelo = (id) => (id || "—").replace("openai:", "");
+// só estes campos voltam para o gerador (os mesmos que o servidor aceita)
+const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento"];
+let ITENS = [], FORMAS = {};
+
+function ficha(i) {
+  const c = i.config, f = FORMAS[c.forma];
+  const linhas = [
+    ["Modelo", modelo(c.texto)],
+    ["Raciocínio", NOMES[c.raciocinio] ?? c.raciocinio ?? "—"],
+    ["Candidatas", c.candidatas],
+    ["Sextilha", f ? `${c.forma} (${f.esquema})` : c.forma],
+    ["Estrofes", c.estrofes + (c.estrofes > 1 ? (c.encadeamento === "deixa" ? ", em deixa" : ", livres") : "")],
+    ["Xilogravura", c.com_imagem === false ? "não gerada" : (c.imagem_qualidade ?? "—")],
+    ["Correções", i.rodadas ?? "—"],
+    ["Custo", usd(i.custo)],
+  ];
+  if (i.angulo) linhas.push(["Ângulo", i.angulo]);
+  if (i.duvidas.length) linhas.push(["Dúvidas (?)", `${i.duvidas.length} para o grupo decidir`]);
+  return linhas.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+}
+
+function cartao(i, idx) {
+  const a = i.arquivos;
+  const estrofes = i.estrofes.map((vs) => `<div class="estrofe">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("");
+  const longo = i.estrofes.length > 2;
+  return `<article class="item">
+    <div class="folheto"><div class="moldura">
+      <div class="cab">Notícias em Cordel</div>
+      <div class="div">✸</div>
+      <div class="manchete">${esc(i.manchete)}</div>
+      <div class="xilo">${a.imagem ? `<img loading="lazy" alt="xilogravura: ${esc(i.manchete)}" src="/${esc(a.imagem)}">` : "<span>sem xilogravura</span>"}</div>
+      <div class="versos${longo ? " recolhido" : ""}" id="v${idx}">${estrofes}</div>
+      ${longo ? `<button class="mais" data-v="v${idx}">mostrar as ${i.estrofes.length} estrofes</button>` : ""}
+    </div></div>
+    <div class="ficha">
+      <div class="topo"><span class="selo ${i.entra ? "entra" : "descarte"}">${i.entra ? "Entrou" : "Descarte"}</span>
+        <span class="quando">${quando(i.inicio)}</span></div>
+      ${i.motivo ? `<div class="motivo">${esc(i.motivo)}</div>` : ""}
+      <dl>${ficha(i)}</dl>
+      ${i.config_deduzida ? '<div class="deduzida">Geração anterior aos seletores: parâmetros deduzidos do caderno.</div>' : ""}
+      <div class="links">
+        ${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">notícia</a>` : ""}
+        ${a.texto ? `<a href="/${esc(a.texto)}" target="_blank">texto</a>` : ""}
+        <a href="/${esc(a.caderno)}" target="_blank">caderno</a>
+        <button class="refazer" data-i="${idx}" title="abre o gerador com estes parâmetros">gerar de novo</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function render() {
+  const r = $("f-resultado").value, fo = $("f-forma").value, mo = $("f-modelo").value;
+  const vis = ITENS.map((i, idx) => [i, idx]).filter(([i]) =>
+    (!r || (r === "entra") === !!i.entra) && (!fo || i.config.forma === fo) && (!mo || i.config.texto === mo));
+  $("contagem").textContent = `${vis.length} de ${ITENS.length} ${ITENS.length === 1 ? "geração" : "gerações"}`;
+  $("grade").innerHTML = vis.length ? vis.map(([i, idx]) => cartao(i, idx)).join("")
+    : '<div class="vazio">Nenhuma geração com esses filtros.</div>';
+  document.querySelectorAll(".mais").forEach((b) => b.onclick = () => {
+    const v = $(b.dataset.v); const rec = v.classList.toggle("recolhido");
+    b.textContent = rec ? `mostrar as ${v.children.length} estrofes` : "recolher";
+  });
+  document.querySelectorAll(".refazer").forEach((b) => b.onclick = () => {
+    const c = ITENS[b.dataset.i].config;
+    try { localStorage.setItem("cordel-config", JSON.stringify(Object.fromEntries(CAMPOS.filter((k) => c[k] != null).map((k) => [k, c[k]])))); } catch {}
+    location.href = "/";
+  });
+}
+
+Promise.all([fetch("/api/historico").then((r) => r.json()), fetch("/api/config").then((r) => r.json())])
+  .then(([{ itens }, { formas }]) => {
+    ITENS = itens; FORMAS = formas;
+    $("f-forma").innerHTML += Object.keys(formas).map((f) => `<option value="${esc(f)}">${esc(f)}</option>`).join("");
+    const modelos = [...new Set(itens.map((i) => i.config.texto).filter(Boolean))];
+    $("f-modelo").innerHTML += modelos.map((m) => `<option value="${esc(m)}">${esc(modelo(m))}</option>`).join("");
+    ["f-resultado", "f-forma", "f-modelo"].forEach((id) => $(id).onchange = render);
+    render();
+  })
+  .catch((e) => $("grade").innerHTML = `<div class="vazio">Erro ao carregar: ${esc(e)}</div>`);
+</script>
+</body>
+</html>

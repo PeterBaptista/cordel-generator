@@ -119,7 +119,7 @@
   <h1>Notícias em Cordel</h1>
   <p>Do 7 ao 6 — a semana de IA contada em sextilha e em xilogravura</p>
   <div class="cfg" id="cfg"></div>
-  <nav class="nav"><a href="/" aria-current="page">Gerador</a> · <a href="/logs">Logs</a></nav>
+  <nav class="nav"><a href="/" aria-current="page">Gerador</a> · <a href="/historico">Histórico</a> · <a href="/logs">Logs</a></nav>
 </header>
 
 <main>
@@ -338,7 +338,7 @@ function tratar(ev) {
       $("selo").className = "selo " + (ev.entra ? "entra" : "descarte");
       $("selo").textContent = ev.entra ? "Entra na coleção" : "Descarte";
       if (ev.custo) {
-        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/logs">ver logs</a>`;
+        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/historico">histórico</a> · <a href="/logs">logs</a>`;
       }
       $("motivo").textContent = ev.motivo || (ev.duvidas.length ? `${ev.duvidas.length} ponto(s) marcados com "?" — o grupo decide.` : "");
       $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${p}" target="_blank">${k}</a>`).join("·")
