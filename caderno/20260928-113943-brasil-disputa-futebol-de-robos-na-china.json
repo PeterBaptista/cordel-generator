@@ -1,0 +1,220 @@
+{
+  "inicio": "2026-09-28T11:38:26",
+  "url": "https://forbes.com.br/forbes-tech/2026/08/universitarios-representam-o-brasil-no-futebol-de-robos-humanoides-em-olimpiada-na-china/",
+  "chamadas": [
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Universitários representam o Brasil no futebol de robôs humanoides em Olimpíada na China\n\nUniversitários brasileiros viajaram para a China e estão finalizando a preparação para disputar um campeonato de futebol entre robôs, uma das modalidades da 2ª edição do World Humanoid Robot Games (Olimpíada de Robôs Humanoides).\nA seleção nacional é formada por universitários e mestrandos de diferentes instituições brasileiras. O país será representado por Lucas Reis (CEIA-UFG), Isabela Moura (UFPE), Riel Joaquim (UFPE), Pedro Pizarro (USP), Caio Lucena (UNEB), Guilherme Escudeiro (Centro Universitário FEI) e João Victor Aguiar, pesquisador da área de robótica e IA (Centro Universitário FEI). À frente da seleção está o pesquisador Flavio Tonidandel, vice-presidente da RoboCup Brasil e da RoboCup Federation. \nOs brasileiros precisam desenvolver estratégias complexas de inteligência artificial até o início da competição. O trabalho vai além de fazer o robô chutar a bola e envolve técnicas para que as máquinas tomem decisões, elaborem táticas de defesa e ataque e executem ações autônomas durante a partida de futebol.\nO Brasil competirá na categoria Humanoid Adult Size Soccer (Large), disputando partidas de futebol entre robôs humanoides de tamanho adulto, com equipes da China, Tailândia, Malásia, Itália, México e Alemanha.\nDesafio extra\nAlém de se prepararem para enfrentar adversários de diferentes países, os participantes tiveram que aprender a operar e a programar um robô que ainda não havia sido utilizado em uma competição desse tipo.\nOs robôs são da empresa chinesa Booster e, nesta edição, todas as equipes da categoria utilizarão o Booster T2, modelo lançado oficialmente em julho pela Booster Robotics.\nO técnico da seleção brasileira encara o período de preparação como uma oportunidade essencial. “Estamos aqui não apenas para competir, mas para aprender e trocar experiências com pesquisadores e estudantes de diferentes países. Vamos aproveitar cada dia de treinamento e fazer o nosso melhor para representar o Brasil”, afirma Flavio Tonidandel.\nÚltimos preparativos\nA equipe já está em Pequim desde a semana passada, onde realiza treinamentos. O time brasileiro realizou partidas contra a Itália e Tailândia nesta fase preparatória. Os jogos classificatórios para a montagem da tabela oficial da competição ocorrem durante esta semana.\nA competição começa no dia 22 de agosto e vai até o dia 26 de agosto e acontece no National Speed Skating Oval, arena construída para os Jogos Olímpicos de Inverno de Pequim 2022.",
+      "saida_bruta": "{\"fato\":\"Universitários brasileiros estão em Pequim preparando robôs humanoides para disputar futebol contra equipes de outros países.\",\"titulo\":\"Brasil disputa futebol de robôs na China\",\"imagens_concretas\":[\"Universitários brasileiros treinando ao lado de robôs humanoides em uma arena\",\"Um robô humanoide adulto chutando uma bola de futebol\",\"Pesquisadores programando um robô com notebooks abertos\",\"Times do Brasil, Itália e Tailândia em partidas de treino\",\"O National Speed Skating Oval em Pequim recebendo a competição\"]}",
+      "tokens": {
+        "input_tokens": 767,
+        "output_tokens": 122,
+        "reasoning_tokens": 0
+      },
+      "segundos": 3.6
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Universitários brasileiros estão em Pequim preparando robôs humanoides para disputar futebol contra equipes de outros países.\nImagens possíveis: Universitários brasileiros treinando ao lado de robôs humanoides em uma arena; Um robô humanoide adulto chutando uma bola de futebol; Pesquisadores programando um robô com notebooks abertos; Times do Brasil, Itália e Tailândia em partidas de treino; O National Speed Skating Oval em Pequim recebendo a competição\nÂngulo: como cantador que anuncia uma notícia de longe, com espanto e maravilha\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Como cantador de feira, anuncio de longe o assombro de estudantes do Brasil ensinando humanoides a jogar bola em Pequim.\",\"rimas\":[\"Pequim\",\"tamborim\",\"clarim\"],\"versos\":[\"Na feira, rádio de pilha\",\"traz espanto de Pequim\",\"Humanoide treina chute\",\"faz da trave tamborim\",\"Brasil encara outro mundo\",\"a bola pede clarim\"]}",
+      "tokens": {
+        "input_tokens": 694,
+        "output_tokens": 3209,
+        "reasoning_tokens": 3106
+      },
+      "segundos": 49.1
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Universitários brasileiros estão em Pequim preparando robôs humanoides para disputar futebol contra equipes de outros países.\nImagens possíveis: Universitários brasileiros treinando ao lado de robôs humanoides em uma arena; Um robô humanoide adulto chutando uma bola de futebol; Pesquisadores programando um robô com notebooks abertos; Times do Brasil, Itália e Tailândia em partidas de treino; O National Speed Skating Oval em Pequim recebendo a competição\nÂngulo: como um causo contado na feira, com humor e exagero\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Contar, como na feira, que estudantes brasileiros em Pequim treinam robôs humanoides para jogar bola contra gringos, com graça de roça.\",\"rimas\":[\"Pequim\",\"capim\",\"clarim\"],\"versos\":[\"Na feira se canta causo\",\"Brasuca treina em Pequim\",\"Robô feito gente em campo\",\"Mas não belisca capim\",\"Gringalhada no terreiro\",\"Vaqueiro toca clarim\"]}",
+      "tokens": {
+        "input_tokens": 691,
+        "output_tokens": 4251,
+        "reasoning_tokens": 4142
+      },
+      "segundos": 56.5
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Universitários brasileiros estão em Pequim preparando robôs humanoides para disputar futebol contra equipes de outros países.\nImagens possíveis: Universitários brasileiros treinando ao lado de robôs humanoides em uma arena; Um robô humanoide adulto chutando uma bola de futebol; Pesquisadores programando um robô com notebooks abertos; Times do Brasil, Itália e Tailândia em partidas de treino; O National Speed Skating Oval em Pequim recebendo a competição\nÂngulo: como conselho de gente velha, terminando numa moral\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Como conselho de gente velha, mostro que estudo e treino fazem até ferro virar craque.\",\"rimas\":[\"lição\",\"nação\",\"razão\"],\"versos\":[\"Meu conselho de velho é bom\",\"Pequim já virou lição\",\"Estudante brasileiro\",\"Tecla contra outra nação\",\"Humanoide joga bola\",\"Quem aprende tem razão\"]}",
+      "tokens": {
+        "input_tokens": 688,
+        "output_tokens": 4816,
+        "reasoning_tokens": 4728
+      },
+      "segundos": 58.8
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você é o júri de um concurso de cordel. Recebe sextilhas candidatas sobre a mesma\nnotícia, cada uma com o relatório de um verificador de métrica e rima.\nEscolha UMA, nesta ordem de critérios:\n1. Prefira as que o verificador aprovou. Se nenhuma passou, prefira as com menos\n   versos reprovados: cada verso reprovado ainda vai precisar de correção.\n2. Entre essas, a mais criativa: imagem concreta e surpreendente, comparação com o\n   mundo do cordel, nenhuma palavra repetida à toa, verso final com virada.\n3. Fiel ao fato da notícia, sem inventar acontecimento.\nJustifique em uma ou duas frases, citando versos.",
+      "usuario": "Fato: Universitários brasileiros estão em Pequim preparando robôs humanoides para disputar futebol contra equipes de outros países.\n\nCandidata 1 (ângulo: como um causo contado na feira, com humor e exagero) — reprovados: versos [2]\nNa feira se canta causo\nBrasuca treina em Pequim\nRobô feito gente em campo\nMas não belisca capim\nGringalhada no terreiro\nVaqueiro toca clarim\n\nCandidata 2 (ângulo: como conselho de gente velha, terminando numa moral) — reprovados: versos [1]\nMeu conselho de velho é bom\nPequim já virou lição\nEstudante brasileiro\nTecla contra outra nação\nHumanoide joga bola\nQuem aprende tem razão\n\nCandidata 3 (ângulo: como cantador que anuncia uma notícia de longe, com espanto e maravilha) — reprovados: versos [2]\nNa feira, rádio de pilha\ntraz espanto de Pequim\nHumanoide treina chute\nfaz da trave tamborim\nBrasil encara outro mundo\na bola pede clarim\n\nQual é a escolhida (número)?",
+      "saida_bruta": "{\"escolhida\":3,\"justificativa\":\"Como todas têm um verso reprovado, vence a mais criativa: “rádio de pilha” trazendo “espanto de Pequim” e “faz da trave tamborim” dão imagem viva de cordel. Também mantém o fato central — humanoide treinando futebol em Pequim contra gente de fora — com a virada de “a bola pede clarim”.\"}",
+      "tokens": {
+        "input_tokens": 470,
+        "output_tokens": 383,
+        "reasoning_tokens": 282
+      },
+      "segundos": 6.1
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige sextilhas de cordel (7 sílabas poéticas, rima ABCBDB).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça a estrofe:\n- A palavra final do verso corrigido não pode repetir nenhuma outra palavra final\n  da estrofe. Para a rima B, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com o número dele (1 a 6).",
+      "usuario": "Sextilha atual:\n1. Na feira, rádio de pilha\n2. traz espanto de Pequim\n3. Humanoide treina chute\n4. faz da trave tamborim\n5. Brasil encara outro mundo\n6. a bola pede clarim\n\nRelatório do verificador:\n=== sextilha ===\n  ok v1 [7] Na feira, rádio de pilha\n         na / FEI / ra / RÁ / dio / de / PI / (lha)\n       ? rádio: 'io' pode virar hiato\n  ok v2 [7] traz espanto de Pequim\n         TRAZ / es / PAN / to / de / pe / QUIM\n  ok v3 [7] Humanoide treina chute\n         hu / ma / NOI / de / TREI / na / CHU / (te)\n  ok v4 [7] faz da trave tamborim\n         FAZ / da / TRA / ve / tam / bo / RIM\n  ok v5 [7] Brasil encara outro mundo\n         bra / SIL / en / CA / RA_OU / tro / MUN / (do)\n  ok v6 [7] a bola pede clarim\n         a / BO / la / PE / de / cla / RIM\n  rima B (versos [2, 4, 6]): SEM RIMA  ['uim', 'im', 'im']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos 2.",
+      "saida_bruta": "{\"versos\":[{\"n\":2,\"verso\":\"traz notícia em mandarim\"}]}",
+      "tokens": {
+        "input_tokens": 640,
+        "output_tokens": 505,
+        "reasoning_tokens": 474
+      },
+      "segundos": 8.0
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "versos": [
+        "Na feira, rádio de pilha",
+        "traz espanto de Pequim",
+        "Humanoide treina chute",
+        "faz da trave tamborim",
+        "Brasil encara outro mundo",
+        "a bola pede clarim"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Na feira, rádio de pilha\n         na / FEI / ra / RÁ / dio / de / PI / (lha)\n       ? rádio: 'io' pode virar hiato\n  ok v2 [7] traz espanto de Pequim\n         TRAZ / es / PAN / to / de / pe / QUIM\n  ok v3 [7] Humanoide treina chute\n         hu / ma / NOI / de / TREI / na / CHU / (te)\n  ok v4 [7] faz da trave tamborim\n         FAZ / da / TRA / ve / tam / bo / RIM\n  ok v5 [7] Brasil encara outro mundo\n         bra / SIL / en / CA / RA_OU / tro / MUN / (do)\n  ok v6 [7] a bola pede clarim\n         a / BO / la / PE / de / cla / RIM\n  rima B (versos [2, 4, 6]): SEM RIMA  ['uim', 'im', 'im']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 1,
+      "versos": [
+        "Na feira, rádio de pilha",
+        "traz notícia em mandarim",
+        "Humanoide treina chute",
+        "faz da trave tamborim",
+        "Brasil encara outro mundo",
+        "a bola pede clarim"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Na feira, rádio de pilha\n         na / FEI / ra / RÁ / dio / de / PI / (lha)\n       ? rádio: 'io' pode virar hiato\n  ok v2 [7] traz notícia em mandarim\n         TRAZ / no / TÍ / cia_em / man / da / RIM\n       ? notícia: 'ia' pode virar hiato\n  ok v3 [7] Humanoide treina chute\n         hu / ma / NOI / de / TREI / na / CHU / (te)\n  ok v4 [7] faz da trave tamborim\n         FAZ / da / TRA / ve / tam / bo / RIM\n  ok v5 [7] Brasil encara outro mundo\n         bra / SIL / en / CA / RA_OU / tro / MUN / (do)\n  ok v6 [7] a bola pede clarim\n         a / BO / la / PE / de / cla / RIM\n  rima B (versos [2, 4, 6]): consoante  ['im', 'im', 'im']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "Universitários representam o Brasil no futebol de robôs humanoides em Olimpíada na China\n\nUniversitários brasileiros viajaram para a China e estão finalizando a preparação para disputar um campeonato de futebol entre robôs, uma das modalidades da 2ª edição do World Humanoid Robot Games (Olimpíada de Robôs Humanoides).\nA seleção nacional é formada por universitários e mestrandos de diferentes instituições brasileiras. O país será representado por Lucas Reis (CEIA-UFG), Isabela Moura (UFPE), Riel Joaquim (UFPE), Pedro Pizarro (USP), Caio Lucena (UNEB), Guilherme Escudeiro (Centro Universitário FEI) e João Victor Aguiar, pesquisador da área de robótica e IA (Centro Universitário FEI). À frente da seleção está o pesquisador Flavio Tonidandel, vice-presidente da RoboCup Brasil e da RoboCup Federation. \nOs brasileiros precisam desenvolver estratégias complexas de inteligência artificial até o início da competição. O trabalho vai além de fazer o robô chutar a bola e envolve técnicas para que as máquinas tomem decisões, elaborem táticas de defesa e ataque e executem ações autônomas durante a partida de futebol.\nO Brasil competirá na categoria Humanoid Adult Size Soccer (Large), disputando partidas de futebol entre robôs humanoides de tamanho adulto, com equipes da China, Tailândia, Malásia, Itália, México e Alemanha.\nDesafio extra\nAlém de se prepararem para enfrentar adversários de diferentes países, os participantes tiveram que aprender a operar e a programar um robô que ainda não havia sido utilizado em uma competição desse tipo.\nOs robôs são da empresa chinesa Booster e, nesta edição, todas as equipes da categoria utilizarão o Booster T2, modelo lançado oficialmente em julho pela Booster Robotics.\nO técnico da seleção brasileira encara o período de preparação como uma oportunidade essencial. “Estamos aqui não apenas para competir, mas para aprender e trocar experiências com pesquisadores e estudantes de diferentes países. Vamos aproveitar cada dia de treinamento e fazer o nosso melhor para representar o Brasil”, afirma Flavio Tonidandel.\nÚltimos preparativos\nA equipe já está em Pequim desde a semana passada, onde realiza treinamentos. O time brasileiro realizou partidas contra a Itália e Tailândia nesta fase preparatória. Os jogos classificatórios para a montagem da tabela oficial da competição ocorrem durante esta semana.\nA competição começa no dia 22 de agosto e vai até o dia 26 de agosto e acontece no National Speed Skating Oval, arena construída para os Jogos Olímpicos de Inverno de Pequim 2022.",
+  "origem": "link",
+  "titulo": "Universitários representam o Brasil no futebol de robôs humanoides em Olimpíada na China",
+  "fonte": "",
+  "data": "2026-08-18",
+  "fato": {
+    "fato": "Universitários brasileiros estão em Pequim preparando robôs humanoides para disputar futebol contra equipes de outros países.",
+    "titulo": "Brasil disputa futebol de robôs na China",
+    "imagens_concretas": [
+      "Universitários brasileiros treinando ao lado de robôs humanoides em uma arena",
+      "Um robô humanoide adulto chutando uma bola de futebol",
+      "Pesquisadores programando um robô com notebooks abertos",
+      "Times do Brasil, Itália e Tailândia em partidas de treino",
+      "O National Speed Skating Oval em Pequim recebendo a competição"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como um causo contado na feira, com humor e exagero",
+      "plano": "Contar, como na feira, que estudantes brasileiros em Pequim treinam robôs humanoides para jogar bola contra gringos, com graça de roça.",
+      "rimas": [
+        "Pequim",
+        "capim",
+        "clarim"
+      ],
+      "versos": [
+        "Na feira se canta causo",
+        "Brasuca treina em Pequim",
+        "Robô feito gente em campo",
+        "Mas não belisca capim",
+        "Gringalhada no terreiro",
+        "Vaqueiro toca clarim"
+      ],
+      "entra": false,
+      "reprovados": [
+        2
+      ]
+    },
+    {
+      "angulo": "como conselho de gente velha, terminando numa moral",
+      "plano": "Como conselho de gente velha, mostro que estudo e treino fazem até ferro virar craque.",
+      "rimas": [
+        "lição",
+        "nação",
+        "razão"
+      ],
+      "versos": [
+        "Meu conselho de velho é bom",
+        "Pequim já virou lição",
+        "Estudante brasileiro",
+        "Tecla contra outra nação",
+        "Humanoide joga bola",
+        "Quem aprende tem razão"
+      ],
+      "entra": false,
+      "reprovados": [
+        1
+      ]
+    },
+    {
+      "angulo": "como cantador que anuncia uma notícia de longe, com espanto e maravilha",
+      "plano": "Como cantador de feira, anuncio de longe o assombro de estudantes do Brasil ensinando humanoides a jogar bola em Pequim.",
+      "rimas": [
+        "Pequim",
+        "tamborim",
+        "clarim"
+      ],
+      "versos": [
+        "Na feira, rádio de pilha",
+        "traz espanto de Pequim",
+        "Humanoide treina chute",
+        "faz da trave tamborim",
+        "Brasil encara outro mundo",
+        "a bola pede clarim"
+      ],
+      "entra": false,
+      "reprovados": [
+        2
+      ]
+    }
+  ],
+  "escolhida": {
+    "indice": 2,
+    "justificativa": "Como todas têm um verso reprovado, vence a mais criativa: “rádio de pilha” trazendo “espanto de Pequim” e “faz da trave tamborim” dão imagem viva de cordel. Também mantém o fato central — humanoide treinando futebol em Pequim contra gente de fora — com a virada de “a bola pede clarim”."
+  },
+  "fim": "2026-09-28T11:39:43",
+  "entra": true,
+  "motivo": null,
+  "versos_finais": [
+    "Na feira, rádio de pilha",
+    "traz notícia em mandarim",
+    "Humanoide treina chute",
+    "faz da trave tamborim",
+    "Brasil encara outro mundo",
+    "a bola pede clarim"
+  ],
+  "duvidas_para_o_grupo": [
+    {
+      "n": 1,
+      "duvida": "rádio: 'io' pode virar hiato"
+    },
+    {
+      "n": 2,
+      "duvida": "notícia: 'ia' pode virar hiato"
+    }
+  ],
+  "rodadas_de_correcao": 1,
+  "arquivos": {
+    "texto": "folhetos/20260928-113943-brasil-disputa-futebol-de-robos-na-china.txt"
+  }
+}

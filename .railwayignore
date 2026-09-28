@@ -1,0 +1,7 @@
+.env
+.venv/
+__pycache__/
+apresentacao/
+caderno/
+folhetos/2026*
+descarte/2026*

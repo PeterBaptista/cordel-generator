@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notícias em Cordel — gerador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35;
+    --vermelho: #a3301f; --verde: #2f5d3a; --linha: #15121033;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papel); color: var(--tinta);
+    font-family: "Libre Baskerville", Georgia, serif; font-size: 16px; line-height: 1.5;
+    background-image: radial-gradient(#1b161210 1px, transparent 1px); background-size: 4px 4px;
+  }
+  header { border-bottom: 3px double var(--tinta); padding: 18px 16px 12px; text-align: center; }
+  header h1 { font: 700 clamp(26px, 5vw, 40px)/1.1 "Oswald", sans-serif; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-style: italic; color: var(--tinta-2); font-size: 14px; }
+  .cfg { font-family: "Special Elite", monospace; font-size: 12px; color: var(--tinta-2); margin-top: 6px; }
+  main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 28px;
+         grid-template-columns: minmax(0, 1fr) minmax(0, 440px); align-items: start; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  main > section { min-width: 0; }
+  h2 { font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 10px; }
+  .campo { display: block; font-size: 13px; color: var(--tinta-2); margin: 10px 0 4px; }
+  input[type=url], textarea {
+    width: 100%; padding: 10px 12px; border: 2px solid var(--tinta);
+    background: #fbf6ea; color: var(--tinta); font: 15px/1.5 "Libre Baskerville", serif;
+  }
+  textarea { min-height: 140px; resize: vertical; }
+  .ou { text-align: center; font: 700 13px "Oswald", sans-serif; letter-spacing: 2px; margin: 8px 0 -4px; color: var(--tinta-2); }
+  .acoes { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  label { font-size: 14px; }
+  button {
+    font: 700 16px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; padding: 10px 22px; cursor: pointer;
+    background: var(--tinta); color: var(--papel); border: 2px solid var(--tinta);
+    box-shadow: 4px 4px 0 var(--vermelho);
+  }
+  button:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--vermelho); }
+  button:disabled { opacity: .5; cursor: wait; transform: none; }
+  button.sec { background: transparent; color: var(--tinta); box-shadow: 3px 3px 0 var(--tinta); font-size: 13px; padding: 6px 14px; }
+  .exemplos { margin-top: 6px; font-size: 13px; }
+  .exemplos a { color: var(--vermelho); cursor: pointer; margin-right: 10px; }
+
+  #linha { list-style: none; margin: 20px 0 0; padding: 0; border-left: 2px solid var(--tinta); }
+  #linha li { position: relative; padding: 4px 0 14px 18px; }
+  #linha li::before { content: ""; position: absolute; left: -7px; top: 10px; width: 12px; height: 12px;
+                      background: var(--papel); border: 2px solid var(--tinta); border-radius: 50%; }
+  #linha li.ok::before { background: var(--tinta); }
+  #linha li.rodando::before { animation: pulsa 1s infinite alternate; }
+  #linha li.erro::before { background: var(--vermelho); border-color: var(--vermelho); }
+  @keyframes pulsa { to { background: var(--vermelho); } }
+  .etq { font-family: "Special Elite", monospace; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+  .corpo { font-size: 14px; margin-top: 4px; overflow-wrap: anywhere; }
+  .corpo a { color: var(--tinta); }
+  table.esc { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 6px; }
+  table.esc td { padding: 3px 6px; border-bottom: 1px dotted var(--linha); vertical-align: top; }
+  table.esc td.n { font-family: "Special Elite", monospace; white-space: nowrap; }
+  .sil { font-family: "Special Elite", monospace; color: var(--tinta-2); font-size: 12px; }
+  .duv { color: #8a5a00; font-size: 12px; }
+  .bom { color: var(--verde); font-weight: bold; } .mau { color: var(--vermelho); font-weight: bold; }
+  .cand { border: 1px dashed var(--linha); padding: 6px 8px; margin-top: 6px; }
+  .cand.escolhida { border: 2px solid var(--tinta); background: #fbf6ea; }
+  .cand .versos-c { font: 13px/1.5 "Courier Prime", monospace; margin-top: 3px; }
+  del { color: var(--vermelho); } ins { color: var(--verde); text-decoration: none; }
+  details summary { cursor: pointer; font-size: 12px; color: var(--tinta-2); }
+  pre { white-space: pre-wrap; font-size: 12px; background: #fbf6ea; padding: 8px; border: 1px solid var(--linha); overflow-x: auto; }
+
+  /* ---------------- o folheto, no estilo "Notícias em Cordel" ---------------- */
+  .folheto {
+    background: var(--folha); color: var(--tinta); padding: 7px; border: 3px solid var(--tinta);
+    box-shadow: 6px 6px 0 #15121055; max-width: 420px; margin: 0 auto;
+  }
+  .folheto .moldura { border: 1.5px solid var(--tinta); padding: 18px 20px 14px; }
+  .folheto .cab { font: 700 34px/1 "Oswald", sans-serif; text-transform: uppercase; text-align: center; letter-spacing: .5px; }
+  .folheto .sub { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0 4px;
+                  font: 700 10.5px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; text-align: center; }
+  .folheto .div { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+  .folheto .div::before, .folheto .div::after { content: ""; flex: 1; border-top: 2px solid var(--tinta); }
+  .folheto .estrela { font-size: 18px; line-height: 1; }
+  .seta { width: 22px; height: 10px; flex: none; }
+  .folheto .manchete { font: 700 22px/1.15 "Oswald", sans-serif; text-transform: uppercase; text-align: center; margin: 6px 0 8px; min-height: 1em; }
+  .folheto .xilo { aspect-ratio: 3 / 2; background: #ddd5c3; border: 2px solid var(--tinta); display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; overflow: hidden; }
+  .folheto .xilo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1) contrast(1.15); }
+  .folheto .xilo span { font-family: "Special Elite", monospace; font-size: 12px; color: var(--tinta-2); padding: 16px; text-align: center; }
+  .folheto .versos { font: 14.5px/1.55 "Courier Prime", "Courier New", monospace; margin: 16px 4px 10px; min-height: 9.3em; }
+  .folheto .rodape { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .folheto .rodape::before, .folheto .rodape::after { content: ""; flex: 1; border-top: 2px solid var(--tinta); }
+  .fonte { text-align: center; font: 11px "Courier Prime", monospace; color: var(--tinta-2); margin-top: 8px; overflow-wrap: anywhere; }
+
+  .veredito { max-width: 420px; margin: 18px auto 0; text-align: center; display: none; }
+  .selo { display: inline-block; font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px;
+          padding: 4px 14px; border: 3px solid currentColor; transform: rotate(-2deg); }
+  .selo.entra { color: var(--verde); } .selo.descarte { color: var(--vermelho); }
+  .motivo { font-size: 13px; color: var(--vermelho); margin-top: 8px; }
+  .arqs { font-family: "Special Elite", monospace; font-size: 13px; margin-top: 10px; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .arqs a { color: var(--tinta); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Notícias em Cordel</h1>
+  <p>Do 7 ao 6 — a semana de IA contada em sextilha e em xilogravura</p>
+  <div class="cfg" id="cfg"></div>
+</header>
+
+<main>
+  <section>
+    <h2>A notícia</h2>
+    <label class="campo" for="url">Link da notícia</label>
+    <input type="url" id="url" placeholder="https://…" autocomplete="off">
+    <div class="ou">— OU —</div>
+    <label class="campo" for="noticia">Cole o texto da notícia (se o link não abrir, ou se preferir)</label>
+    <textarea id="noticia" placeholder="Título e texto (ou um resumo) da notícia…"></textarea>
+    <div class="exemplos">Exemplos de texto: <a data-ex="0">robô na feira</a><a data-ex="1">modelo que joga xadrez</a></div>
+    <div class="acoes">
+      <button id="gerar">Gerar folheto</button>
+      <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
+    </div>
+    <ol id="linha"></ol>
+  </section>
+
+  <section>
+    <div class="folheto" id="folheto">
+      <div class="moldura">
+        <div class="cab">Notícias em Cordel</div>
+        <div class="sub"><svg class="seta" viewBox="0 0 22 10"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg>O que o mundo vive, em verso e em xilogravura<svg class="seta" viewBox="0 0 22 10" style="transform:scaleX(-1)"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg></div>
+        <div class="div"><span class="estrela">✸</span></div>
+        <div class="manchete" id="manchete">A manchete aparece aqui</div>
+        <div class="div" style="margin-top:0"><span class="estrela">✸</span></div>
+        <div class="xilo" id="xilo"><span>a xilogravura aparece aqui</span></div>
+        <div class="versos" id="versos"></div>
+        <div class="rodape"><svg class="seta" viewBox="0 0 22 10" style="transform:scaleX(-1)"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg><span class="estrela">✸</span><svg class="seta" viewBox="0 0 22 10"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg></div>
+        <div class="fonte" id="fonte"></div>
+      </div>
+    </div>
+    <div class="veredito" id="veredito">
+      <span class="selo" id="selo"></span>
+      <div class="motivo" id="motivo"></div>
+      <div class="arqs" id="arqs"></div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<script>
+const EXEMPLOS = [
+  "Startup de Recife coloca robô com IA para vender frutas numa feira livre. O robô conversa com os clientes, sugere receitas e faz troco, mas se confundiu com o preço da macaxeira e acabou dando desconto de 90% por uma tarde inteira.",
+  "Um novo modelo de linguagem venceu um campeonato de xadrez contra grandes mestres sem nunca ter sido treinado especificamente para xadrez. Os pesquisadores dizem que ele aprendeu as regras lendo livros e partidas comentadas na internet.",
+];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+document.querySelectorAll("[data-ex]").forEach((a) => a.onclick = () => { $("noticia").value = EXEMPLOS[a.dataset.ex]; $("url").value = ""; });
+fetch("/api/config").then((r) => r.json()).then((c) => $("cfg").textContent = `texto: ${c.texto} · imagem: ${c.imagem}`);
+
+const itens = {};
+function passo(chave, rotulo, status, html = "") {
+  let li = itens[chave];
+  if (!li) { li = itens[chave] = document.createElement("li"); $("linha").appendChild(li); }
+  li.className = status;
+  li.innerHTML = `<div class="etq">${esc(rotulo)}</div>${html ? `<div class="corpo">${html}</div>` : ""}`;
+}
+
+function tabelaEscansao(ev) {
+  const linhas = ev.linhas.map((l) => `
+    <tr><td class="n ${l.ok ? "bom" : "mau"}">${l.ok ? "ok" : "XX"} v${l.n} [${l.silabas}]</td>
+    <td>${esc(l.verso)}<div class="sil">${esc(l.escansao)}</div>${l.duvidas ? `<div class="duv">? ${esc(l.duvidas)}</div>` : ""}</td></tr>`).join("");
+  const rimas = ev.rimas.map((r) => `<div>rima ${r.letra} (versos ${r.versos.join(", ")}):
+    <span class="${r.estado === "SEM RIMA" ? "mau" : "bom"}">${esc(r.estado)}</span> <span class="sil">${esc(r.chaves.join(" · "))}</span></div>`).join("");
+  const extras = (ev.extras || []).map((e) => `<div class="mau">v${e.n} ${esc(e.motivo)}</div>`).join("");
+  return `<table class="esc">${linhas}</table>${rimas}${extras}
+    <div>${ev.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados: ${ev.reprovados.join(", ") || "—"}</span>`}</div>
+    <details><summary>relatório do escandir.py</summary><pre>${esc(ev.relatorio)}</pre></details>`;
+}
+
+function htmlCandidatas(cs, escolhida = -1) {
+  return cs.map((c, i) => `<div class="cand ${i === escolhida ? "escolhida" : ""}">
+    <div class="sil">${i + 1}. ${esc(c.angulo)} · rimas: ${esc(c.rimas.join(" / "))} ·
+      ${c.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados ${c.reprovados.join(", ")}</span>`}</div>
+    <div class="versos-c">${c.versos.map(esc).join("<br>")}</div></div>`).join("");
+}
+
+const mostrarVersos = (versos) => $("versos").innerHTML = versos.map((v) => `<div>${esc(v)}</div>`).join("");
+const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
+
+function tratar(ev) {
+  switch (ev.etapa) {
+    case "noticia":
+      if (ev.status === "rodando") return passo("noticia", "0 · buscando a notícia no link", "rodando", esc(ev.url));
+      if (ev.status === "erro") { $("noticia").focus(); return passo("noticia", "0 · a notícia", "erro", esc(ev.erro)); }
+      if (ev.url) $("fonte").textContent = `fonte: ${ev.fonte || dominio(ev.url)}`;
+      return passo("noticia", `0 · notícia (${ev.origem}, ${ev.caracteres} caracteres)`, "ok",
+        `${ev.titulo ? `<b>${esc(ev.titulo)}</b><br>` : ""}<details><summary>trecho lido</summary><pre>${esc(ev.trecho)}…</pre></details>`);
+    case "fato":
+      if (ev.status === "rodando") return passo("fato", "1 · extraindo o fato", "rodando");
+      $("manchete").textContent = ev.titulo;
+      return passo("fato", "1 · o fato", "ok", `<b>${esc(ev.titulo)}</b><br>${esc(ev.fato)}
+        <div class="sil">imagens: ${esc(ev.imagens_concretas.join(" · "))}</div>`);
+    case "sextilha":
+      if (ev.status === "rodando") return passo("sextilha", "2 · escrevendo a sextilha", "rodando");
+      mostrarVersos(ev.versos);
+      return passo("sextilha", "2 · primeira versão", "ok", ev.versos.map(esc).join("<br>"));
+    case "candidatas":
+      if (ev.status === "rodando")
+        return passo("cand", `2 · escrevendo ${ev.angulos.length} sextilhas em paralelo, uma por ângulo`, "rodando");
+      window.__cand = ev.candidatas;
+      return passo("cand", `2 · ${ev.candidatas.length} candidatas`, "ok", htmlCandidatas(ev.candidatas));
+    case "julgamento":
+      if (ev.status === "rodando") return passo("juri", "2b · o júri está lendo", "rodando");
+      mostrarVersos(window.__cand[ev.escolhida].versos);
+      passo("cand", `2 · ${window.__cand.length} candidatas`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
+      return passo("juri", `2b · júri escolheu a candidata ${ev.escolhida + 1}`, "ok", esc(ev.justificativa));
+    case "escansao":
+      mostrarVersos(ev.versos);
+      return passo(`esc${ev.rodada}`, `3 · escansão ${ev.rodada === 0 ? "inicial" : "após rodada " + ev.rodada}`,
+        ev.entra ? "ok" : "erro", tabelaEscansao(ev));
+    case "correcao":
+      if (ev.status === "rodando")
+        return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3 — versos ${ev.reprovados.join(", ")}`, "rodando");
+      return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3`, "ok",
+        ev.mudancas.map((m) => `v${m.n}: <del>${esc(m.antes)}</del><br>&nbsp;&nbsp;&nbsp;&nbsp;<ins>${esc(m.depois)}</ins>`).join("<br>") || "nenhuma mudança");
+    case "xilogravura":
+      if (ev.status === "rodando") { $("xilo").innerHTML = "<span>entalhando a xilogravura…</span>"; return passo("xilo", "5 · entalhando a xilogravura (em paralelo)", "rodando"); }
+      if (ev.url) $("xilo").innerHTML = `<img alt="xilogravura" src="/${ev.url}?t=${Date.now()}">`;
+      else $("xilo").innerHTML = `<span>a imagem falhou: ${esc(ev.erro)}</span>`;
+      return passo("xilo", "5 · xilogravura", ev.url ? "ok" : "erro");
+    case "fim": {
+      $("manchete").textContent = ev.titulo; mostrarVersos(ev.versos);
+      if (!$("imagem").checked) $("xilo").innerHTML = "<span>sem xilogravura nesta rodada</span>";
+      $("veredito").style.display = "block";
+      $("selo").className = "selo " + (ev.entra ? "entra" : "descarte");
+      $("selo").textContent = ev.entra ? "Entra na coleção" : "Descarte";
+      $("motivo").textContent = ev.motivo || (ev.duvidas.length ? `${ev.duvidas.length} ponto(s) marcados com "?" — o grupo decide.` : "");
+      $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${p}" target="_blank">${k}</a>`).join("·")
+        + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
+      $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
+      return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
+    }
+    case "erro":
+      return passo("erro", "erro", "erro", esc(ev.erro));
+  }
+}
+
+async function baixar(nome) {
+  $("baixar").disabled = true;
+  // o PNG original (~2,5 MB) deixa o html-to-image lento (~30 s); uma cópia
+  // reduzida em JPEG, só durante a exportação, faz o mesmo em ~2 s
+  const img = document.querySelector("#xilo img"), orig = img?.src;
+  try {
+    if (img) {
+      const c = document.createElement("canvas");
+      c.width = 1200; c.height = Math.round(1200 * img.naturalHeight / img.naturalWidth);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      img.src = c.toDataURL("image/jpeg", 0.9); await img.decode();
+    }
+    const url = await htmlToImage.toPng($("folheto"), { pixelRatio: 2, backgroundColor: "#f4efe3" });
+    const a = document.createElement("a"); a.href = url; a.download = `${nome}-folheto.png`; a.click();
+  } finally {
+    if (img) img.src = orig;
+    $("baixar").disabled = false;
+  }
+}
+
+$("gerar").onclick = async () => {
+  const noticia = $("noticia").value.trim(), url = $("url").value.trim();
+  if (!noticia && !url) return $("url").focus();
+  $("gerar").disabled = true;
+  $("linha").innerHTML = ""; for (const k in itens) delete itens[k];
+  $("veredito").style.display = "none";
+  $("manchete").textContent = "…"; $("versos").innerHTML = ""; $("fonte").textContent = "";
+  $("xilo").innerHTML = "<span>a xilogravura aparece aqui</span>";
+  try {
+    const resp = await fetch("/api/cordel", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ noticia, url, com_imagem: $("imagem").checked }),
+    });
+    const reader = resp.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const bloco = buf.slice(0, i); buf = buf.slice(i + 2);
+        if (bloco.startsWith("data: ")) tratar(JSON.parse(bloco.slice(6)));
+      }
+    }
+  } catch (e) {
+    passo("erro", "erro de conexão", "erro", esc(e));
+  } finally {
+    $("gerar").disabled = false;
+  }
+};
+</script>
+</body>
+</html>

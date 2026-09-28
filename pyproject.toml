@@ -1,0 +1,16 @@
+[project]
+name = "cordel-generator"
+version = "0.1.0"
+description = "Do 7 ao 6: A Semana em Sextilha — gerador de folhetos de cordel com o AI SDK para Python"
+requires-python = ">=3.12"
+dependencies = [
+    "ai[openai]",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "python-dotenv",
+    "trafilatura>=2.2.0",
+]
+
+[tool.uv]
+package = false

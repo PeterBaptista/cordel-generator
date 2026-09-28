@@ -29,3 +29,32 @@ Python 3, sem dependências, roda offline.
 python3 scripts/escandir.py --verso "O robô chegou na feira"
 python3 scripts/escandir.py folhetos/*.txt --csv caderno/metrica.csv
 ```
+
+## Gerador (AI SDK para Python + OpenAI)
+
+O laço do [`SKILL.md`](SKILL.md) automatizado com o [AI SDK para Python](https://ai-python.dev/docs):
+notícia → fato → sextilha → `escandir.py` → correção só dos versos reprovados (máx. 3 rodadas)
+→ xilogravura → `folhetos/` ou `descarte/`, com o registro completo em `caderno/<slug>.json`
+(prompts na íntegra, modelo, parâmetros, saída bruta e relatório de cada rodada).
+
+A notícia entra por **link** (o servidor extrai o texto da matéria com `trafilatura`) ou
+por **texto colado**. Se o link não abrir (bloqueio, paywall, página sem matéria), a tela
+pede para colar o texto. O folheto sai no formato "Notícias em Cordel": manchete, xilogravura
+horizontal e a sextilha, com botão para baixar o cartaz em PNG.
+
+```bash
+cp .env.example .env        # coloque a OPENAI_API_KEY
+uv sync
+uv run uvicorn app.server:app --reload
+# abra http://localhost:8000
+```
+
+| Arquivo | O que faz |
+|---|---|
+| `app/workflow.py` | o laço; chama o verificador `scripts/escandir.py` sem modificá-lo |
+| `app/prompts.py` | todos os prompts, para irem na íntegra ao caderno de bordo |
+| `app/server.py` | FastAPI; `POST /api/cordel` devolve as etapas por SSE |
+| `app/static/index.html` | a página de teste |
+
+O script não decide o que entra: o que ele marca com `?` aparece na tela e no JSON
+como `duvidas_para_o_grupo`.

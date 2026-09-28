@@ -1,0 +1,139 @@
+{
+  "inicio": "2026-09-28T11:15:52",
+  "url": "https://g1.globo.com/tecnologia/noticia/2026/09/24/google-testa-chips-de-ia-no-espaco.ghtml",
+  "chamadas": [
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Google testa chips de IA no espaço em lançamento de satélite. | G1\n\nLogo do Google exibido em um evento em Berlim, Alemanha. — Foto: REUTERS/Lisi Niesner\nO Google anunciou nesta quinta-feira (24) que lançará um satélite protótipo na próxima semana. A ação marca o primeiro teste em órbita do Projeto Suncatcher, uma pesquisa que investiga se o espaço pode abrigar infraestruturas de processamento de inteligência artificial em grande escala.\nEmpresas como SpaceX e Starcloud desenvolvem planos para instalar centros de dados na órbita baixa da Terra. O objetivo é aproveitar a luz solar de forma quase contínua para alimentar o alto consumo de energia exigido pela computação de IA, além de evitar restrições do suprimento elétrico terrestre.\nA nova missão será realizada em parceria com a empresa de satélites Planet Labs, a bordo do voo compartilhado Transporter-18, da SpaceX. O teste vai avaliar como o hardware de IA do Google suporta as forças do lançamento, a radiação e as temperaturas extremas no espaço.\nApós o lançamento, o satélite protótipo equipado com as unidades de processamento de tensor (TPUs, na sigla em inglês) do Google será posicionado em órbita baixa para verificar se os chips operam com precisão no ambiente espacial.\nA radiação espacial pode interromper ou danificar componentes eletrônicos, provocando erros de dados conhecidos como alteração de bits (bit flips).\nO Google informou que realizou testes em suas TPUs durante a execução de tarefas de IA em uma instalação na Universidade da Califórnia em Davis. No entanto, a empresa destacou que os testes orbitais são indispensáveis para entender o desempenho real do hardware no espaço.\nA missão também testará o sistema projetado para resfriar os chips de alta potência no vácuo espacial, onde o resfriamento convencional por fluxo de ar é inviável. O mecanismo combina tubos de calor com radiadores.\nEspecialistas apontam que o conceito ainda está a anos de se tornar viável comercialmente, devido aos altos custos de lançamento, limitações de engenharia e gargalos na produção de satélites.\nSegundo o Google, esta primeira missão do Suncatcher tem como meta coletar dados em órbita e identificar possíveis pontos de falha, e não demonstrar um centro de dados orbital totalmente operacional.\nA empresa planeja lançar dois satélites em 2027 para testar conexões a laser de alta largura de banda, necessárias para interligar futuros clusters de computação.",
+      "saida_bruta": "{\"fato\":\"O Google lançará um satélite protótipo para testar seus chips de IA em órbita.\",\"titulo\":\"Google Testa Chip de IA no Espaço\",\"imagens_concretas\":[\"Foguete da SpaceX subindo com fogo e fumaça\",\"Satélite pequeno girando acima da Terra\",\"Chip do Google preso dentro do satélite\",\"Radiadores e tubos de calor resfriando peças no vácuo\",\"Logo do Google em uma tela de evento\"]}",
+      "tokens": {
+        "input_tokens": 743,
+        "output_tokens": 152,
+        "reasoning_tokens": 43
+      },
+      "segundos": 4.1
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino. Escreva UMA sextilha sobre o fato dado.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral, com imagem concreta.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- Não invente o que não aconteceu na notícia.\n- Sem título, sem numeração, sem pontuação no fim obrigatória.",
+      "usuario": "Fato: O Google lançará um satélite protótipo para testar seus chips de IA em órbita.\nImagens possíveis: Foguete da SpaceX subindo com fogo e fumaça; Satélite pequeno girando acima da Terra; Chip do Google preso dentro do satélite; Radiadores e tubos de calor resfriando peças no vácuo; Logo do Google em uma tela de evento\n\nEscreva a sextilha.",
+      "saida_bruta": "{\"versos\":[\"O Google manda um satélite\",\"subindo em fogo e clarão\",\"com o chip de IA do Google\",\"pra prova em órbita então\",\"Radiador no vazio\",\"vai testar na amplidão\"]}",
+      "tokens": {
+        "input_tokens": 359,
+        "output_tokens": 2127,
+        "reasoning_tokens": 2070
+      },
+      "segundos": 30.2
+    },
+    {
+      "modelo": "openai:gpt-5.4-mini + image_generation(gpt-image-2)",
+      "usuario": "Gere uma imagem horizontal: ilustração de folheto de cordel em xilogravura tradicional nordestina. Preto e branco puro, alto contraste, tinta preta chapada sobre papel branco, sem cinza, sem degradê, sem sombreado suave. Traço grosso de goiva, céu e chão preenchidos com linhas paralelas entalhadas, figuras em silhueta com poucos detalhes, borda retangular preta ao redor da cena. ABSOLUTAMENTE NENHUM texto, letra, palavra, número ou placa na imagem. Cena: O Google lançará um satélite protótipo para testar seus chips de IA em órbita. Elementos: Foguete da SpaceX subindo com fogo e fumaça; Satélite pequeno girando acima da Terra; Chip do Google preso dentro do satélite; Radiadores e tubos de calor resfriando peças no vácuo; Logo do Google em uma tela de evento.",
+      "segundos": 39.7
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige sextilhas de cordel (7 sílabas poéticas, rima ABCBDB).\nUm verificador de escansão reprovou alguns versos. Reescreva SOMENTE os versos\nreprovados. Os versos aprovados já estão certos e não podem mudar.\nMantenha o sentido e o registro de cordel.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nDevolva cada verso corrigido com o número dele (1 a 6).",
+      "usuario": "Sextilha atual:\n1. O Google manda um satélite\n2. subindo em fogo e clarão\n3. com o chip de IA do Google\n4. pra prova em órbita então\n5. Radiador no vazio\n6. vai testar na amplidão\n\nRelatório do verificador:\n=== sextilha ===\n  XX v1 [8] O Google manda um satélite\n         o / go / O / gle / MAN / da_um / sa / TÉ / (li) / (te)\n  ok v2 [7] subindo em fogo e clarão\n         su / BIN / do_em / FO / go_e / cla / RÃO\n  XX v3 [8] com o chip de IA do Google\n         com / o / CHIP / DE_I / a / do / go / O / (gle)\n  ok v4 [7] pra prova em órbita então\n         pra / PRO / va_em / ÓR / bi / ta_en / TÃO\n  XX v5 [6] Radiador no vazio\n         ra / dia / DOR / no / va / ZI / (o)\n       ? radiador: 'ia' pode virar hiato\n  XX v6 [6] vai testar na amplidão\n         VAI / tes / TAR / na_am / pli / DÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos 1, 3, 5, 6.",
+      "saida_bruta": "{\"versos\":[{\"n\":1,\"verso\":\"Google lança um satélite\"},{\"n\":3,\"verso\":\"com chip Google de IA\"},{\"n\":5,\"verso\":\"Radiador vai no vazio\"},{\"n\":6,\"verso\":\"vai testar lá na amplidão\"}]}",
+      "tokens": {
+        "input_tokens": 578,
+        "output_tokens": 1273,
+        "reasoning_tokens": 1203
+      },
+      "segundos": 17.2
+    },
+    {
+      "modelo": "openai:gpt-5.5",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige sextilhas de cordel (7 sílabas poéticas, rima ABCBDB).\nUm verificador de escansão reprovou alguns versos. Reescreva SOMENTE os versos\nreprovados. Os versos aprovados já estão certos e não podem mudar.\nMantenha o sentido e o registro de cordel.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nDevolva cada verso corrigido com o número dele (1 a 6).",
+      "usuario": "Sextilha atual:\n1. Google lança um satélite\n2. subindo em fogo e clarão\n3. com chip Google de IA\n4. pra prova em órbita então\n5. Radiador vai no vazio\n6. vai testar lá na amplidão\n\nRelatório do verificador:\n=== sextilha ===\n  ok v1 [7] Google lança um satélite\n         go / O / gle / LAN / ça_um / sa / TÉ / (li) / (te)\n  ok v2 [7] subindo em fogo e clarão\n         su / BIN / do_em / FO / go_e / cla / RÃO\n  XX v3 [6] com chip Google de IA\n         com / CHIP / go / O / gle / DE_I / (a)\n  ok v4 [7] pra prova em órbita então\n         pra / PRO / va_em / ÓR / bi / ta_en / TÃO\n  ok v5 [7] Radiador vai no vazio\n         ra / dia / DOR / VAI / no / va / ZI / (o)\n       ? radiador: 'ia' pode virar hiato\n  ok v6 [7] vai testar lá na amplidão\n         VAI / tes / TAR / LÁ / na_am / pli / DÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos 3.",
+      "saida_bruta": "{\"versos\":[{\"n\":3,\"verso\":\"com chip da Google de IA\"}]}",
+      "tokens": {
+        "input_tokens": 567,
+        "output_tokens": 237,
+        "reasoning_tokens": 206
+      },
+      "segundos": 5.6
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "versos": [
+        "O Google manda um satélite",
+        "subindo em fogo e clarão",
+        "com o chip de IA do Google",
+        "pra prova em órbita então",
+        "Radiador no vazio",
+        "vai testar na amplidão"
+      ],
+      "relatorio": "=== sextilha ===\n  XX v1 [8] O Google manda um satélite\n         o / go / O / gle / MAN / da_um / sa / TÉ / (li) / (te)\n  ok v2 [7] subindo em fogo e clarão\n         su / BIN / do_em / FO / go_e / cla / RÃO\n  XX v3 [8] com o chip de IA do Google\n         com / o / CHIP / DE_I / a / do / go / O / (gle)\n  ok v4 [7] pra prova em órbita então\n         pra / PRO / va_em / ÓR / bi / ta_en / TÃO\n  XX v5 [6] Radiador no vazio\n         ra / dia / DOR / no / va / ZI / (o)\n       ? radiador: 'ia' pode virar hiato\n  XX v6 [6] vai testar na amplidão\n         VAI / tes / TAR / na_am / pli / DÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 1,
+      "versos": [
+        "Google lança um satélite",
+        "subindo em fogo e clarão",
+        "com chip Google de IA",
+        "pra prova em órbita então",
+        "Radiador vai no vazio",
+        "vai testar lá na amplidão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Google lança um satélite\n         go / O / gle / LAN / ça_um / sa / TÉ / (li) / (te)\n  ok v2 [7] subindo em fogo e clarão\n         su / BIN / do_em / FO / go_e / cla / RÃO\n  XX v3 [6] com chip Google de IA\n         com / CHIP / go / O / gle / DE_I / (a)\n  ok v4 [7] pra prova em órbita então\n         pra / PRO / va_em / ÓR / bi / ta_en / TÃO\n  ok v5 [7] Radiador vai no vazio\n         ra / dia / DOR / VAI / no / va / ZI / (o)\n       ? radiador: 'ia' pode virar hiato\n  ok v6 [7] vai testar lá na amplidão\n         VAI / tes / TAR / LÁ / na_am / pli / DÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 2,
+      "versos": [
+        "Google lança um satélite",
+        "subindo em fogo e clarão",
+        "com chip da Google de IA",
+        "pra prova em órbita então",
+        "Radiador vai no vazio",
+        "vai testar lá na amplidão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Google lança um satélite\n         go / O / gle / LAN / ça_um / sa / TÉ / (li) / (te)\n  ok v2 [7] subindo em fogo e clarão\n         su / BIN / do_em / FO / go_e / cla / RÃO\n  ok v3 [7] com chip da Google de IA\n         com / CHIP / da / go / O / gle / DE_I / (a)\n  ok v4 [7] pra prova em órbita então\n         pra / PRO / va_em / ÓR / bi / ta_en / TÃO\n  ok v5 [7] Radiador vai no vazio\n         ra / dia / DOR / VAI / no / va / ZI / (o)\n       ? radiador: 'ia' pode virar hiato\n  ok v6 [7] vai testar lá na amplidão\n         VAI / tes / TAR / LÁ / na_am / pli / DÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "Google testa chips de IA no espaço em lançamento de satélite. | G1\n\nLogo do Google exibido em um evento em Berlim, Alemanha. — Foto: REUTERS/Lisi Niesner\nO Google anunciou nesta quinta-feira (24) que lançará um satélite protótipo na próxima semana. A ação marca o primeiro teste em órbita do Projeto Suncatcher, uma pesquisa que investiga se o espaço pode abrigar infraestruturas de processamento de inteligência artificial em grande escala.\nEmpresas como SpaceX e Starcloud desenvolvem planos para instalar centros de dados na órbita baixa da Terra. O objetivo é aproveitar a luz solar de forma quase contínua para alimentar o alto consumo de energia exigido pela computação de IA, além de evitar restrições do suprimento elétrico terrestre.\nA nova missão será realizada em parceria com a empresa de satélites Planet Labs, a bordo do voo compartilhado Transporter-18, da SpaceX. O teste vai avaliar como o hardware de IA do Google suporta as forças do lançamento, a radiação e as temperaturas extremas no espaço.\nApós o lançamento, o satélite protótipo equipado com as unidades de processamento de tensor (TPUs, na sigla em inglês) do Google será posicionado em órbita baixa para verificar se os chips operam com precisão no ambiente espacial.\nA radiação espacial pode interromper ou danificar componentes eletrônicos, provocando erros de dados conhecidos como alteração de bits (bit flips).\nO Google informou que realizou testes em suas TPUs durante a execução de tarefas de IA em uma instalação na Universidade da Califórnia em Davis. No entanto, a empresa destacou que os testes orbitais são indispensáveis para entender o desempenho real do hardware no espaço.\nA missão também testará o sistema projetado para resfriar os chips de alta potência no vácuo espacial, onde o resfriamento convencional por fluxo de ar é inviável. O mecanismo combina tubos de calor com radiadores.\nEspecialistas apontam que o conceito ainda está a anos de se tornar viável comercialmente, devido aos altos custos de lançamento, limitações de engenharia e gargalos na produção de satélites.\nSegundo o Google, esta primeira missão do Suncatcher tem como meta coletar dados em órbita e identificar possíveis pontos de falha, e não demonstrar um centro de dados orbital totalmente operacional.\nA empresa planeja lançar dois satélites em 2027 para testar conexões a laser de alta largura de banda, necessárias para interligar futuros clusters de computação.",
+  "origem": "link",
+  "titulo": "Google testa chips de IA no espaço em lançamento de satélite. | G1",
+  "fonte": "",
+  "data": "2026-09-24",
+  "fato": {
+    "fato": "O Google lançará um satélite protótipo para testar seus chips de IA em órbita.",
+    "titulo": "Google Testa Chip de IA no Espaço",
+    "imagens_concretas": [
+      "Foguete da SpaceX subindo com fogo e fumaça",
+      "Satélite pequeno girando acima da Terra",
+      "Chip do Google preso dentro do satélite",
+      "Radiadores e tubos de calor resfriando peças no vácuo",
+      "Logo do Google em uma tela de evento"
+    ]
+  },
+  "fim": "2026-09-28T11:16:50",
+  "entra": true,
+  "motivo": null,
+  "versos_finais": [
+    "Google lança um satélite",
+    "subindo em fogo e clarão",
+    "com chip da Google de IA",
+    "pra prova em órbita então",
+    "Radiador vai no vazio",
+    "vai testar lá na amplidão"
+  ],
+  "duvidas_para_o_grupo": [
+    {
+      "n": 5,
+      "duvida": "radiador: 'ia' pode virar hiato"
+    }
+  ],
+  "rodadas_de_correcao": 2,
+  "arquivos": {
+    "texto": "folhetos/20260928-111650-google-testa-chip-de-ia-no-espaco.txt",
+    "imagem": "folhetos/20260928-111650-google-testa-chip-de-ia-no-espaco.png"
+  }
+}
