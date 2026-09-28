@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custos das gerações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papel: #efe4cc; --folha: #fbf6ea; --tinta: #151210; --tinta-2: #4a3f35; --tinta-3: #7a6d5f;
+    --vermelho: #a3301f; --verde: #2f5d3a; --linha: #15121026;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papel); color: var(--tinta);
+    font-family: "Libre Baskerville", Georgia, serif; font-size: 15px; line-height: 1.5;
+    background-image: radial-gradient(#1b161210 1px, transparent 1px); background-size: 4px 4px;
+  }
+  header { border-bottom: 3px double var(--tinta); padding: 18px 16px 12px; text-align: center; }
+  header h1 { font: 700 clamp(26px, 5vw, 40px)/1.1 "Oswald", sans-serif; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-style: italic; color: var(--tinta-2); font-size: 14px; }
+  nav { margin-top: 8px; font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+  nav a { color: var(--tinta); margin: 0 8px; }
+  nav a[aria-current] { color: var(--vermelho); text-decoration: none; }
+  main { max-width: 1120px; margin: 0 auto; padding: 22px 16px 60px; }
+  h2 { font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin: 28px 0 10px; }
+
+  /* fileira de indicadores */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .kpi { background: var(--folha); border: 2px solid var(--tinta); padding: 12px 14px; }
+  .kpi.hero { grid-column: span 2; box-shadow: 5px 5px 0 var(--tinta); }
+  @media (max-width: 420px) { .kpi.hero { grid-column: span 1; } }
+  .kpi .rot { font-size: 13px; color: var(--tinta-2); }
+  .kpi .val { font: 600 30px/1.15 "Oswald", sans-serif; margin-top: 2px; }
+  .kpi.hero .val { font-size: 52px; }
+  .kpi .sub { font-size: 12.5px; color: var(--tinta-3); margin-top: 2px; }
+  .aviso { font-size: 13px; color: var(--tinta-2); margin-top: 10px; }
+
+  /* tabela */
+  .rolagem { overflow-x: auto; border: 2px solid var(--tinta); background: var(--folha); }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  th { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; color: var(--tinta-2);
+       background: #f1e8d4; position: sticky; top: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.num { font-family: "Courier Prime", monospace; }
+  tr.geracao { cursor: pointer; }
+  tr.geracao:hover td { background: #f6eedc; }
+  tr.geracao td:first-child::before { content: "▸"; display: inline-block; width: 1em; color: var(--tinta-3); transition: transform .15s; }
+  tr.geracao.aberta td:first-child::before { transform: rotate(90deg); }
+  tr.geracao:focus-visible { outline: 2px solid var(--vermelho); outline-offset: -2px; }
+  .quando { font-family: "Courier Prime", monospace; font-size: 13px; white-space: nowrap; }
+  .manchete a { color: var(--tinta); }
+  .cfg { display: block; font: 12px "Courier Prime", monospace; color: var(--tinta-3); margin-top: 2px; }
+  .selo { display: inline-block; font: 700 11px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px;
+          padding: 1px 6px; border: 2px solid currentColor; white-space: nowrap; }
+  .selo.entra { color: var(--verde); } .selo.descarte { color: var(--vermelho); }
+  .nd { color: var(--tinta-3); font-style: italic; font-family: "Libre Baskerville", serif; font-size: 12px; }
+  tr.total td { font-weight: 700; border-top: 2px solid var(--tinta); background: #f1e8d4; }
+
+  tr.detalhe > td { background: #f6efdf; padding: 4px 10px 14px 34px; }
+  table.chamadas { min-width: 0; font-size: 13px; }
+  table.chamadas th { background: transparent; position: static; font-size: 11px; }
+  table.chamadas td { border-bottom: 1px dotted var(--linha); }
+  .rid { font-family: "Courier Prime", monospace; font-size: 12px; }
+  .rid a { color: var(--tinta-2); }
+  .arqs { font-family: "Special Elite", monospace; font-size: 13px; margin: 8px 0 2px; }
+  .arqs a { color: var(--tinta); margin-right: 12px; }
+  .vazio { padding: 28px; text-align: center; color: var(--tinta-2); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Custos das gerações</h1>
+  <p>Quanto cada folheto gastou na API da OpenAI, estimado pelos tokens registrados no caderno</p>
+  <nav><a href="/">Gerador</a> · <a href="/logs" aria-current="page">Logs</a></nav>
+</header>
+
+<main>
+  <section class="kpis" id="kpis" aria-label="Resumo"></section>
+  <div class="aviso" id="aviso"></div>
+
+  <h2>Gerações</h2>
+  <div class="rolagem">
+    <table>
+      <thead>
+        <tr>
+          <th>Quando</th><th>Manchete</th><th>Resultado</th>
+          <th class="num">Candidatas</th><th class="num">Correções</th><th class="num">Tempo</th>
+          <th class="num">Texto</th><th class="num">Imagem</th><th class="num">Total</th>
+        </tr>
+      </thead>
+      <tbody id="linhas"><tr><td colspan="9" class="vazio">carregando…</td></tr></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const usd = (v, casas = 3) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: casas, maximumFractionDigits: casas }).format(v);
+const int = (v) => v == null ? "—" : new Intl.NumberFormat("pt-BR").format(v);
+const quando = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+const segundos = (g) => {
+  if (!g.inicio || !g.fim) return "—";
+  const s = Math.round((new Date(g.fim) - new Date(g.inicio)) / 1000);
+  return s >= 60 ? `${Math.floor(s / 60)}min ${String(s % 60).padStart(2, "0")}s` : `${s}s`;
+};
+const NOMES = { low: "baixo", medium: "médio", high: "alto" };
+const configTxt = (c) => [
+  (c.texto || "").replace("openai:", ""), NOMES[c.raciocinio] ?? c.raciocinio,
+  c.imagem_qualidade ? `imagem ${c.imagem_qualidade}` : null,
+].filter(Boolean).map(esc).join(" · ");
+const custoImagem = (g) => !g.tem_imagem ? '<span class="nd">—</span>' : g.imagem_medida ? usd(g.imagem) : `<span class="nd" title="gerações antigas não registravam o uso da imagem">sem medição</span>`;
+
+function kpis(gs) {
+  const total = gs.reduce((a, g) => a + g.total, 0);
+  const texto = gs.reduce((a, g) => a + g.texto, 0);
+  const imagem = gs.reduce((a, g) => a + g.imagem, 0);
+  const entraram = gs.filter((g) => g.entra).length;
+  const medidas = gs.filter((g) => g.imagem_medida && g.chamadas.some((c) => c.etapa === "xilogravura"));
+  const mediaImg = medidas.length ? medidas.reduce((a, g) => a + g.imagem, 0) / medidas.length : null;
+  const pct = (v) => total ? `${Math.round(v / total * 100)}% do total` : "";
+  $("kpis").innerHTML = `
+    <div class="kpi hero"><div class="rot">Gasto total</div><div class="val">${usd(total, 2)}</div>
+      <div class="sub">em ${gs.length} ${gs.length === 1 ? "geração" : "gerações"}</div></div>
+    <div class="kpi"><div class="rot">Média por folheto</div><div class="val">${usd(gs.length ? total / gs.length : 0)}</div>
+      <div class="sub">texto + imagem</div></div>
+    <div class="kpi"><div class="rot">Texto</div><div class="val">${usd(texto, 2)}</div><div class="sub">${pct(texto)}</div></div>
+    <div class="kpi"><div class="rot">Imagem</div><div class="val">${usd(imagem, 2)}</div>
+      <div class="sub">${mediaImg != null ? `${usd(mediaImg)} por xilogravura medida` : "nenhuma medida ainda"}</div></div>
+    <div class="kpi"><div class="rot">Entraram na coleção</div><div class="val">${entraram} de ${gs.length}</div>
+      <div class="sub">o resto foi para descarte/</div></div>`;
+  const semMedida = gs.filter((g) => !g.imagem_medida).length;
+  $("aviso").textContent = semMedida
+    ? `${semMedida} ${semMedida === 1 ? "geração antiga não registrou" : "gerações antigas não registraram"} o uso da imagem; nelas, o gasto da xilogravura não entra na soma.`
+    : "";
+}
+
+function detalhe(g) {
+  const linhas = g.chamadas.map((c) => {
+    const img = c.imagem ? `${int(c.imagem.imagem_saida)} img` : (c.etapa === "xilogravura" ? '<span class="nd">—</span>' : "");
+    const rid = c.response_id
+      ? `<a href="https://platform.openai.com/logs/${encodeURIComponent(c.response_id)}" target="_blank" rel="noopener">${esc(c.response_id.slice(0, 18))}…</a>`
+      : '<span class="nd">—</span>';
+    return `<tr><td>${esc(c.etapa)}</td><td>${esc(c.modelo.replace("openai:", ""))}</td>
+      <td class="num">${int(c.entrada)}</td><td class="num">${int(c.saida)}</td><td class="num">${int(c.raciocinio)}</td>
+      <td class="num">${img}</td><td class="num">${c.segundos ?? "—"}s</td>
+      <td class="num">${c.imagem_medida ? usd(c.custo, 4) : usd(c.custo, 4) + ' <span class="nd">+ imagem</span>'}</td>
+      <td class="rid">${rid}</td></tr>`;
+  }).join("");
+  const arqs = Object.entries(g.arquivos).map(([k, p]) => `<a href="/${esc(p)}" target="_blank">${esc(k)}</a>`).join("");
+  return `<tr class="detalhe" hidden><td colspan="9">
+    <div class="arqs">${arqs}${g.url ? `<a href="${esc(g.url)}" target="_blank" rel="noopener">notícia</a>` : ""}</div>
+    <table class="chamadas"><thead><tr><th>Etapa</th><th>Modelo</th><th class="num">Entrada</th><th class="num">Saída</th>
+      <th class="num">Raciocínio</th><th class="num">Imagem</th><th class="num">Tempo</th><th class="num">Custo</th><th>Log na OpenAI</th></tr></thead>
+    <tbody>${linhas}</tbody></table></td></tr>`;
+}
+
+function tabela(gs) {
+  if (!gs.length) { $("linhas").innerHTML = '<tr><td colspan="9" class="vazio">Nenhuma geração ainda.</td></tr>'; return; }
+  const soma = (k) => gs.reduce((a, g) => a + g[k], 0);
+  $("linhas").innerHTML = gs.map((g) => `
+    <tr class="geracao" tabindex="0" aria-expanded="false">
+      <td class="quando">${quando(g.inicio)}</td>
+      <td class="manchete">${g.arquivos.imagem ? `<a href="/${esc(g.arquivos.imagem)}" target="_blank" onclick="event.stopPropagation()">${esc(g.manchete)}</a>` : esc(g.manchete)}<span class="cfg">${configTxt(g.config)}</span></td>
+      <td><span class="selo ${g.entra ? "entra" : "descarte"}">${g.entra ? "Entrou" : "Descarte"}</span></td>
+      <td class="num">${g.candidatas}</td><td class="num">${g.rodadas ?? "—"}</td><td class="num">${segundos(g)}</td>
+      <td class="num">${usd(g.texto)}</td><td class="num">${custoImagem(g)}</td><td class="num"><b>${usd(g.total)}</b></td>
+    </tr>${detalhe(g)}`).join("") + `
+    <tr class="total"><td colspan="6">Total</td><td class="num">${usd(soma("texto"))}</td>
+      <td class="num">${usd(soma("imagem"))}</td><td class="num">${usd(soma("total"))}</td></tr>`;
+  document.querySelectorAll("tr.geracao").forEach((tr) => {
+    const alternar = () => {
+      const aberta = tr.classList.toggle("aberta");
+      tr.setAttribute("aria-expanded", aberta);
+      tr.nextElementSibling.hidden = !aberta;
+    };
+    tr.onclick = alternar;
+    tr.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); alternar(); } };
+  });
+}
+
+fetch("/api/logs").then((r) => r.json()).then(({ geracoes }) => { kpis(geracoes); tabela(geracoes); })
+  .catch((e) => $("linhas").innerHTML = `<tr><td colspan="9" class="vazio">Erro ao carregar: ${esc(e)}</td></tr>`);
+</script>
+</body>
+</html>

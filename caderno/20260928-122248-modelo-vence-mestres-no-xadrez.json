@@ -1,0 +1,223 @@
+{
+  "inicio": "2026-09-28T12:21:56",
+  "url": null,
+  "chamadas": [
+    {
+      "etapa": "fato",
+      "modelo": "openai:gpt-5.5",
+      "response_id": "resp_0732679da6e825f7006aba8615595c87d29f3e83dd272689f2",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Um novo modelo de linguagem venceu um campeonato de xadrez contra grandes mestres sem nunca ter sido treinado especificamente para xadrez. Os pesquisadores dizem que ele aprendeu as regras lendo livros e partidas comentadas na internet.",
+      "saida_bruta": "{\"fato\":\"Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo.\",\"titulo\":\"Modelo vence mestres no xadrez\",\"imagens_concretas\":[\"Tabuleiro de xadrez com peças pretas e brancas\",\"Grandes mestres sentados diante do tabuleiro\",\"Tela de computador fazendo lances de xadrez\",\"Livros abertos sobre xadrez e partidas comentadas na internet\"]}",
+      "tokens": {
+        "input_tokens": 268,
+        "output_tokens": 138,
+        "reasoning_tokens": 34,
+        "cache_read_tokens": 0
+      },
+      "segundos": 4.5
+    },
+    {
+      "etapa": "xilogravura",
+      "modelo": "openai:gpt-5.4-mini + image_generation(gpt-image-2, low)",
+      "modelo_imagem": "gpt-image-2",
+      "response_id": "resp_04e0199894ab67e3006aba86198ec887d2a06cadf267d80af8",
+      "usuario": "Gere uma imagem horizontal: ilustração de folheto de cordel em xilogravura tradicional nordestina. Preto e branco puro, alto contraste, tinta preta chapada sobre papel branco, sem cinza, sem degradê, sem sombreado suave. Traço grosso de goiva, céu e chão preenchidos com linhas paralelas entalhadas, figuras em silhueta com poucos detalhes, borda retangular preta ao redor da cena. ABSOLUTAMENTE NENHUM texto, letra, palavra, número, placa, logotipo ou marca de empresa na imagem. Cena: Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo. Elementos: Tabuleiro de xadrez com peças pretas e brancas; Grandes mestres sentados diante do tabuleiro; Tela de computador fazendo lances de xadrez; Livros abertos sobre xadrez e partidas comentadas na internet.",
+      "tokens": {
+        "input_tokens": 2625,
+        "output_tokens": 228,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "tokens_imagem": {
+        "texto_entrada": 215,
+        "imagem_entrada": 0,
+        "imagem_saida": 158
+      },
+      "segundos": 25.9
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-5.5",
+      "response_id": "resp_054d788d11a95abe006aba86198bfc87d294bf6da16724220c",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo.\nImagens possíveis: Tabuleiro de xadrez com peças pretas e brancas; Grandes mestres sentados diante do tabuleiro; Tela de computador fazendo lances de xadrez; Livros abertos sobre xadrez e partidas comentadas na internet\nÂngulo: como um causo contado na feira, com humor e exagero\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Contar na feira, em tom de causo exagerado, a tela faladeira derrubando mestre no xadrez sem nunca ter pegado treino de tabuleiro.\",\"rimas\":[\"pregão\",\"peão\",\"botão\"],\"versos\":[\"Na feira cantou jornal\",\"A tela deu seu pregão\",\"Mestres de gravata e livro\",\"tremiam ante o peão\",\"Modelo verbal sem treino\",\"mate brotou do botão\"]}",
+      "tokens": {
+        "input_tokens": 670,
+        "output_tokens": 2567,
+        "reasoning_tokens": 2461,
+        "cache_read_tokens": 0
+      },
+      "segundos": 34.5
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-5.5",
+      "response_id": "resp_07ddec3a5e3ca040006aba86198b6c87d2a290ac0f43b33781",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo.\nImagens possíveis: Tabuleiro de xadrez com peças pretas e brancas; Grandes mestres sentados diante do tabuleiro; Tela de computador fazendo lances de xadrez; Livros abertos sobre xadrez e partidas comentadas na internet\nÂngulo: como conselho de gente velha, terminando numa moral\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Vou contar como conselho de avô na feira: não subestime saber que chega por caminho torto.\",\"rimas\":[\"lição\",\"peão\",\"razão\"],\"versos\":[\"Meu avô falou na feira\",\"Preste bem nesta lição\",\"Bicho de letra venceu\",\"Sem treino, comeu peão\",\"A taça curvou grão-mestres\",\"Nunca zombe da razão\"]}",
+      "tokens": {
+        "input_tokens": 667,
+        "output_tokens": 3203,
+        "reasoning_tokens": 3106,
+        "cache_read_tokens": 0
+      },
+      "segundos": 43.5
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-5.5",
+      "response_id": "resp_0d763e37243c6ce5006aba861985c887d2931727988fea3964",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo.\nImagens possíveis: Tabuleiro de xadrez com peças pretas e brancas; Grandes mestres sentados diante do tabuleiro; Tela de computador fazendo lances de xadrez; Livros abertos sobre xadrez e partidas comentadas na internet\nÂngulo: como cantador que anuncia uma notícia de longe, com espanto e maravilha\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Como cantador na feira, anuncio de longe, com espanto, que um modelo de linguagem derrubou mestres no xadrez sem preparo próprio.\",\"rimas\":[\"torneio\",\"alheio\",\"passeio\"],\"versos\":[\"De longe trago recado\",\"Da feira canto o torneio\",\"Modelo de fala arrisca\",\"Sem treino no xadrez alheio\",\"Grão-mestres ficaram mudos\",\"Deu xeque-mate em passeio\"]}",
+      "tokens": {
+        "input_tokens": 673,
+        "output_tokens": 3217,
+        "reasoning_tokens": 3103,
+        "cache_read_tokens": 0
+      },
+      "segundos": 44.6
+    },
+    {
+      "etapa": "júri",
+      "modelo": "openai:gpt-5.5",
+      "response_id": "resp_0d1d18a67740f216006aba864612c887d292701a8c906b84d3",
+      "reasoning_effort": "medium",
+      "sistema": "Você é o júri de um concurso de cordel. Recebe sextilhas candidatas sobre a mesma\nnotícia, cada uma com o relatório de um verificador de métrica e rima.\nEscolha UMA, nesta ordem de critérios:\n1. Prefira as que o verificador aprovou. Se nenhuma passou, prefira as com menos\n   versos reprovados: cada verso reprovado ainda vai precisar de correção.\n2. Entre essas, a mais criativa: imagem concreta e surpreendente, comparação com o\n   mundo do cordel, nenhuma palavra repetida à toa, verso final com virada.\n3. Fiel ao fato da notícia, sem inventar acontecimento.\nJustifique em uma ou duas frases, citando versos.",
+      "usuario": "Fato: Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo.\n\nCandidata 1 (ângulo: como conselho de gente velha, terminando numa moral) — reprovados: versos [1, 5]\nMeu avô falou na feira\nPreste bem nesta lição\nBicho de letra venceu\nSem treino, comeu peão\nA taça curvou grão-mestres\nNunca zombe da razão\n\nCandidata 2 (ângulo: como cantador que anuncia uma notícia de longe, com espanto e maravilha) — reprovados: versos [4]\nDe longe trago recado\nDa feira canto o torneio\nModelo de fala arrisca\nSem treino no xadrez alheio\nGrão-mestres ficaram mudos\nDeu xeque-mate em passeio\n\nCandidata 3 (ângulo: como um causo contado na feira, com humor e exagero) — APROVADA\nNa feira cantou jornal\nA tela deu seu pregão\nMestres de gravata e livro\ntremiam ante o peão\nModelo verbal sem treino\nmate brotou do botão\n\nQual é a escolhida (número)?",
+      "saida_bruta": "{\"escolhida\":3,\"justificativa\":\"Escolho a 3 porque foi a única aprovada pelo verificador e ainda traz imagem viva de cordel em “Na feira cantou jornal” e “A tela deu seu pregão”. É fiel ao fato — “Modelo verbal sem treino” vencendo mestres — e fecha com boa virada em “mate brotou do botão”.\"}",
+      "tokens": {
+        "input_tokens": 476,
+        "output_tokens": 148,
+        "reasoning_tokens": 56,
+        "cache_read_tokens": 0
+      },
+      "segundos": 2.9
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "versos": [
+        "Na feira cantou jornal",
+        "A tela deu seu pregão",
+        "Mestres de gravata e livro",
+        "tremiam ante o peão",
+        "Modelo verbal sem treino",
+        "mate brotou do botão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Na feira cantou jornal\n         na / FEI / ra / can / TOU / jor / NAL\n  ok v2 [7] A tela deu seu pregão\n         a / TE / la / DEU / seu / pre / GÃO\n  ok v3 [7] Mestres de gravata e livro\n         MES / tres / de / gra / VA / ta_e / LI / (vro)\n  ok v4 [7] tremiam ante o peão\n         tre / MI / am / AN / te_o / pe / ÃO\n  ok v5 [7] Modelo verbal sem treino\n         mo / DE / lo / ver / BAL / SEM / TREI / (no)\n  ok v6 [7] mate brotou do botão\n         MA / te / bro / TOU / do / bo / TÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "Um novo modelo de linguagem venceu um campeonato de xadrez contra grandes mestres sem nunca ter sido treinado especificamente para xadrez. Os pesquisadores dizem que ele aprendeu as regras lendo livros e partidas comentadas na internet.",
+  "origem": "texto colado",
+  "titulo": "",
+  "fonte": "",
+  "fato": {
+    "fato": "Um modelo de linguagem venceu grandes mestres em um campeonato de xadrez sem treino específico no jogo.",
+    "titulo": "Modelo vence mestres no xadrez",
+    "imagens_concretas": [
+      "Tabuleiro de xadrez com peças pretas e brancas",
+      "Grandes mestres sentados diante do tabuleiro",
+      "Tela de computador fazendo lances de xadrez",
+      "Livros abertos sobre xadrez e partidas comentadas na internet"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como conselho de gente velha, terminando numa moral",
+      "plano": "Vou contar como conselho de avô na feira: não subestime saber que chega por caminho torto.",
+      "rimas": [
+        "lição",
+        "peão",
+        "razão"
+      ],
+      "versos": [
+        "Meu avô falou na feira",
+        "Preste bem nesta lição",
+        "Bicho de letra venceu",
+        "Sem treino, comeu peão",
+        "A taça curvou grão-mestres",
+        "Nunca zombe da razão"
+      ],
+      "entra": false,
+      "reprovados": [
+        1,
+        5
+      ]
+    },
+    {
+      "angulo": "como cantador que anuncia uma notícia de longe, com espanto e maravilha",
+      "plano": "Como cantador na feira, anuncio de longe, com espanto, que um modelo de linguagem derrubou mestres no xadrez sem preparo próprio.",
+      "rimas": [
+        "torneio",
+        "alheio",
+        "passeio"
+      ],
+      "versos": [
+        "De longe trago recado",
+        "Da feira canto o torneio",
+        "Modelo de fala arrisca",
+        "Sem treino no xadrez alheio",
+        "Grão-mestres ficaram mudos",
+        "Deu xeque-mate em passeio"
+      ],
+      "entra": false,
+      "reprovados": [
+        4
+      ]
+    },
+    {
+      "angulo": "como um causo contado na feira, com humor e exagero",
+      "plano": "Contar na feira, em tom de causo exagerado, a tela faladeira derrubando mestre no xadrez sem nunca ter pegado treino de tabuleiro.",
+      "rimas": [
+        "pregão",
+        "peão",
+        "botão"
+      ],
+      "versos": [
+        "Na feira cantou jornal",
+        "A tela deu seu pregão",
+        "Mestres de gravata e livro",
+        "tremiam ante o peão",
+        "Modelo verbal sem treino",
+        "mate brotou do botão"
+      ],
+      "entra": true,
+      "reprovados": []
+    }
+  ],
+  "escolhida": {
+    "indice": 2,
+    "justificativa": "Escolho a 3 porque foi a única aprovada pelo verificador e ainda traz imagem viva de cordel em “Na feira cantou jornal” e “A tela deu seu pregão”. É fiel ao fato — “Modelo verbal sem treino” vencendo mestres — e fecha com boa virada em “mate brotou do botão”."
+  },
+  "fim": "2026-09-28T12:22:48",
+  "entra": true,
+  "motivo": null,
+  "versos_finais": [
+    "Na feira cantou jornal",
+    "A tela deu seu pregão",
+    "Mestres de gravata e livro",
+    "tremiam ante o peão",
+    "Modelo verbal sem treino",
+    "mate brotou do botão"
+  ],
+  "duvidas_para_o_grupo": [],
+  "rodadas_de_correcao": 0,
+  "arquivos": {
+    "texto": "folhetos/20260928-122248-modelo-vence-mestres-no-xadrez.txt",
+    "imagem": "folhetos/20260928-122248-modelo-vence-mestres-no-xadrez.png"
+  },
+  "custo_estimado_usd": {
+    "texto": 0.29495,
+    "imagem": 0.00581,
+    "total": 0.30077
+  }
+}

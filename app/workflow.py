@@ -19,17 +19,19 @@ import sys
 import time
 import unicodedata
 from collections import Counter
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, AsyncIterator
 
 import ai
 import dotenv
+import openai
 import pydantic
 import trafilatura
 from ai.providers.openai import tools as openai_tools
 
-from . import prompts
+from . import custos, prompts
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
@@ -37,14 +39,40 @@ import escandir  # noqa: E402  (o verificador fica intocado em scripts/)
 
 dotenv.load_dotenv(RAIZ / ".env")
 
-TEXT_MODEL = os.getenv("CORDEL_TEXT_MODEL", "openai:gpt-5.5")
 IMAGE_HOST_MODEL = os.getenv("CORDEL_IMAGE_HOST_MODEL", "openai:gpt-5.4-mini")
 IMAGE_MODEL = os.getenv("CORDEL_IMAGE_MODEL", "gpt-image-2")
-# em xilogravura preto e branco, "low" ficou tão bom quanto "medium" e sai mais barato
-IMAGE_QUALITY = os.getenv("CORDEL_IMAGE_QUALITY", "low")
-REASONING = os.getenv("CORDEL_REASONING", "medium")
-CANDIDATAS = int(os.getenv("CORDEL_CANDIDATAS", "3"))
+
+# O que a página deixa escolher. O servidor só aceita estes valores: a API não
+# pode ser usada para chamar um modelo qualquer com a chave do grupo.
+OPCOES = {
+    "texto": [f"openai:{m}" for m in custos.PRECOS],
+    "raciocinio": ["low", "medium", "high"],
+    "candidatas": [1, 2, 3],
+    "imagem_qualidade": ["low", "medium"],
+}
+
+
+@dataclass(frozen=True)
+class Config:
+    """Configuração de uma geração. Viaja com a geração (não é global) para que
+    duas pessoas gerando ao mesmo tempo não troquem o modelo uma da outra."""
+    texto: str = os.getenv("CORDEL_TEXT_MODEL", "openai:gpt-6-luna")
+    raciocinio: str = os.getenv("CORDEL_REASONING", "medium")
+    candidatas: int = int(os.getenv("CORDEL_CANDIDATAS", "1"))
+    # em xilogravura preto e branco, "low" ficou tão bom quanto "medium" e sai mais barato
+    imagem_qualidade: str = os.getenv("CORDEL_IMAGE_QUALITY", "low")
+
+    def validar(self) -> "Config":
+        for campo, valor in asdict(self).items():
+            if valor not in OPCOES[campo]:
+                raise ValueError(f"{campo}={valor!r} não está entre {OPCOES[campo]}")
+        return self
 MAX_RODADAS = 3
+# Teto de gasto por geração. Passou dele, a geração não chama o júri nem faz novas
+# rodadas de correção: entrega o que tem. É um freio, não uma garantia exata — uma
+# chamada já iniciada termina — e reserva uns centavos para a xilogravura.
+TETO_USD = float(os.getenv("CORDEL_TETO_USD", "0.10"))
+RESERVA_IMAGEM_USD = 0.01
 
 # No Railway, CORDEL_DADOS aponta para o volume montado (/data), que sobrevive
 # aos deploys. Local, as pastas ficam na raiz do projeto.
@@ -81,11 +109,12 @@ class Correcao(pydantic.BaseModel):
 
 # ---------------------------------------------------------------- modelo
 async def gerar(
-    sistema: str, usuario: str, output_type: type[pydantic.BaseModel], log: list
+    sistema: str, usuario: str, output_type: type[pydantic.BaseModel], log: list,
+    cfg: Config, etapa: str = "",
 ) -> Any:
     """Uma chamada estruturada ao modelo de texto, registrada na íntegra no log."""
-    model = ai.get_model(TEXT_MODEL)
-    params = ai.InferenceRequestParams(reasoning=ai.ReasoningParams(effort=REASONING))
+    model = ai.get_model(cfg.texto)
+    params = ai.InferenceRequestParams(reasoning=ai.ReasoningParams(effort=cfg.raciocinio))
     t0 = time.monotonic()
     async with ai.stream(
         model,
@@ -93,11 +122,12 @@ async def gerar(
         output_type=output_type,
         params=params,
     ) as stream:
-        async for _ in stream:
-            pass
+        response_id = await _consumir(stream)
     log.append({
-        "modelo": TEXT_MODEL,
-        "reasoning_effort": REASONING,
+        "etapa": etapa,
+        "modelo": cfg.texto,
+        "response_id": response_id,
+        "reasoning_effort": cfg.raciocinio,
         "sistema": sistema,
         "usuario": usuario,
         "saida_bruta": stream.text,
@@ -107,11 +137,37 @@ async def gerar(
     return stream.output
 
 
-async def gerar_xilogravura(fato: Fato, log: list) -> bytes | None:
+async def _consumir(stream) -> str | None:
+    """Esvazia o stream e devolve o response_id da OpenAI (para cruzar com os logs dela)."""
+    response_id = None
+    async for ev in stream:
+        if isinstance(ev, ai.events.StreamEnd):
+            response_id = ev.response_id
+    return response_id
+
+
+async def uso_da_imagem(response_id: str | None) -> dict | None:
+    """O SDK só repassa o uso do modelo hospedeiro; a geração da imagem é cobrada à
+    parte e aparece em tool_usage.image_gen da resposta, que buscamos pelo id."""
+    if not response_id:
+        return None
+    try:
+        r = await openai.AsyncOpenAI().responses.retrieve(response_id)
+        ig = (r.model_dump().get("tool_usage") or {}).get("image_gen") or {}
+    except openai.OpenAIError:
+        return None
+    ent = ig.get("input_tokens_details") or {}
+    sai = ig.get("output_tokens_details") or {}
+    return {"texto_entrada": ent.get("text_tokens") or 0,
+            "imagem_entrada": ent.get("image_tokens") or 0,
+            "imagem_saida": sai.get("image_tokens") or ig.get("output_tokens") or 0}
+
+
+async def gerar_xilogravura(fato: Fato, log: list, cfg: Config) -> bytes | None:
     """Imagem pela ferramenta image_generation da OpenAI (provider tool do SDK)."""
     prompt = prompts.prompt_xilogravura(fato.fato, fato.imagens_concretas)
     tool = openai_tools.image_generation(
-        model=IMAGE_MODEL, size="1536x1024", quality=IMAGE_QUALITY, output_format="png"
+        model=IMAGE_MODEL, size="1536x1024", quality=cfg.imagem_qualidade, output_format="png"
     )
     params = ai.InferenceRequestParams(
         tool_calling=ai.ToolCallingParams(tool_choice=ai.ToolChoiceMode.REQUIRED)
@@ -121,12 +177,15 @@ async def gerar_xilogravura(fato: Fato, log: list) -> bytes | None:
         ai.get_model(IMAGE_HOST_MODEL), [ai.user_message(prompt)],
         tools=[tool], params=params,
     ) as stream:
-        async for _ in stream:
-            pass
+        response_id = await _consumir(stream)
     log.append({
-        "modelo": f"{IMAGE_HOST_MODEL} + image_generation({IMAGE_MODEL}, {IMAGE_QUALITY})",
+        "etapa": "xilogravura",
+        "modelo": f"{IMAGE_HOST_MODEL} + image_generation({IMAGE_MODEL}, {cfg.imagem_qualidade})",
+        "modelo_imagem": IMAGE_MODEL,
+        "response_id": response_id,
         "usuario": prompt,
         "tokens": _uso(stream.usage),
+        "tokens_imagem": await uso_da_imagem(response_id),
         "segundos": round(time.monotonic() - t0, 1),
     })
     for f in stream.message.files:
@@ -222,11 +281,13 @@ def motivo_descarte(medida: dict, n_versos: int) -> str:
 
 # ---------------------------------------------------------------- o laço
 async def run_cordel(
-    noticia: str = "", url: str = "", com_imagem: bool = True
+    noticia: str = "", url: str = "", com_imagem: bool = True, cfg: Config | None = None
 ) -> AsyncIterator[dict]:
+    cfg = (cfg or Config()).validar()
     noticia, url = noticia.strip(), url.strip()
     log: dict = {"inicio": datetime.now().isoformat(timespec="seconds"),
-                 "url": url or None, "chamadas": [], "rodadas": []}
+                 "url": url or None, "config": {**asdict(cfg), "com_imagem": com_imagem},
+                 "chamadas": [], "rodadas": []}
     chamadas = log["chamadas"]
 
     # 0. a notícia: o texto colado vale; sem texto, busca pelo link
@@ -251,23 +312,23 @@ async def run_cordel(
 
     # 1. fato
     yield {"etapa": "fato", "status": "rodando"}
-    fato: Fato = await gerar(prompts.SISTEMA_FATO, noticia, Fato, chamadas)
+    fato: Fato = await gerar(prompts.SISTEMA_FATO, noticia, Fato, chamadas, cfg, "fato")
     log["fato"] = fato.model_dump()
     yield {"etapa": "fato", "status": "ok", **fato.model_dump()}
 
     # 5. a xilogravura só depende do fato: roda em paralelo com o laço do texto
     imagem_task = None
     if com_imagem:
-        imagem_task = asyncio.create_task(gerar_xilogravura(fato, chamadas))
+        imagem_task = asyncio.create_task(gerar_xilogravura(fato, chamadas, cfg))
         yield {"etapa": "xilogravura", "status": "rodando"}
 
     # 2. candidatas: várias sextilhas em paralelo, cada uma por um ângulo
-    angulos = random.sample(prompts.ANGULOS, min(CANDIDATAS, len(prompts.ANGULOS)))
+    angulos = random.sample(prompts.ANGULOS, min(cfg.candidatas, len(prompts.ANGULOS)))
     yield {"etapa": "candidatas", "status": "rodando", "angulos": angulos}
     geradas = await asyncio.gather(*(
         gerar(prompts.SISTEMA_SEXTILHA,
               prompts.usuario_sextilha(fato.fato, fato.imagens_concretas, a),
-              Sextilha, chamadas)
+              Sextilha, chamadas, cfg, "candidata")
         for a in angulos), return_exceptions=True)
     candidatas = []
     for a, g in zip(angulos, geradas):
@@ -283,15 +344,25 @@ async def run_cordel(
     log["candidatas"] = candidatas
     yield {"etapa": "candidatas", "status": "ok", "candidatas": candidatas}
 
+    teto_texto = TETO_USD - (RESERVA_IMAGEM_USD if com_imagem else 0)
+    def estourou() -> bool:
+        return custos.resumo(log)["total"] >= teto_texto
+
     # 2b. júri: escolhe a mais criativa entre as que o verificador prefere
     validas = [i for i, c in enumerate(candidatas) if len(c["versos"]) == 6] or [0]
-    escolhida, justificativa = validas[0], "única candidata com 6 versos"
-    if len(validas) > 1:
+    # sem júri, fica a que o verificador reprovou menos
+    escolhida = min(validas, key=lambda i: len(candidatas[i]["reprovados"]))
+    justificativa = ("única candidata com 6 versos" if len(validas) == 1
+                     else "sem júri (teto de custo): fica a com menos versos reprovados")
+    if len(validas) > 1 and estourou():
+        log["parou_no_teto"] = "júri"
+        yield {"etapa": "teto", "onde": "júri", "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
+    elif len(validas) > 1:
         yield {"etapa": "julgamento", "status": "rodando"}
         juri: Escolha = await gerar(
             prompts.SISTEMA_JULGAMENTO,
             prompts.usuario_julgamento(fato.fato, [candidatas[i] for i in validas]),
-            Escolha, chamadas,
+            Escolha, chamadas, cfg, "júri",
         )
         if 1 <= juri.escolhida <= len(validas):
             escolhida, justificativa = validas[juri.escolhida - 1], juri.justificativa
@@ -315,13 +386,18 @@ async def run_cordel(
                "relatorio": medida["relatorio"]}
         if medida["entra"] or rodada >= MAX_RODADAS or len(versos) != 6 or not reprovados:
             break
+        if estourou():
+            log["parou_no_teto"] = f"correção {rodada + 1}"
+            yield {"etapa": "teto", "onde": f"correção {rodada + 1}",
+                   "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
+            break
         rodada += 1
         yield {"etapa": "correcao", "status": "rodando", "rodada": rodada,
                "reprovados": reprovados}
         corr: Correcao = await gerar(
             prompts.SISTEMA_CORRECAO,
             prompts.usuario_correcao(versos, medida["relatorio"], reprovados),
-            Correcao, chamadas,
+            Correcao, chamadas, cfg, "correção",
         )
         mudancas = []
         for c in corr.versos:
@@ -361,20 +437,23 @@ async def run_cordel(
     log.update(fim=datetime.now().isoformat(timespec="seconds"), entra=entra,
                motivo=motivo, versos_finais=versos, duvidas_para_o_grupo=duvidas,
                rodadas_de_correcao=rodada, arquivos=arquivos)
+    custo = custos.resumo(log)
+    log["custo_estimado_usd"] = {k: round(v, 5) for k, v in custo.items() if k in ("texto", "imagem", "total")}
     (PASTAS["caderno"] / f"{slug}.json").write_text(
         json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
     arquivos["caderno"] = f"caderno/{slug}.json"
 
     yield {"etapa": "fim", "entra": entra, "motivo": motivo, "titulo": fato.titulo,
            "url": url or None, "fonte": origem["fonte"],
-           "versos": versos, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos}
+           "versos": versos, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos,
+           "custo": log["custo_estimado_usd"]}
 
 
 # ------------------------------------------------------------------- util
 def _uso(u) -> dict | None:
     if u is None:
         return None
-    return {k: getattr(u, k, None) for k in ("input_tokens", "output_tokens", "reasoning_tokens")}
+    return {k: getattr(u, k, None) for k in ("input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens")}
 
 
 def _slug(titulo: str) -> str:

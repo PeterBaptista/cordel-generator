@@ -56,5 +56,12 @@ uv run uvicorn app.server:app --reload
 | `app/server.py` | FastAPI; `POST /api/cordel` devolve as etapas por SSE |
 | `app/static/index.html` | a página de teste |
 
+Na página dá para escolher o modelo de texto (famílias GPT-5, 5.4, 5.5, 5.6 e 6, com o
+preço ao lado), o nível de raciocínio, quantas candidatas gerar e a qualidade da
+xilogravura. O servidor só aceita os modelos da tabela em `app/custos.py`.
+
+Em `/logs` fica o custo de cada geração, estimado pelos tokens do caderno: por etapa,
+com o `response_id` para abrir a chamada no painel da OpenAI.
+
 O script não decide o que entra: o que ele marca com `?` aparece na tela e no JSON
 como `duvidas_para_o_grupo`.

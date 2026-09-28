@@ -20,6 +20,11 @@
   header { border-bottom: 3px double var(--tinta); padding: 18px 16px 12px; text-align: center; }
   header h1 { font: 700 clamp(26px, 5vw, 40px)/1.1 "Oswald", sans-serif; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
   header p { margin: 4px 0 0; font-style: italic; color: var(--tinta-2); font-size: 14px; }
+  .nav { margin-top: 8px; font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+  .nav a { color: var(--tinta); margin: 0 8px; }
+  .nav a[aria-current] { color: var(--vermelho); text-decoration: none; }
+  .custo { font: 13px "Courier Prime", monospace; color: var(--tinta-2); margin-top: 6px; }
+  .custo a { color: var(--tinta); }
   .cfg { font-family: "Special Elite", monospace; font-size: 12px; color: var(--tinta-2); margin-top: 6px; }
   main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 28px;
          grid-template-columns: minmax(0, 1fr) minmax(0, 440px); align-items: start; }
@@ -43,6 +48,11 @@
   button:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--vermelho); }
   button:disabled { opacity: .5; cursor: wait; transform: none; }
   button.sec { background: transparent; color: var(--tinta); box-shadow: 3px 3px 0 var(--tinta); font-size: 13px; padding: 6px 14px; }
+  .config { border: 2px solid var(--tinta); margin: 14px 0 0; padding: 8px 12px 10px; display: flex; flex-wrap: wrap; gap: 10px 16px; }
+  .config legend { font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; padding: 0 6px; }
+  .config label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--tinta-2); }
+  .config select { font: 14px "Libre Baskerville", serif; color: var(--tinta); background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 5px 6px; min-width: 0; }
+  .estimativa { flex-basis: 100%; font: 13px "Courier Prime", monospace; color: var(--tinta-2); }
   .exemplos { margin-top: 6px; font-size: 13px; }
   .exemplos a { color: var(--vermelho); cursor: pointer; margin-right: 10px; }
 
@@ -106,6 +116,7 @@
   <h1>Notícias em Cordel</h1>
   <p>Do 7 ao 6 — a semana de IA contada em sextilha e em xilogravura</p>
   <div class="cfg" id="cfg"></div>
+  <nav class="nav"><a href="/" aria-current="page">Gerador</a> · <a href="/logs">Logs</a></nav>
 </header>
 
 <main>
@@ -117,6 +128,14 @@
     <label class="campo" for="noticia">Cole o texto da notícia (se o link não abrir, ou se preferir)</label>
     <textarea id="noticia" placeholder="Título e texto (ou um resumo) da notícia…"></textarea>
     <div class="exemplos">Exemplos de texto: <a data-ex="0">robô na feira</a><a data-ex="1">modelo que joga xadrez</a></div>
+    <fieldset class="config">
+      <legend>Modelos</legend>
+      <label>Texto <select id="c-texto"></select></label>
+      <label>Raciocínio <select id="c-raciocinio"></select></label>
+      <label>Candidatas <select id="c-candidatas"></select></label>
+      <label>Xilogravura <select id="c-imagem_qualidade"></select></label>
+      <div class="estimativa" id="estimativa"></div>
+    </fieldset>
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
       <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
@@ -141,6 +160,7 @@
     <div class="veredito" id="veredito">
       <span class="selo" id="selo"></span>
       <div class="motivo" id="motivo"></div>
+      <div class="custo" id="custo"></div>
       <div class="arqs" id="arqs"></div>
     </div>
   </section>
@@ -155,7 +175,61 @@ const EXEMPLOS = [
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 document.querySelectorAll("[data-ex]").forEach((a) => a.onclick = () => { $("noticia").value = EXEMPLOS[a.dataset.ex]; $("url").value = ""; });
-fetch("/api/config").then((r) => r.json()).then((c) => $("cfg").textContent = `texto: ${c.texto} · imagem: ${c.imagem}`);
+// ---- seletores de modelo
+const NOMES = { low: "baixo", medium: "médio", high: "alto" };
+const ROTULOS_IMAGEM = { low: "rápida (low)", medium: "detalhada (medium)" };
+// custo real de texto medido em 4 notícias de teste com 3 candidatas (28/09/2026);
+// com menos candidatas sai mais barato, e o valor exato de cada geração fica em Logs
+const MEDIDO = {
+  "openai:gpt-5.4-mini|medium": 0.12, "openai:gpt-5.4-mini|high": 0.29,
+  "openai:gpt-5.5|low": 0.13, "openai:gpt-5.5|medium": 0.36,
+};
+const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade"];
+let PRECOS = {};
+const usd = (v, c = 2) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: c, maximumFractionDigits: c }).format(v);
+const nomeModelo = (id) => id.replace("openai:", "").replace(/^gpt-/, "GPT-").replace(/-(luna|sol|terra|astra|mini|nano)$/, " $1");
+const lerCfg = () => Object.fromEntries(CAMPOS.map((k) => {
+  const v = $(`c-${k}`).value;
+  return [k, k === "candidatas" ? Number(v) : v];
+}));
+
+function opcoesTexto(ids) {
+  // agrupa por família (gpt-6, gpt-5.6, …) e ordena do mais barato ao mais caro
+  const familias = {};
+  for (const id of ids) (familias[id.replace("openai:", "").match(/^gpt-[\d.]+/)[0]] ??= []).push(id);
+  const saida = (id) => PRECOS[id.replace("openai:", "")]?.saida ?? 0;
+  return Object.entries(familias).map(([fam, ms]) => `<optgroup label="${esc(fam.toUpperCase())}">${
+    ms.sort((a, b) => saida(a) - saida(b)).map((id) =>
+      `<option value="${esc(id)}">${esc(nomeModelo(id))} — ${esc(usd(saida(id)))}/M saída</option>`).join("")
+  }</optgroup>`).join("");
+}
+
+function estimativa() {
+  const c = lerCfg(), m = MEDIDO[`${c.texto}|${c.raciocinio}`];
+  const p = PRECOS[c.texto.replace("openai:", "")];
+  const preco = p ? `${usd(p.entrada)} entrada · ${usd(p.saida)} saída por 1M tokens` : "";
+  const medido = m != null
+    ? ` · medido: ~${usd(m)} com 3 candidatas${c.candidatas < 3 ? " (com menos, sai mais barato)" : ""}`
+    : " · ainda não medido: o custo real aparece em Logs";
+  $("estimativa").textContent = preco + medido + (c.candidatas > 1 ? " · com mais de 1 candidata, um júri escolhe a melhor" : "");
+  try { localStorage.setItem("cordel-config", JSON.stringify(c)); } catch {}
+}
+
+fetch("/api/config").then((r) => r.json()).then(({ padrao, opcoes, imagem, precos }) => {
+  PRECOS = precos;
+  let salvo = {};
+  try { salvo = JSON.parse(localStorage.getItem("cordel-config") || "{}"); } catch {}
+  for (const k of CAMPOS) {
+    const sel = $(`c-${k}`);
+    sel.innerHTML = k === "texto" ? opcoesTexto(opcoes.texto)
+      : opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
+          k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : k === "candidatas" ? v : NOMES[v] ?? v)}</option>`).join("");
+    sel.value = opcoes[k].includes(salvo[k]) ? salvo[k] : padrao[k];
+    sel.onchange = estimativa;
+  }
+  $("cfg").textContent = `imagem: ${imagem}`;
+  estimativa();
+});
 
 const itens = {};
 function passo(chave, rotulo, status, html = "") {
@@ -234,12 +308,18 @@ function tratar(ev) {
       $("veredito").style.display = "block";
       $("selo").className = "selo " + (ev.entra ? "entra" : "descarte");
       $("selo").textContent = ev.entra ? "Entra na coleção" : "Descarte";
+      if (ev.custo) {
+        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/logs">ver logs</a>`;
+      }
       $("motivo").textContent = ev.motivo || (ev.duvidas.length ? `${ev.duvidas.length} ponto(s) marcados com "?" — o grupo decide.` : "");
       $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${p}" target="_blank">${k}</a>`).join("·")
         + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
       $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
       return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
     }
+    case "teto":
+      return passo("teto", `teto de custo: parou antes de ${ev.onde}`, "erro",
+        `já gastou ~${esc(usd(ev.gasto, 3))} de um teto de ${esc(usd(ev.teto))} por geração; entregando o que tem`);
     case "erro":
       return passo("erro", "erro", "erro", esc(ev.erro));
   }
@@ -270,13 +350,13 @@ $("gerar").onclick = async () => {
   if (!noticia && !url) return $("url").focus();
   $("gerar").disabled = true;
   $("linha").innerHTML = ""; for (const k in itens) delete itens[k];
-  $("veredito").style.display = "none";
+  $("veredito").style.display = "none"; $("custo").textContent = "";
   $("manchete").textContent = "…"; $("versos").innerHTML = ""; $("fonte").textContent = "";
   $("xilo").innerHTML = "<span>a xilogravura aparece aqui</span>";
   try {
     const resp = await fetch("/api/cordel", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ noticia, url, com_imagem: $("imagem").checked }),
+      body: JSON.stringify({ noticia, url, com_imagem: $("imagem").checked, config: lerCfg() }),
     });
     const reader = resp.body.getReader(), dec = new TextDecoder();
     let buf = "";
