@@ -1,0 +1,320 @@
+{
+  "inicio": "2026-09-28T12:56:57",
+  "url": null,
+  "config": {
+    "texto": "openai:gpt-6-luna",
+    "raciocinio": "medium",
+    "candidatas": 1,
+    "imagem_qualidade": "low",
+    "forma": "corrida",
+    "estrofes": 2,
+    "encadeamento": "livre",
+    "com_imagem": true
+  },
+  "chamadas": [
+    {
+      "etapa": "fato",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_021975dc0bbc9462006aba8e49d02c87d2bcdfd817fb04fad2",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Um novo modelo de linguagem venceu um campeonato de xadrez contra grandes mestres sem nunca ter sido treinado especificamente para xadrez. Os pesquisadores dizem que ele aprendeu as regras lendo livros e partidas comentadas na internet.",
+      "saida_bruta": "{\"fato\":\"Um modelo de linguagem venceu grandes mestres no xadrez sem treinamento específico no jogo.\",\"titulo\":\"Modelo vence grandes mestres no xadrez\",\"imagens_concretas\":[\"Um modelo de linguagem diante de um tabuleiro de xadrez\",\"Grandes mestres sentados para jogar\",\"Livros abertos com regras de xadrez\",\"Uma tela exibindo partidas comentadas na internet\"]}",
+      "tokens": {
+        "input_tokens": 268,
+        "output_tokens": 146,
+        "reasoning_tokens": 51,
+        "cache_read_tokens": 0
+      },
+      "segundos": 2.8
+    },
+    {
+      "etapa": "xilogravura",
+      "modelo": "openai:gpt-5.4-mini + image_generation(gpt-image-2, low)",
+      "modelo_imagem": "gpt-image-2",
+      "response_id": "resp_00b2f4cf1752daaf006aba8e4cc48887d2a7101d32bbb94112",
+      "usuario": "Gere uma imagem horizontal: ilustração de folheto de cordel em xilogravura tradicional nordestina. Preto e branco puro, alto contraste, tinta preta chapada sobre papel branco, sem cinza, sem degradê, sem sombreado suave. Traço grosso de goiva, céu e chão preenchidos com linhas paralelas entalhadas, figuras em silhueta com poucos detalhes, borda retangular preta ao redor da cena. ABSOLUTAMENTE NENHUM texto, letra, palavra, número, placa, logotipo ou marca de empresa na imagem. Cena: Um modelo de linguagem venceu grandes mestres no xadrez sem treinamento específico no jogo. Elementos: Um modelo de linguagem diante de um tabuleiro de xadrez; Grandes mestres sentados para jogar; Livros abertos com regras de xadrez; Uma tela exibindo partidas comentadas na internet.",
+      "tokens": {
+        "input_tokens": 2589,
+        "output_tokens": 202,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "tokens_imagem": {
+        "texto_entrada": 189,
+        "imagem_entrada": 0,
+        "imagem_saida": 158
+      },
+      "segundos": 21.1
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0cf5314f6a23ab2d006aba8e4c86a887d28d985010f28dfb69",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva 2 sextilhas sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória em cada estrofe:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Sextilha corrida, rima AABCCB: o 1 rima com o 2, o 3 rima com o 6 e o 4 rima com o 5. De preferência rima consoante\n  (igual a partir da vogal tônica).\n\nCom 2 estrofes, conte a notícia como história de folheto: a primeira abre\ncomo o cantador abre (anuncia a novidade), as do meio desenvolvem o fato com\nimagens novas, e a última fecha com virada, graça ou moral. Cada estrofe traz\ninformação nova: não repita a mesma ideia em estrofes diferentes.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- para cada estrofe, finais: as 6 palavras finais dos versos, seguindo o esquema\n  AABCCB. Palavras que rimam têm que ser DIFERENTES (ex.: sertão / razão /\n  clarão). Repetir a mesma palavra final é proibido: o verificador reprova.\nDepois escreva os versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo: nome de lugar,\n  pessoa ou empresa aparece no máximo UMA vez por estrofe.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso do poema dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Um modelo de linguagem venceu grandes mestres no xadrez sem treinamento específico no jogo.\nImagens possíveis: Um modelo de linguagem diante de um tabuleiro de xadrez; Grandes mestres sentados para jogar; Livros abertos com regras de xadrez; Uma tela exibindo partidas comentadas na internet\nÂngulo: como conselho de gente velha, terminando numa moral\n\nPlaneje e escreva.",
+      "saida_bruta": "{\"angulo\":\"Conto a vitória como novidade de feira e, na segunda sextilha, trago o conselho dos mais velhos para fechar com uma moral.\",\"estrofes\":[{\"finais\":[\"jogo\",\"fogo\",\"vitória\",\"mesa\",\"surpresa\",\"memória\"],\"versos\":[\"Modelo entrou no jogo\",\"Os mestres sentiram fogo\",\"Já traçou sua vitória\",\"No xadrez, sentam à mesa\",\"Na tela, nasce surpresa\",\"Virou marca na memória\"]},{\"finais\":[\"pensar\",\"olhar\",\"saber\",\"razão\",\"chão\",\"crescer\"],\"versos\":[\"Meu velho mandou pensar\",\"Antes do passo, olhar\",\"Sem treino, mostrou saber\",\"A palavra traz razão\",\"Bom senso sustenta o chão\",\"Quem ouve pode crescer\"]}]}",
+      "tokens": {
+        "input_tokens": 793,
+        "output_tokens": 10892,
+        "reasoning_tokens": 10718,
+        "cache_read_tokens": 0
+      },
+      "segundos": 139.1
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_07546076285e0020006aba8ed7b35887d28d2154a53252bd9a",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha corrida,\nrima AABCCB (o 1 rima com o 2, o 3 rima com o 6 e o 4 rima com o 5).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Modelo entrou no jogo\nE1.2 Os mestres sentiram fogo\nE1.3 Já traçou sua vitória\nE1.4 No xadrez, sentam à mesa\nE1.5 Na tela, nasce surpresa\nE1.6 Virou marca na memória\n\nE2.1 Meu velho mandou pensar\nE2.2 Antes do passo, olhar\nE2.3 Sem treino, mostrou saber\nE2.4 A palavra traz razão\nE2.5 Bom senso sustenta o chão\nE2.6 Quem ouve pode crescer\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [6] Modelo entrou no jogo\n         mo / DE / lo_en / TROU / no / JO / (go)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  XX v2 [6] Antes do passo, olhar\n         AN / tes / do / PAS / so_o / LHAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos E1.1, E2.2.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Modelo chegou logo\"},{\"estrofe\":2,\"n\":2,\"verso\":\"Antes, há que ponderar\"}]}",
+      "tokens": {
+        "input_tokens": 1100,
+        "output_tokens": 2567,
+        "reasoning_tokens": 2515,
+        "cache_read_tokens": 0
+      },
+      "segundos": 32.1
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_06f33337343d2366006aba8ef7f32087d298b68cb041fac01a",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha corrida,\nrima AABCCB (o 1 rima com o 2, o 3 rima com o 6 e o 4 rima com o 5).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Modelo chegou logo\nE1.2 Os mestres sentiram fogo\nE1.3 Já traçou sua vitória\nE1.4 No xadrez, sentam à mesa\nE1.5 Na tela, nasce surpresa\nE1.6 Virou marca na memória\n\nE2.1 Meu velho mandou pensar\nE2.2 Antes, há que ponderar\nE2.3 Sem treino, mostrou saber\nE2.4 A palavra traz razão\nE2.5 Bom senso sustenta o chão\nE2.6 Quem ouve pode crescer\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [6] Modelo chegou logo\n         mo / DE / lo / che / GOU / LO / (go)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  ok v2 [7] Antes, há que ponderar\n         AN / tes / HÁ / que / pon / de / RAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> ENTRA na colecao\n\nReescreva só os versos E1.1.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"O modelo mudou o jogo\"}]}",
+      "tokens": {
+        "input_tokens": 1095,
+        "output_tokens": 729,
+        "reasoning_tokens": 694,
+        "cache_read_tokens": 0
+      },
+      "segundos": 8.7
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_022c7bb38cffaac4006aba8f0062cc87d2b893e209d23195d2",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha corrida,\nrima AABCCB (o 1 rima com o 2, o 3 rima com o 6 e o 4 rima com o 5).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 O modelo mudou o jogo\nE1.2 Os mestres sentiram fogo\nE1.3 Já traçou sua vitória\nE1.4 No xadrez, sentam à mesa\nE1.5 Na tela, nasce surpresa\nE1.6 Virou marca na memória\n\nE2.1 Meu velho mandou pensar\nE2.2 Antes, há que ponderar\nE2.3 Sem treino, mostrou saber\nE2.4 A palavra traz razão\nE2.5 Bom senso sustenta o chão\nE2.6 Quem ouve pode crescer\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [8] O modelo mudou o jogo\n         o / mo / DE / lo / mu / DOU / o / JO / (go)\n       ? elisao opcional em 'dou o' (a anterior e tonica)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  ok v2 [7] Antes, há que ponderar\n         AN / tes / HÁ / que / pon / de / RAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> ENTRA na colecao\n\nReescreva só os versos E1.1.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Modelo refez o jogo\"}]}",
+      "tokens": {
+        "input_tokens": 1122,
+        "output_tokens": 1143,
+        "reasoning_tokens": 1108,
+        "cache_read_tokens": 0
+      },
+      "segundos": 14.2
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "estrofes": [
+        [
+          "Modelo entrou no jogo",
+          "Os mestres sentiram fogo",
+          "Já traçou sua vitória",
+          "No xadrez, sentam à mesa",
+          "Na tela, nasce surpresa",
+          "Virou marca na memória"
+        ],
+        [
+          "Meu velho mandou pensar",
+          "Antes do passo, olhar",
+          "Sem treino, mostrou saber",
+          "A palavra traz razão",
+          "Bom senso sustenta o chão",
+          "Quem ouve pode crescer"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [6] Modelo entrou no jogo\n         mo / DE / lo_en / TROU / no / JO / (go)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  XX v2 [6] Antes do passo, olhar\n         AN / tes / do / PAS / so_o / LHAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 1,
+      "estrofes": [
+        [
+          "Modelo chegou logo",
+          "Os mestres sentiram fogo",
+          "Já traçou sua vitória",
+          "No xadrez, sentam à mesa",
+          "Na tela, nasce surpresa",
+          "Virou marca na memória"
+        ],
+        [
+          "Meu velho mandou pensar",
+          "Antes, há que ponderar",
+          "Sem treino, mostrou saber",
+          "A palavra traz razão",
+          "Bom senso sustenta o chão",
+          "Quem ouve pode crescer"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [6] Modelo chegou logo\n         mo / DE / lo / che / GOU / LO / (go)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  ok v2 [7] Antes, há que ponderar\n         AN / tes / HÁ / que / pon / de / RAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> ENTRA na colecao"
+    },
+    {
+      "rodada": 2,
+      "estrofes": [
+        [
+          "O modelo mudou o jogo",
+          "Os mestres sentiram fogo",
+          "Já traçou sua vitória",
+          "No xadrez, sentam à mesa",
+          "Na tela, nasce surpresa",
+          "Virou marca na memória"
+        ],
+        [
+          "Meu velho mandou pensar",
+          "Antes, há que ponderar",
+          "Sem treino, mostrou saber",
+          "A palavra traz razão",
+          "Bom senso sustenta o chão",
+          "Quem ouve pode crescer"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [8] O modelo mudou o jogo\n         o / mo / DE / lo / mu / DOU / o / JO / (go)\n       ? elisao opcional em 'dou o' (a anterior e tonica)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  ok v2 [7] Antes, há que ponderar\n         AN / tes / HÁ / que / pon / de / RAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> ENTRA na colecao"
+    },
+    {
+      "rodada": 3,
+      "estrofes": [
+        [
+          "Modelo refez o jogo",
+          "Os mestres sentiram fogo",
+          "Já traçou sua vitória",
+          "No xadrez, sentam à mesa",
+          "Na tela, nasce surpresa",
+          "Virou marca na memória"
+        ],
+        [
+          "Meu velho mandou pensar",
+          "Antes, há que ponderar",
+          "Sem treino, mostrou saber",
+          "A palavra traz razão",
+          "Bom senso sustenta o chão",
+          "Quem ouve pode crescer"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  ok v1 [7] Modelo refez o jogo\n         mo / DE / lo / re / FEZ / o / JO / (go)\n  ok v2 [7] Os mestres sentiram fogo\n         os / MES / tres / sen / TI / ram / FO / (go)\n  ok v3 [7] Já traçou sua vitória\n         JÁ / tra / ÇOU / SU / a / vi / TÓ / (ria)\n       ? vitória: 'ia' pode virar hiato\n  ok v4 [7] No xadrez, sentam à mesa\n         no / xa / DREZ / SEN / tam / à / ME / (sa)\n  ok v5 [7] Na tela, nasce surpresa\n         na / TE / la / NAS / ce / sur / PRE / (sa)\n  ok v6 [7] Virou marca na memória\n         vi / ROU / MAR / ca / na / me / MÓ / (ria)\n       ? memória: 'ia' pode virar hiato\n  rima A (versos [1, 2]): consoante  ['ogo', 'ogo']\n  rima B (versos [3, 6]): consoante  ['oria', 'oria']\n  rima C (versos [4, 5]): consoante  ['esa', 'esa']\n  --> ENTRA na colecao\n\n=== estrofe 2 ===\n  ok v1 [7] Meu velho mandou pensar\n         meu / VE / lho / man / DOU / pen / SAR\n  ok v2 [7] Antes, há que ponderar\n         AN / tes / HÁ / que / pon / de / RAR\n  ok v3 [7] Sem treino, mostrou saber\n         SEM / TREI / no / mos / TROU / sa / BER\n  ok v4 [7] A palavra traz razão\n         a / pa / LA / vra / TRAZ / ra / ZÃO\n  ok v5 [7] Bom senso sustenta o chão\n         BOM / SEN / so / sus / TEN / ta_o / CHÃO\n  ok v6 [7] Quem ouve pode crescer\n         QUEM / OU / ve / PO / de / cres / CER\n  rima A (versos [1, 2]): consoante  ['ar', 'ar']\n  rima B (versos [3, 6]): consoante  ['er', 'er']\n  rima C (versos [4, 5]): consoante  ['am', 'am']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "Um novo modelo de linguagem venceu um campeonato de xadrez contra grandes mestres sem nunca ter sido treinado especificamente para xadrez. Os pesquisadores dizem que ele aprendeu as regras lendo livros e partidas comentadas na internet.",
+  "origem": "texto colado",
+  "titulo": "",
+  "fonte": "",
+  "fato": {
+    "fato": "Um modelo de linguagem venceu grandes mestres no xadrez sem treinamento específico no jogo.",
+    "titulo": "Modelo vence grandes mestres no xadrez",
+    "imagens_concretas": [
+      "Um modelo de linguagem diante de um tabuleiro de xadrez",
+      "Grandes mestres sentados para jogar",
+      "Livros abertos com regras de xadrez",
+      "Uma tela exibindo partidas comentadas na internet"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como conselho de gente velha, terminando numa moral",
+      "plano": "Conto a vitória como novidade de feira e, na segunda sextilha, trago o conselho dos mais velhos para fechar com uma moral.",
+      "finais": [
+        [
+          "jogo",
+          "fogo",
+          "vitória",
+          "mesa",
+          "surpresa",
+          "memória"
+        ],
+        [
+          "pensar",
+          "olhar",
+          "saber",
+          "razão",
+          "chão",
+          "crescer"
+        ]
+      ],
+      "estrofes": [
+        [
+          "Modelo entrou no jogo",
+          "Os mestres sentiram fogo",
+          "Já traçou sua vitória",
+          "No xadrez, sentam à mesa",
+          "Na tela, nasce surpresa",
+          "Virou marca na memória"
+        ],
+        [
+          "Meu velho mandou pensar",
+          "Antes do passo, olhar",
+          "Sem treino, mostrou saber",
+          "A palavra traz razão",
+          "Bom senso sustenta o chão",
+          "Quem ouve pode crescer"
+        ]
+      ],
+      "entra": false,
+      "forma_ok": true,
+      "reprovados": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  ],
+  "escolhida": {
+    "indice": 0,
+    "justificativa": "única candidata com a forma pedida"
+  },
+  "fim": "2026-09-28T13:00:14",
+  "entra": true,
+  "motivo": null,
+  "estrofes_finais": [
+    [
+      "Modelo refez o jogo",
+      "Os mestres sentiram fogo",
+      "Já traçou sua vitória",
+      "No xadrez, sentam à mesa",
+      "Na tela, nasce surpresa",
+      "Virou marca na memória"
+    ],
+    [
+      "Meu velho mandou pensar",
+      "Antes, há que ponderar",
+      "Sem treino, mostrou saber",
+      "A palavra traz razão",
+      "Bom senso sustenta o chão",
+      "Quem ouve pode crescer"
+    ]
+  ],
+  "duvidas_para_o_grupo": [
+    {
+      "estrofe": 1,
+      "n": 3,
+      "duvida": "vitória: 'ia' pode virar hiato"
+    },
+    {
+      "estrofe": 1,
+      "n": 6,
+      "duvida": "memória: 'ia' pode virar hiato"
+    }
+  ],
+  "rodadas_de_correcao": 3,
+  "arquivos": {
+    "texto": "folhetos/20260928-130014-modelo-vence-grandes-mestres-no-xadrez.txt",
+    "imagem": "folhetos/20260928-130014-modelo-vence-grandes-mestres-no-xadrez.png"
+  },
+  "custo_estimado_usd": {
+    "texto": 0.00818,
+    "imagem": 0.00854,
+    "total": 0.01671
+  }
+}

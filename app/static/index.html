@@ -76,6 +76,9 @@
   .cand { border: 1px dashed var(--linha); padding: 6px 8px; margin-top: 6px; }
   .cand.escolhida { border: 2px solid var(--tinta); background: #fbf6ea; }
   .cand .versos-c { font: 13px/1.5 "Courier Prime", monospace; margin-top: 3px; }
+  .cand .versos-c + .versos-c { margin-top: 8px; }
+  .sub-est { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin-top: 8px; }
+  .folheto .estrofe-c + .estrofe-c { margin-top: 1em; }
   del { color: var(--vermelho); } ins { color: var(--verde); text-decoration: none; }
   details summary { cursor: pointer; font-size: 12px; color: var(--tinta-2); }
   pre { white-space: pre-wrap; font-size: 12px; background: #fbf6ea; padding: 8px; border: 1px solid var(--linha); overflow-x: auto; }
@@ -136,6 +139,13 @@
       <label>Xilogravura <select id="c-imagem_qualidade"></select></label>
       <div class="estimativa" id="estimativa"></div>
     </fieldset>
+    <fieldset class="config">
+      <legend>Sextilha</legend>
+      <label>Tipo <select id="c-forma"></select></label>
+      <label>Estrofes <select id="c-estrofes"></select></label>
+      <label>Encadeamento <select id="c-encadeamento"></select></label>
+      <div class="estimativa" id="regra"></div>
+    </fieldset>
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
       <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
@@ -184,13 +194,15 @@ const MEDIDO = {
   "openai:gpt-5.4-mini|medium": 0.12, "openai:gpt-5.4-mini|high": 0.29,
   "openai:gpt-5.5|low": 0.13, "openai:gpt-5.5|medium": 0.36,
 };
-const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade"];
-let PRECOS = {};
+const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento"];
+const NUMERICOS = ["candidatas", "estrofes"];
+const ROTULOS_ENCADEAMENTO = { livre: "livre", deixa: "em deixa (cantoria)" };
+let PRECOS = {}, FORMAS = {};
 const usd = (v, c = 2) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: c, maximumFractionDigits: c }).format(v);
 const nomeModelo = (id) => id.replace("openai:", "").replace(/^gpt-/, "GPT-").replace(/-(luna|sol|terra|astra|mini|nano)$/, " $1");
 const lerCfg = () => Object.fromEntries(CAMPOS.map((k) => {
   const v = $(`c-${k}`).value;
-  return [k, k === "candidatas" ? Number(v) : v];
+  return [k, NUMERICOS.includes(k) ? Number(v) : v];
 }));
 
 function opcoesTexto(ids) {
@@ -212,18 +224,26 @@ function estimativa() {
     ? ` · medido: ~${usd(m)} com 3 candidatas${c.candidatas < 3 ? " (com menos, sai mais barato)" : ""}`
     : " · ainda não medido: o custo real aparece em Logs";
   $("estimativa").textContent = preco + medido + (c.candidatas > 1 ? " · com mais de 1 candidata, um júri escolhe a melhor" : "");
+  // sextilha: a regra do tipo escolhido; deixa só faz sentido com 2+ estrofes
+  const f = FORMAS[c.forma];
+  $("c-encadeamento").disabled = c.estrofes === 1;
+  $("regra").textContent = (f ? `${f.esquema}: ${f.regra}` : "")
+    + (c.estrofes > 1 ? ` · ${c.estrofes} estrofes = ${c.estrofes * 6} versos, custa uns ${c.estrofes}× o texto` : "")
+    + (c.estrofes > 1 && c.encadeamento === "deixa" ? " · em deixa: o 1º verso de cada estrofe rima com o último da anterior" : "");
   try { localStorage.setItem("cordel-config", JSON.stringify(c)); } catch {}
 }
 
-fetch("/api/config").then((r) => r.json()).then(({ padrao, opcoes, imagem, precos }) => {
-  PRECOS = precos;
+fetch("/api/config").then((r) => r.json()).then(({ padrao, opcoes, imagem, precos, formas }) => {
+  PRECOS = precos; FORMAS = formas;
   let salvo = {};
   try { salvo = JSON.parse(localStorage.getItem("cordel-config") || "{}"); } catch {}
   for (const k of CAMPOS) {
     const sel = $(`c-${k}`);
     sel.innerHTML = k === "texto" ? opcoesTexto(opcoes.texto)
       : opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
-          k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : k === "candidatas" ? v : NOMES[v] ?? v)}</option>`).join("");
+          k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : NUMERICOS.includes(k) ? v
+          : k === "forma" ? `${v} (${formas[v].esquema})` : k === "encadeamento" ? ROTULOS_ENCADEAMENTO[v]
+          : NOMES[v] ?? v)}</option>`).join("");
     sel.value = opcoes[k].includes(salvo[k]) ? salvo[k] : padrao[k];
     sel.onchange = estimativa;
   }
@@ -239,26 +259,38 @@ function passo(chave, rotulo, status, html = "") {
   li.innerHTML = `<div class="etq">${esc(rotulo)}</div>${html ? `<div class="corpo">${html}</div>` : ""}`;
 }
 
-function tabelaEscansao(ev) {
-  const linhas = ev.linhas.map((l) => `
-    <tr><td class="n ${l.ok ? "bom" : "mau"}">${l.ok ? "ok" : "XX"} v${l.n} [${l.silabas}]</td>
+const ev2 = (e, n) => `E${e}.${n}`;
+const rotuloVerso = (e, n, total) => total > 1 ? ev2(e, n) : `v${n}`;
+const listaReprovados = (rs, total) => rs.map(([e, n]) => rotuloVerso(e, n, total)).join(", ");
+
+function tabelaEstrofe(m, e, total) {
+  const linhas = m.linhas.map((l) => `
+    <tr><td class="n ${l.ok ? "bom" : "mau"}">${l.ok ? "ok" : "XX"} ${rotuloVerso(e, l.n, total)} [${l.silabas}]</td>
     <td>${esc(l.verso)}<div class="sil">${esc(l.escansao)}</div>${l.duvidas ? `<div class="duv">? ${esc(l.duvidas)}</div>` : ""}</td></tr>`).join("");
-  const rimas = ev.rimas.map((r) => `<div>rima ${r.letra} (versos ${r.versos.join(", ")}):
+  const rimas = m.rimas.map((r) => `<div>rima ${r.letra} (versos ${r.versos.join(", ")}):
     <span class="${r.estado === "SEM RIMA" ? "mau" : "bom"}">${esc(r.estado)}</span> <span class="sil">${esc(r.chaves.join(" · "))}</span></div>`).join("");
-  const extras = (ev.extras || []).map((e) => `<div class="mau">v${e.n} ${esc(e.motivo)}</div>`).join("");
-  return `<table class="esc">${linhas}</table>${rimas}${extras}
-    <div>${ev.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados: ${ev.reprovados.join(", ") || "—"}</span>`}</div>
+  const extras = (m.extras || []).map((x) => `<div class="mau">${rotuloVerso(e, x.n, total)} ${esc(x.motivo)}</div>`).join("");
+  return `${total > 1 ? `<div class="sub-est">estrofe ${e}</div>` : ""}<table class="esc">${linhas}</table>${rimas}${extras}`;
+}
+
+function tabelaEscansao(ev) {
+  const total = ev.medidas.length;
+  const deixa = ev.deixa.map((d) => `<div>deixa estrofe ${d.estrofe}:
+    <span class="${d.ok ? "bom" : "mau"}">${esc(d.estado)}</span> <span class="sil">${esc(d.chaves.join(" · "))}</span></div>`).join("");
+  return ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + `
+    <div>${ev.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados: ${listaReprovados(ev.reprovados, total) || "—"}</span>`}</div>
     <details><summary>relatório do escandir.py</summary><pre>${esc(ev.relatorio)}</pre></details>`;
 }
 
 function htmlCandidatas(cs, escolhida = -1) {
   return cs.map((c, i) => `<div class="cand ${i === escolhida ? "escolhida" : ""}">
-    <div class="sil">${i + 1}. ${esc(c.angulo)} · rimas: ${esc(c.rimas.join(" / "))} ·
-      ${c.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados ${c.reprovados.join(", ")}</span>`}</div>
-    <div class="versos-c">${c.versos.map(esc).join("<br>")}</div></div>`).join("");
+    <div class="sil">${i + 1}. ${esc(c.angulo)} ·
+      ${c.entra ? '<span class="bom">passou</span>' : `<span class="mau">${c.forma_ok ? `reprovados ${listaReprovados(c.reprovados, c.estrofes.length)}` : "forma errada"}</span>`}</div>
+    ${c.estrofes.map((vs) => `<div class="versos-c">${vs.map(esc).join("<br>")}</div>`).join("")}</div>`).join("");
 }
 
-const mostrarVersos = (versos) => $("versos").innerHTML = versos.map((v) => `<div>${esc(v)}</div>`).join("");
+const mostrarEstrofes = (estrofes) => $("versos").innerHTML = estrofes.map((vs) =>
+  `<div class="estrofe-c">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("");
 const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
 
 function tratar(ev) {
@@ -274,36 +306,33 @@ function tratar(ev) {
       $("manchete").textContent = ev.titulo;
       return passo("fato", "1 · o fato", "ok", `<b>${esc(ev.titulo)}</b><br>${esc(ev.fato)}
         <div class="sil">imagens: ${esc(ev.imagens_concretas.join(" · "))}</div>`);
-    case "sextilha":
-      if (ev.status === "rodando") return passo("sextilha", "2 · escrevendo a sextilha", "rodando");
-      mostrarVersos(ev.versos);
-      return passo("sextilha", "2 · primeira versão", "ok", ev.versos.map(esc).join("<br>"));
     case "candidatas":
       if (ev.status === "rodando")
-        return passo("cand", `2 · escrevendo ${ev.angulos.length} sextilhas em paralelo, uma por ângulo`, "rodando");
+        return passo("cand", ev.angulos.length > 1 ? `2 · escrevendo ${ev.angulos.length} candidatas em paralelo, uma por ângulo` : "2 · escrevendo o poema", "rodando");
       window.__cand = ev.candidatas;
-      return passo("cand", `2 · ${ev.candidatas.length} candidatas`, "ok", htmlCandidatas(ev.candidatas));
+      return passo("cand", ev.candidatas.length > 1 ? `2 · ${ev.candidatas.length} candidatas` : "2 · primeira versão", "ok", htmlCandidatas(ev.candidatas));
     case "julgamento":
       if (ev.status === "rodando") return passo("juri", "2b · o júri está lendo", "rodando");
-      mostrarVersos(window.__cand[ev.escolhida].versos);
+      mostrarEstrofes(window.__cand[ev.escolhida].estrofes);
+      if (window.__cand.length < 2) return;
       passo("cand", `2 · ${window.__cand.length} candidatas`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
       return passo("juri", `2b · júri escolheu a candidata ${ev.escolhida + 1}`, "ok", esc(ev.justificativa));
     case "escansao":
-      mostrarVersos(ev.versos);
+      mostrarEstrofes(ev.estrofes);
       return passo(`esc${ev.rodada}`, `3 · escansão ${ev.rodada === 0 ? "inicial" : "após rodada " + ev.rodada}`,
         ev.entra ? "ok" : "erro", tabelaEscansao(ev));
     case "correcao":
       if (ev.status === "rodando")
-        return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3 — versos ${ev.reprovados.join(", ")}`, "rodando");
+        return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3 — ${listaReprovados(ev.reprovados, 2)}`, "rodando");
       return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3`, "ok",
-        ev.mudancas.map((m) => `v${m.n}: <del>${esc(m.antes)}</del><br>&nbsp;&nbsp;&nbsp;&nbsp;<ins>${esc(m.depois)}</ins>`).join("<br>") || "nenhuma mudança");
+        ev.mudancas.map((m) => `${ev2(m.estrofe, m.n)}: <del>${esc(m.antes)}</del><br>&nbsp;&nbsp;&nbsp;&nbsp;<ins>${esc(m.depois)}</ins>`).join("<br>") || "nenhuma mudança");
     case "xilogravura":
       if (ev.status === "rodando") { $("xilo").innerHTML = "<span>entalhando a xilogravura…</span>"; return passo("xilo", "5 · entalhando a xilogravura (em paralelo)", "rodando"); }
       if (ev.url) $("xilo").innerHTML = `<img alt="xilogravura" src="/${ev.url}?t=${Date.now()}">`;
       else $("xilo").innerHTML = `<span>a imagem falhou: ${esc(ev.erro)}</span>`;
       return passo("xilo", "5 · xilogravura", ev.url ? "ok" : "erro");
     case "fim": {
-      $("manchete").textContent = ev.titulo; mostrarVersos(ev.versos);
+      $("manchete").textContent = ev.titulo; mostrarEstrofes(ev.estrofes);
       if (!$("imagem").checked) $("xilo").innerHTML = "<span>sem xilogravura nesta rodada</span>";
       $("veredito").style.display = "block";
       $("selo").className = "selo " + (ev.entra ? "entra" : "descarte");

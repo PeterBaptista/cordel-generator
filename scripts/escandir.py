@@ -10,6 +10,12 @@ Uso:
     python3 escandir.py --verso "O robo chegou na feira"
     python3 escandir.py ../folhetos/*.txt
     python3 escandir.py ../folhetos/*.txt --csv ../caderno/metrica.csv
+    python3 escandir.py ../folhetos/*.txt --esquema AABCCB
+
+Um arquivo pode ter varias estrofes, separadas por linha em branco: cada uma e
+verificada sozinha, e o folheto passa se todas passarem. Linhas que comecam com
+"#" sao comentario. O esquema de rima vem de --esquema, ou de uma linha
+"# esquema: AABCCB" no proprio arquivo; sem nenhum dos dois, ABCBDB.
 
 Marcas opcionais dentro do verso, para o poeta forcar uma leitura:
     _   junta com a palavra anterior   ("poema _a cor")
@@ -239,6 +245,24 @@ def imprimir(nome, texto, metro=7, esquema="ABCBDB"):
     print("  --> %s" % ("ENTRA na colecao" if entra else "DESCARTE (ver acima)"))
     return linhas, rimas, entra
 
+def estrofes(texto):
+    """Blocos separados por linha em branco; linhas com # sao comentario."""
+    blocos, atual = [], []
+    for linha in texto.splitlines():
+        if linha.lstrip().startswith("#"):
+            continue
+        if linha.strip():
+            atual.append(linha)
+        elif atual:
+            blocos.append(atual); atual = []
+    if atual:
+        blocos.append(atual)
+    return ["\n".join(b) for b in blocos]
+
+def esquema_do_arquivo(texto, padrao="ABCBDB"):
+    m = re.search(r"^#\s*esquema:\s*([A-Z]{6})\b", texto, re.M)
+    return m.group(1) if m else padrao
+
 # --------------------------------------------------------------------- cli
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -252,7 +276,9 @@ if __name__ == "__main__":
         if dv: print("   ? %s" % "; ".join(dv))
         print("     rima: %s" % (chave_rima(v),))
         sys.exit(0)
-    csv_out = None
+    csv_out, esquema = None, None
+    if "--esquema" in args:
+        k = args.index("--esquema"); esquema = args[k+1].upper(); args = args[:k] + args[k+2:]
     if "--csv" in args:
         k = args.index("--csv"); csv_out = args[k+1]; args = args[:k] + args[k+2:]
     arquivos = sorted({f for a in args for f in glob.glob(a)})
@@ -260,13 +286,20 @@ if __name__ == "__main__":
         print("nenhum arquivo encontrado"); sys.exit(1)
     todas, aprovados = [], 0
     for f in arquivos:
-        linhas, rimas, entra = imprimir(f, open(f, encoding="utf-8").read())
-        aprovados += 1 if entra else 0
-        for l in linhas:
-            l["arquivo"] = f; todas.append(l)
+        texto = open(f, encoding="utf-8").read()
+        esq = esquema or esquema_do_arquivo(texto)
+        blocos = estrofes(texto)
+        entra_todas = bool(blocos)
+        for k, bloco in enumerate(blocos, 1):
+            nome = f if len(blocos) == 1 else "%s [estrofe %d]" % (f, k)
+            linhas, rimas, entra = imprimir(nome, bloco, esquema=esq)
+            entra_todas = entra_todas and entra
+            for l in linhas:
+                l["arquivo"] = f; l["estrofe"] = k; todas.append(l)
+        aprovados += 1 if entra_todas else 0
     print("\n%d de %d folhetos passaram." % (aprovados, len(arquivos)))
     if csv_out and todas:
         with open(csv_out, "w", newline="", encoding="utf-8") as fh:
-            w = csv.DictWriter(fh, fieldnames=["arquivo","n","verso","silabas","ok","escansao","duvidas"])
+            w = csv.DictWriter(fh, fieldnames=["arquivo","estrofe","n","verso","silabas","ok","escansao","duvidas"])
             w.writeheader(); w.writerows(todas)
         print("CSV: %s" % csv_out)

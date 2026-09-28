@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import custos
+from . import custos, prompts
 from .workflow import IMAGE_MODEL, OPCOES, PASTAS, RAIZ, Config, run_cordel
 
 app = FastAPI(title="Do 7 ao 6")
@@ -103,7 +103,8 @@ def logs():
 def config():
     from dataclasses import asdict
     return {"padrao": asdict(Config()), "opcoes": OPCOES, "imagem": IMAGE_MODEL,
-            "precos": {m: {"entrada": e, "saida": o} for m, (e, _, o) in custos.PRECOS.items()}}
+            "precos": {m: {"entrada": e, "saida": o} for m, (e, _, o) in custos.PRECOS.items()},
+            "formas": {nome: {"esquema": esq, "regra": regra} for nome, (esq, regra) in prompts.FORMAS.items()}}
 
 
 @app.post("/api/cordel")

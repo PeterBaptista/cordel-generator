@@ -60,6 +60,26 @@ Na página dá para escolher o modelo de texto (famílias GPT-5, 5.4, 5.5, 5.6 e
 preço ao lado), o nível de raciocínio, quantas candidatas gerar e a qualidade da
 xilogravura. O servidor só aceita os modelos da tabela em `app/custos.py`.
 
+Também dá para escolher a forma do poema:
+
+| Tipo de sextilha | Rima | Quem rima |
+|---|---|---|
+| aberta (padrão) | ABCBDB | 2, 4 e 6; os ímpares ficam livres |
+| solta | ABABCD | 1 com 3, 2 com 4; 5 e 6 livres |
+| corrida | AABCCB | 1 com 2, 3 com 6, 4 com 5 |
+| desencontrada | ABBAAB | 1, 4 e 5; e 2, 3 e 6 |
+
+com 1 a 6 estrofes, livres ou **em deixa** (como na cantoria: o 1º verso de cada estrofe
+rima com o último da anterior). Fontes: [Francisco Martins, "Aprendendo sobre cordel:
+sextilha"](https://franciscomartinsescritor.blogspot.com/2019/08/aprendndo-sobre-cordel-sextilha.html),
+[Cordel na Educação](https://www.cordelnaeducacao.com.br/dicas-de-cordel/modalidades-de-estrofes-que-podem-ser-encontradas-no-cordel),
+[Repentistas: sextilha](https://repentistas.identidadessonoras.org/modalidades/sextilha/).
+A sextilha "fechada" (rimam todos os versos) ficou de fora porque as fontes não dizem
+em que ordem.
+
+O `escandir.py` verifica arquivos com várias estrofes (separadas por linha em branco)
+e lê o esquema de uma linha `# esquema: AABCCB` no arquivo, ou de `--esquema`.
+
 Em `/logs` fica o custo de cada geração, estimado pelos tokens do caderno: por etapa,
 com o `response_id` para abrir a chamada no painel da OpenAI.
 

@@ -49,6 +49,9 @@ OPCOES = {
     "raciocinio": ["low", "medium", "high"],
     "candidatas": [1, 2, 3],
     "imagem_qualidade": ["low", "medium"],
+    "forma": list(prompts.FORMAS),
+    "estrofes": [1, 2, 3, 4, 6],
+    "encadeamento": ["livre", "deixa"],
 }
 
 
@@ -61,12 +64,21 @@ class Config:
     candidatas: int = int(os.getenv("CORDEL_CANDIDATAS", "1"))
     # em xilogravura preto e branco, "low" ficou tão bom quanto "medium" e sai mais barato
     imagem_qualidade: str = os.getenv("CORDEL_IMAGE_QUALITY", "low")
+    forma: str = "aberta"         # tipo de sextilha pelo esquema de rima
+    estrofes: int = 1
+    encadeamento: str = "livre"   # "deixa": 1º verso rima com o último da estrofe anterior
+
+    @property
+    def esquema(self) -> str:
+        return prompts.FORMAS[self.forma][0]
 
     def validar(self) -> "Config":
         for campo, valor in asdict(self).items():
             if valor not in OPCOES[campo]:
                 raise ValueError(f"{campo}={valor!r} não está entre {OPCOES[campo]}")
         return self
+
+
 MAX_RODADAS = 3
 # Teto de gasto por geração. Passou dele, a geração não chama o júri nem faz novas
 # rodadas de correção: entrega o que tem. É um freio, não uma garantia exata — uma
@@ -87,10 +99,14 @@ class Fato(pydantic.BaseModel):
     imagens_concretas: list[str]
 
 
-class Sextilha(pydantic.BaseModel):
-    angulo: str
-    rimas: list[str]
+class Estrofe(pydantic.BaseModel):
+    finais: list[str]
     versos: list[str]
+
+
+class Poema(pydantic.BaseModel):
+    angulo: str
+    estrofes: list[Estrofe]
 
 
 class Escolha(pydantic.BaseModel):
@@ -99,6 +115,7 @@ class Escolha(pydantic.BaseModel):
 
 
 class VersoCorrigido(pydantic.BaseModel):
+    estrofe: int
     n: int
     verso: str
 
@@ -235,13 +252,13 @@ def palavras_repetidas(versos: list[str]) -> list[dict]:
     return problemas
 
 
-def medir(versos: list[str]) -> dict:
-    """Roda o escandir.py e devolve o resultado + o relatório como o CLI imprime,
-    somado ao critério extra de palavra final repetida."""
+def medir(versos: list[str], esquema: str = "ABCBDB", nome: str = "sextilha") -> dict:
+    """Roda o escandir.py numa estrofe e devolve o resultado + o relatório como o
+    CLI imprime, somado ao critério extra de palavra final repetida."""
     texto = "\n".join(versos)
     saida = io.StringIO()
     with contextlib.redirect_stdout(saida):
-        linhas, rimas, entra_script = escandir.imprimir("sextilha", texto)
+        linhas, rimas, entra_script = escandir.imprimir(nome, texto, esquema=esquema)
     relatorio = saida.getvalue().strip()
     extras = palavras_repetidas(versos)
     if extras:
@@ -267,15 +284,55 @@ def versos_reprovados(medida: dict) -> list[int]:
     return sorted(ruins)
 
 
-def motivo_descarte(medida: dict, n_versos: int) -> str:
+def ligacoes_em_deixa(estrofes: list[list[str]]) -> list[dict]:
+    """Deixa da cantoria: da 2ª estrofe em diante, o 1º verso rima com o último
+    verso da estrofe anterior (com palavra diferente)."""
+    res = []
+    for e in range(1, len(estrofes)):
+        if not estrofes[e] or not estrofes[e - 1]:
+            continue
+        ant, pri = estrofes[e - 1][-1], estrofes[e][0]
+        (c1, t1), (c2, t2) = escandir.chave_rima(ant), escandir.chave_rima(pri)
+        estado = ("mesma palavra" if palavra_final(ant) == palavra_final(pri)
+                  else "consoante" if c1 == c2 else "toante" if t1 == t2 else "SEM RIMA")
+        res.append({"estrofe": e + 1, "estado": estado, "chaves": [c1, c2],
+                    "ok": estado in ("consoante", "toante")})
+    return res
+
+
+def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
+    """Mede cada estrofe no escandir.py com o esquema escolhido, e a deixa entre elas."""
+    unica = len(estrofes) == 1
+    medidas = [medir(vs, cfg.esquema, "sextilha" if unica else f"estrofe {e}")
+               for e, vs in enumerate(estrofes, 1)]
+    deixa = ligacoes_em_deixa(estrofes) if cfg.encadeamento == "deixa" else []
+    reprovados = sorted({(e, n) for e, m in enumerate(medidas, 1) for n in versos_reprovados(m)}
+                        | {(d["estrofe"], 1) for d in deixa if not d["ok"]})
+    forma_ok = len(estrofes) == cfg.estrofes and all(len(vs) == 6 for vs in estrofes)
+    relatorio = "\n\n".join(m["relatorio"] for m in medidas)
+    if deixa:
+        relatorio += "\n\n  deixa (1º verso rima com o último da estrofe anterior):\n" + "\n".join(
+            f"  {'ok' if d['ok'] else 'XX'} estrofe {d['estrofe']}: {d['estado']} {d['chaves']}"
+            for d in deixa)
+    return {"medidas": medidas, "deixa": deixa, "reprovados": reprovados, "forma_ok": forma_ok,
+            "entra": forma_ok and all(m["entra"] for m in medidas) and all(d["ok"] for d in deixa),
+            "relatorio": relatorio}
+
+
+def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:
     partes = []
-    if n_versos != 6:
-        partes.append(f"{n_versos} versos (a sextilha pede 6)")
-    partes += [f"verso {l['n']} com {l['silabas']} sílabas"
-               for l in medida["linhas"] if not l["ok"]]
-    partes += [f"rima {r['letra']} quebrou ({', '.join(r['chaves'])})"
-               for r in medida["rimas"] if r["estado"] == "SEM RIMA"]
-    partes += [f"verso {e['n']} {e['motivo']}" for e in medida["extras"]]
+    if len(estrofes) != cfg.estrofes:
+        partes.append(f"{len(estrofes)} estrofes (pedidas {cfg.estrofes})")
+    for e, (vs, m) in enumerate(zip(estrofes, mp["medidas"]), 1):
+        pref = "" if len(estrofes) == 1 else f"estrofe {e}, "
+        if len(vs) != 6:
+            partes.append(f"{pref}{len(vs)} versos (a sextilha pede 6)")
+        partes += [f"{pref}verso {l['n']} com {l['silabas']} sílabas"
+                   for l in m["linhas"] if not l["ok"]]
+        partes += [f"{pref}rima {r['letra']} quebrou ({', '.join(r['chaves'])})"
+                   for r in m["rimas"] if r["estado"] == "SEM RIMA"]
+        partes += [f"{pref}verso {x['n']} {x['motivo']}" for x in m["extras"]]
+    partes += [f"deixa da estrofe {d['estrofe']}: {d['estado']}" for d in mp["deixa"] if not d["ok"]]
     return "; ".join(partes) + f" — resistiu a {MAX_RODADAS} rodadas de correção."
 
 
@@ -326,19 +383,20 @@ async def run_cordel(
     angulos = random.sample(prompts.ANGULOS, min(cfg.candidatas, len(prompts.ANGULOS)))
     yield {"etapa": "candidatas", "status": "rodando", "angulos": angulos}
     geradas = await asyncio.gather(*(
-        gerar(prompts.SISTEMA_SEXTILHA,
-              prompts.usuario_sextilha(fato.fato, fato.imagens_concretas, a),
-              Sextilha, chamadas, cfg, "candidata")
+        gerar(prompts.sistema_poema(cfg.forma, cfg.estrofes, cfg.encadeamento),
+              prompts.usuario_poema(fato.fato, fato.imagens_concretas, a),
+              Poema, chamadas, cfg, "candidata")
         for a in angulos), return_exceptions=True)
     candidatas = []
     for a, g in zip(angulos, geradas):
         if isinstance(g, BaseException):
             log.setdefault("erros_candidatas", []).append(f"{a}: {g}")
             continue
-        vs = [v.strip() for v in g.versos if v.strip()]
-        m = medir(vs)
-        candidatas.append({"angulo": a, "plano": g.angulo, "rimas": g.rimas, "versos": vs,
-                           "entra": m["entra"], "reprovados": versos_reprovados(m)})
+        ests = [[v.strip() for v in e.versos if v.strip()] for e in g.estrofes]
+        mp = medir_poema(ests, cfg)
+        candidatas.append({"angulo": a, "plano": g.angulo, "finais": [e.finais for e in g.estrofes],
+                           "estrofes": ests, "entra": mp["entra"], "forma_ok": mp["forma_ok"],
+                           "reprovados": mp["reprovados"]})
     if not candidatas:
         raise RuntimeError("nenhuma candidata foi gerada: " + "; ".join(log["erros_candidatas"]))
     log["candidatas"] = candidatas
@@ -349,10 +407,10 @@ async def run_cordel(
         return custos.resumo(log)["total"] >= teto_texto
 
     # 2b. júri: escolhe a mais criativa entre as que o verificador prefere
-    validas = [i for i, c in enumerate(candidatas) if len(c["versos"]) == 6] or [0]
+    validas = [i for i, c in enumerate(candidatas) if c["forma_ok"]] or [0]
     # sem júri, fica a que o verificador reprovou menos
     escolhida = min(validas, key=lambda i: len(candidatas[i]["reprovados"]))
-    justificativa = ("única candidata com 6 versos" if len(validas) == 1
+    justificativa = ("única candidata com a forma pedida" if len(validas) == 1
                      else "sem júri (teto de custo): fica a com menos versos reprovados")
     if len(validas) > 1 and estourou():
         log["parou_no_teto"] = "júri"
@@ -371,20 +429,20 @@ async def run_cordel(
     log["escolhida"] = {"indice": escolhida, "justificativa": justificativa}
     yield {"etapa": "julgamento", "status": "ok", "escolhida": escolhida,
            "justificativa": justificativa}
-    versos = list(candidatas[escolhida]["versos"])
+    estrofes = [list(vs) for vs in candidatas[escolhida]["estrofes"]]
 
     # 3-4. escandir e corrigir só o que foi reprovado, no máximo 3 rodadas
     rodada = 0
     while True:
-        medida = medir(versos)
-        reprovados = versos_reprovados(medida)
-        log["rodadas"].append({"rodada": rodada, "versos": list(versos),
-                               "relatorio": medida["relatorio"]})
-        yield {"etapa": "escansao", "rodada": rodada, "versos": versos,
-               "linhas": medida["linhas"], "rimas": medida["rimas"],
-               "extras": medida["extras"], "entra": medida["entra"], "reprovados": reprovados,
-               "relatorio": medida["relatorio"]}
-        if medida["entra"] or rodada >= MAX_RODADAS or len(versos) != 6 or not reprovados:
+        mp = medir_poema(estrofes, cfg)
+        reprovados = mp["reprovados"]
+        log["rodadas"].append({"rodada": rodada, "estrofes": [list(vs) for vs in estrofes],
+                               "relatorio": mp["relatorio"]})
+        yield {"etapa": "escansao", "rodada": rodada, "estrofes": estrofes,
+               "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
+               "deixa": mp["deixa"], "entra": mp["entra"], "reprovados": reprovados,
+               "relatorio": mp["relatorio"]}
+        if mp["entra"] or rodada >= MAX_RODADAS or not mp["forma_ok"] or not reprovados:
             break
         if estourou():
             log["parou_no_teto"] = f"correção {rodada + 1}"
@@ -395,26 +453,30 @@ async def run_cordel(
         yield {"etapa": "correcao", "status": "rodando", "rodada": rodada,
                "reprovados": reprovados}
         corr: Correcao = await gerar(
-            prompts.SISTEMA_CORRECAO,
-            prompts.usuario_correcao(versos, medida["relatorio"], reprovados),
+            prompts.sistema_correcao(cfg.forma, cfg.encadeamento),
+            prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados),
             Correcao, chamadas, cfg, "correção",
         )
         mudancas = []
+        alvo = set(reprovados)
         for c in corr.versos:
             # só aceita troca nos versos reprovados: o que passou fica
-            if c.n in reprovados and c.verso.strip():
-                mudancas.append({"n": c.n, "antes": versos[c.n - 1], "depois": c.verso.strip()})
-                versos[c.n - 1] = c.verso.strip()
+            if (c.estrofe, c.n) in alvo and c.verso.strip():
+                antes = estrofes[c.estrofe - 1][c.n - 1]
+                estrofes[c.estrofe - 1][c.n - 1] = c.verso.strip()
+                mudancas.append({"estrofe": c.estrofe, "n": c.n, "antes": antes, "depois": c.verso.strip()})
         yield {"etapa": "correcao", "status": "ok", "rodada": rodada, "mudancas": mudancas}
 
     # 6. registro
-    entra = medida["entra"]
+    entra = mp["entra"]
     slug = _slug(fato.titulo)
     pasta = PASTAS["folhetos" if entra else "descarte"]
-    texto = "\n".join(versos) + "\n"
+    # o cabeçalho diz ao escandir.py qual esquema conferir
+    forma = f"sextilha {cfg.forma}, {cfg.estrofes} estrofe(s)" + (", em deixa" if cfg.encadeamento == "deixa" else "")
+    texto = f"# esquema: {cfg.esquema}\n# forma: {forma}\n" + prompts.poema_em_texto(estrofes) + "\n"
     motivo = None
     if not entra:
-        motivo = motivo_descarte(medida, len(versos))
+        motivo = motivo_descarte(mp, estrofes, cfg)
         texto = f"# DESCARTADA: {motivo}\n" + texto
     for p in PASTAS.values():
         p.mkdir(parents=True, exist_ok=True)
@@ -433,9 +495,10 @@ async def run_cordel(
         yield {"etapa": "xilogravura", "status": "ok" if png else "erro",
                "url": arquivos.get("imagem"), "erro": log.get("erro_imagem")}
 
-    duvidas = [{"n": l["n"], "duvida": l["duvidas"]} for l in medida["linhas"] if l["duvidas"]]
+    duvidas = [{"estrofe": e, "n": l["n"], "duvida": l["duvidas"]}
+               for e, m in enumerate(mp["medidas"], 1) for l in m["linhas"] if l["duvidas"]]
     log.update(fim=datetime.now().isoformat(timespec="seconds"), entra=entra,
-               motivo=motivo, versos_finais=versos, duvidas_para_o_grupo=duvidas,
+               motivo=motivo, estrofes_finais=estrofes, duvidas_para_o_grupo=duvidas,
                rodadas_de_correcao=rodada, arquivos=arquivos)
     custo = custos.resumo(log)
     log["custo_estimado_usd"] = {k: round(v, 5) for k, v in custo.items() if k in ("texto", "imagem", "total")}
@@ -445,7 +508,7 @@ async def run_cordel(
 
     yield {"etapa": "fim", "entra": entra, "motivo": motivo, "titulo": fato.titulo,
            "url": url or None, "fonte": origem["fonte"],
-           "versos": versos, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos,
+           "estrofes": estrofes, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos,
            "custo": log["custo_estimado_usd"]}
 
 

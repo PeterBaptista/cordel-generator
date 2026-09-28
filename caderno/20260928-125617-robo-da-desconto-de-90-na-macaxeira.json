@@ -1,0 +1,410 @@
+{
+  "inicio": "2026-09-28T12:53:38",
+  "url": null,
+  "config": {
+    "texto": "openai:gpt-6-luna",
+    "raciocinio": "medium",
+    "candidatas": 1,
+    "imagem_qualidade": "low",
+    "forma": "aberta",
+    "estrofes": 4,
+    "encadeamento": "deixa",
+    "com_imagem": true
+  },
+  "chamadas": [
+    {
+      "etapa": "fato",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0eefff5ea11be1ea006aba8d82a56087d294feb6d03c4168a3",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Startup de Recife coloca robô com IA para vender frutas numa feira livre. O robô conversa com os clientes, sugere receitas e faz troco, mas se confundiu com o preço da macaxeira e acabou dando desconto de 90% por uma tarde inteira.",
+      "saida_bruta": "{\"fato\":\"Um robô com IA vendeu frutas numa feira do Recife e deu desconto de 90% na macaxeira por uma tarde.\",\"titulo\":\"Robô dá desconto de 90% na macaxeira\",\"imagens_concretas\":[\"Robô vendendo frutas numa feira livre do Recife\",\"Clientes conversando com o robô\",\"Robô sugerindo receitas aos clientes\",\"Macaxeiras com desconto na banca\"]}",
+      "tokens": {
+        "input_tokens": 277,
+        "output_tokens": 157,
+        "reasoning_tokens": 59,
+        "cache_read_tokens": 0
+      },
+      "segundos": 4.1
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0d8c64e1de780e8e006aba8d867e4887d28cc83c2500f122ca",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva 4 sextilhas sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória em cada estrofe:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Sextilha aberta, rima ABCBDB: os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres. De preferência rima consoante\n  (igual a partir da vogal tônica).\n\nCom 4 estrofes, conte a notícia como história de folheto: a primeira abre\ncomo o cantador abre (anuncia a novidade), as do meio desenvolvem o fato com\nimagens novas, e a última fecha com virada, graça ou moral. Cada estrofe traz\ninformação nova: não repita a mesma ideia em estrofes diferentes.\n\nEncadeamento em deixa, como na cantoria: a partir da 2ª estrofe, o PRIMEIRO verso\nde cada estrofe rima com o ÚLTIMO verso da estrofe anterior, com palavra\ndiferente. O verificador confere essa ligação.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- para cada estrofe, finais: as 6 palavras finais dos versos, seguindo o esquema\n  ABCBDB. Palavras que rimam têm que ser DIFERENTES (ex.: sertão / razão /\n  clarão). Repetir a mesma palavra final é proibido: o verificador reprova.\nDepois escreva os versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo: nome de lugar,\n  pessoa ou empresa aparece no máximo UMA vez por estrofe.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso do poema dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Um robô com IA vendeu frutas numa feira do Recife e deu desconto de 90% na macaxeira por uma tarde.\nImagens possíveis: Robô vendendo frutas numa feira livre do Recife; Clientes conversando com o robô; Robô sugerindo receitas aos clientes; Macaxeiras com desconto na banca\nÂngulo: como um causo contado na feira, com humor e exagero\n\nPlaneje e escreva.",
+      "saida_bruta": "{\"angulo\":\"Conto a novidade como causo de feira, fazendo do desconto uma pechincha tão espantosa que até o troco sua.\",\"estrofes\":[{\"finais\":[\"novidade\",\"feira\",\"fila\",\"besteira\",\"pregão\",\"zoeira\"],\"versos\":[\"Vou contar novidade\",\"Robô vende na feira\",\"Fruta se põe na fila\",\"Banca, pura besteira\",\"No Recife, há pregão\",\"Feira virou zoeira\"]},{\"finais\":[\"certeira\",\"animado\",\"receita\",\"recado\",\"palpite\",\"guisado\"],\"versos\":[\"Veio com voz certeira\",\"Freguês chega animado\",\"Pergunta por receita\",\"Robô dá seu recado\",\"A voz dá seu palpite\",\"Sugere um bom guisado\"]},{\"finais\":[\"quebrado\",\"despencou\",\"sim\",\"desmanchou\",\"balcão\",\"durou\"],\"versos\":[\"Preço ficou quebrado\",\"O desconto despencou\",\"Noventa por cento, sim\",\"O valor se desmanchou\",\"Macaxeira no balcão\",\"Só uma tarde durou\"]},{\"finais\":[\"suou\",\"patrão\",\"alta\",\"razão\",\"cambalhota\",\"lição\"],\"versos\":[\"Até o troco já suou\",\"Foi pechincha de patrão\",\"Quem faz conta em voz alta\",\"Derruba minha razão\",\"Bolso dá cambalhota\",\"Macaxeira deu lição\"]}]}",
+      "tokens": {
+        "input_tokens": 851,
+        "output_tokens": 8230,
+        "reasoning_tokens": 7907,
+        "cache_read_tokens": 0
+      },
+      "segundos": 92.3
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_00354247c25526c8006aba8de2e8d887d29dbde5f7689ca98f",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\n- Em deixa: o 1º verso de cada estrofe (da 2ª em diante) rima com o último verso da estrofe anterior, com palavra diferente.\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Vou contar novidade\nE1.2 Robô vende na feira\nE1.3 Fruta se põe na fila\nE1.4 Banca, pura besteira\nE1.5 No Recife, há pregão\nE1.6 Feira virou zoeira\n\nE2.1 Veio com voz certeira\nE2.2 Freguês chega animado\nE2.3 Pergunta por receita\nE2.4 Robô dá seu recado\nE2.5 A voz dá seu palpite\nE2.6 Sugere um bom guisado\n\nE3.1 Preço ficou quebrado\nE3.2 O desconto despencou\nE3.3 Noventa por cento, sim\nE3.4 O valor se desmanchou\nE3.5 Macaxeira no balcão\nE3.6 Só uma tarde durou\n\nE4.1 Até o troco já suou\nE4.2 Foi pechincha de patrão\nE4.3 Quem faz conta em voz alta\nE4.4 Derruba minha razão\nE4.5 Bolso dá cambalhota\nE4.6 Macaxeira deu lição\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [6] Vou contar novidade\n         VOU / con / TAR / no / vi / DA / (de)\n  XX v2 [6] Robô vende na feira\n         ro / BÔ / VEN / de / na / FEI / (ra)\n  XX v3 [6] Fruta se põe na fila\n         FRU / ta / se / PÕE / na / FI / (la)\n  XX v4 [6] Banca, pura besteira\n         BAN / ca / PU / ra / bes / TEI / (ra)\n  XX v5 [6] No Recife, há pregão\n         no / re / CI / FE_HÁ / pre / GÃO\n  XX v6 [6] Feira virou zoeira\n         FEI / ra / vi / ROU / zo / EI / (ra)\n  rima B (versos [2, 4, 6]): consoante  ['eira', 'eira', 'eira']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  XX v1 [6] Veio com voz certeira\n         VEI / o / com / VOZ / cer / TEI / (ra)\n  XX v2 [6] Freguês chega animado\n         fre / GUÊS / CHE / ga_a / ni / MA / (do)\n  XX v3 [6] Pergunta por receita\n         per / GUN / ta / por / re / CEI / (ta)\n  XX v4 [6] Robô dá seu recado\n         ro / BÔ / dá / seu / re / CA / (do)\n  XX v5 [6] A voz dá seu palpite\n         a / VOZ / dá / seu / pal / PI / (te)\n  XX v6 [6] Sugere um bom guisado\n         su / GE / re_um / BOM / gui / SA / (do)\n  rima B (versos [2, 4, 6]): consoante  ['ado', 'ado', 'ado']\n  --> DESCARTE (ver acima)\n\n=== estrofe 3 ===\n  XX v1 [6] Preço ficou quebrado\n         PRE / ço / fi / COU / que / BRA / (do)\n  ok v2 [7] O desconto despencou\n         o / des / CON / to / des / pen / COU\n  ok v3 [7] Noventa por cento, sim\n         no / VEN / ta / por / CEN / to / SIM\n  ok v4 [7] O valor se desmanchou\n         o / va / LOR / se / des / man / CHOU\n  ok v5 [7] Macaxeira no balcão\n         ma / ca / XEI / ra / no / bal / CÃO\n  ok v6 [7] Só uma tarde durou\n         SÓ / U / ma / TAR / de / du / ROU\n       ? elisao opcional em 'só u' (a anterior e tonica)\n  rima B (versos [2, 4, 6]): consoante  ['ou', 'ou', 'ou']\n  --> DESCARTE (ver acima)\n\n=== estrofe 4 ===\n  ok v1 [7] Até o troco já suou\n         a / TÉ / o / TRO / co / JÁ / SUOU\n       ? suou: 'uo' pode virar hiato; elisao opcional em 'té o' (a anterior e tonica)\n  ok v2 [7] Foi pechincha de patrão\n         FOI / pe / CHIN / cha / de / pa / TRÃO\n  XX v3 [6] Quem faz conta em voz alta\n         QUEM / FAZ / CON / ta_em / VOZ / AL / (ta)\n  ok v4 [7] Derruba minha razão\n         der / RU / ba / MI / nha / ra / ZÃO\n  XX v5 [6] Bolso dá cambalhota\n         BOL / so / dá / cam / ba / LHO / (ta)\n  ok v6 [7] Macaxeira deu lição\n         ma / ca / XEI / ra / DEU / li / ÇÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\n  deixa (1º verso rima com o último da estrofe anterior):\n  ok estrofe 2: consoante ['eira', 'eira']\n  ok estrofe 3: consoante ['ado', 'ado']\n  XX estrofe 4: SEM RIMA ['ou', 'uou']\n\nReescreva só os versos E1.1, E1.2, E1.3, E1.4, E1.5, E1.6, E2.1, E2.2, E2.3, E2.4, E2.5, E2.6, E3.1, E4.1, E4.3, E4.5.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Na praça, o sol já nasceu\"},{\"estrofe\":1,\"n\":2,\"verso\":\"Robô já vende na feira\"},{\"estrofe\":1,\"n\":3,\"verso\":\"Fruta aguarda no cesto\"},{\"estrofe\":1,\"n\":4,\"verso\":\"A banca virou besteira\"},{\"estrofe\":1,\"n\":5,\"verso\":\"Recife ouve o pregão\"},{\"estrofe\":1,\"n\":6,\"verso\":\"O balcão virou zoeira\"},{\"estrofe\":2,\"n\":1,\"verso\":\"Chegou com fala faceira\"},{\"estrofe\":2,\"n\":2,\"verso\":\"Freguês já chega animado\"},{\"estrofe\":2,\"n\":3,\"verso\":\"Pede receita bem feita\"},{\"estrofe\":2,\"n\":4,\"verso\":\"Robô já dá seu recado\"},{\"estrofe\":2,\"n\":5,\"verso\":\"Máquina dá seu palpite\"},{\"estrofe\":2,\"n\":6,\"verso\":\"Logo sugere um guisado\"},{\"estrofe\":3,\"n\":1,\"verso\":\"O preço foi remarcado\"},{\"estrofe\":4,\"n\":1,\"verso\":\"Meu troco enfim rolou\"},{\"estrofe\":4,\"n\":3,\"verso\":\"Quem faz conta em voz bem alta\"},{\"estrofe\":4,\"n\":5,\"verso\":\"O bolso dá cambalhota\"}]}",
+      "tokens": {
+        "input_tokens": 1827,
+        "output_tokens": 4744,
+        "reasoning_tokens": 4414,
+        "cache_read_tokens": 0
+      },
+      "segundos": 42.8
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_02b6d1329503c96f006aba8e0dd27c87d29454087720da36fa",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\n- Em deixa: o 1º verso de cada estrofe (da 2ª em diante) rima com o último verso da estrofe anterior, com palavra diferente.\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Na praça, o sol já nasceu\nE1.2 Robô já vende na feira\nE1.3 Fruta aguarda no cesto\nE1.4 A banca virou besteira\nE1.5 Recife ouve o pregão\nE1.6 O balcão virou zoeira\n\nE2.1 Chegou com fala faceira\nE2.2 Freguês já chega animado\nE2.3 Pede receita bem feita\nE2.4 Robô já dá seu recado\nE2.5 Máquina dá seu palpite\nE2.6 Logo sugere um guisado\n\nE3.1 O preço foi remarcado\nE3.2 O desconto despencou\nE3.3 Noventa por cento, sim\nE3.4 O valor se desmanchou\nE3.5 Macaxeira no balcão\nE3.6 Só uma tarde durou\n\nE4.1 Meu troco enfim rolou\nE4.2 Foi pechincha de patrão\nE4.3 Quem faz conta em voz bem alta\nE4.4 Derruba minha razão\nE4.5 O bolso dá cambalhota\nE4.6 Macaxeira deu lição\n\nRelatório do verificador:\n=== estrofe 1 ===\n  ok v1 [7] Na praça, o sol já nasceu\n         na / PRA / ça_o / SOL / JÁ / nas / CEU\n  ok v2 [7] Robô já vende na feira\n         ro / BÔ / JÁ / VEN / de / na / FEI / (ra)\n  XX v3 [6] Fruta aguarda no cesto\n         FRU / ta_a / GUAR / da / no / CES / (to)\n  ok v4 [7] A banca virou besteira\n         a / BAN / ca / vi / ROU / bes / TEI / (ra)\n  XX v5 [6] Recife ouve o pregão\n         re / CI / FE_OU / ve_o / pre / GÃO\n  ok v6 [7] O balcão virou zoeira\n         o / bal / CÃO / vi / ROU / zo / EI / (ra)\n  rima B (versos [2, 4, 6]): consoante  ['eira', 'eira', 'eira']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Chegou com fala faceira\n         che / GOU / com / FA / la / fa / CEI / (ra)\n  ok v2 [7] Freguês já chega animado\n         fre / GUÊS / JÁ / CHE / ga_a / ni / MA / (do)\n  ok v3 [7] Pede receita bem feita\n         PE / de / re / CEI / ta / BEM / FEI / (ta)\n  ok v4 [7] Robô já dá seu recado\n         ro / BÔ / JÁ / dá / seu / re / CA / (do)\n  ok v5 [7] Máquina dá seu palpite\n         MÁ / qui / na / dá / seu / pal / PI / (te)\n  ok v6 [7] Logo sugere um guisado\n         LO / go / su / GE / re_um / gui / SA / (do)\n  rima B (versos [2, 4, 6]): consoante  ['ado', 'ado', 'ado']\n  --> ENTRA na colecao\n\n=== estrofe 3 ===\n  ok v1 [7] O preço foi remarcado\n         o / PRE / ço / FOI / re / mar / CA / (do)\n  ok v2 [7] O desconto despencou\n         o / des / CON / to / des / pen / COU\n  ok v3 [7] Noventa por cento, sim\n         no / VEN / ta / por / CEN / to / SIM\n  ok v4 [7] O valor se desmanchou\n         o / va / LOR / se / des / man / CHOU\n  ok v5 [7] Macaxeira no balcão\n         ma / ca / XEI / ra / no / bal / CÃO\n  ok v6 [7] Só uma tarde durou\n         SÓ / U / ma / TAR / de / du / ROU\n       ? elisao opcional em 'só u' (a anterior e tonica)\n  rima B (versos [2, 4, 6]): consoante  ['ou', 'ou', 'ou']\n  --> ENTRA na colecao\n\n=== estrofe 4 ===\n  XX v1 [6] Meu troco enfim rolou\n         meu / TRO / co_en / FIM / ro / LOU\n  ok v2 [7] Foi pechincha de patrão\n         FOI / pe / CHIN / cha / de / pa / TRÃO\n  ok v3 [7] Quem faz conta em voz bem alta\n         QUEM / FAZ / CON / ta_em / VOZ / BEM / AL / (ta)\n  ok v4 [7] Derruba minha razão\n         der / RU / ba / MI / nha / ra / ZÃO\n  ok v5 [7] O bolso dá cambalhota\n         o / BOL / so / dá / cam / ba / LHO / (ta)\n  ok v6 [7] Macaxeira deu lição\n         ma / ca / XEI / ra / DEU / li / ÇÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\n  deixa (1º verso rima com o último da estrofe anterior):\n  ok estrofe 2: consoante ['eira', 'eira']\n  ok estrofe 3: consoante ['ado', 'ado']\n  ok estrofe 4: consoante ['ou', 'ou']\n\nReescreva só os versos E1.3, E1.5, E4.1.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":3,\"verso\":\"A fruta aguarda no cesto\"},{\"estrofe\":1,\"n\":5,\"verso\":\"Recife canta o pregão\"},{\"estrofe\":4,\"n\":1,\"verso\":\"Meu troco enfim já voltou\"}]}",
+      "tokens": {
+        "input_tokens": 1777,
+        "output_tokens": 2145,
+        "reasoning_tokens": 2070,
+        "cache_read_tokens": 0
+      },
+      "segundos": 20.2
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "estrofes": [
+        [
+          "Vou contar novidade",
+          "Robô vende na feira",
+          "Fruta se põe na fila",
+          "Banca, pura besteira",
+          "No Recife, há pregão",
+          "Feira virou zoeira"
+        ],
+        [
+          "Veio com voz certeira",
+          "Freguês chega animado",
+          "Pergunta por receita",
+          "Robô dá seu recado",
+          "A voz dá seu palpite",
+          "Sugere um bom guisado"
+        ],
+        [
+          "Preço ficou quebrado",
+          "O desconto despencou",
+          "Noventa por cento, sim",
+          "O valor se desmanchou",
+          "Macaxeira no balcão",
+          "Só uma tarde durou"
+        ],
+        [
+          "Até o troco já suou",
+          "Foi pechincha de patrão",
+          "Quem faz conta em voz alta",
+          "Derruba minha razão",
+          "Bolso dá cambalhota",
+          "Macaxeira deu lição"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [6] Vou contar novidade\n         VOU / con / TAR / no / vi / DA / (de)\n  XX v2 [6] Robô vende na feira\n         ro / BÔ / VEN / de / na / FEI / (ra)\n  XX v3 [6] Fruta se põe na fila\n         FRU / ta / se / PÕE / na / FI / (la)\n  XX v4 [6] Banca, pura besteira\n         BAN / ca / PU / ra / bes / TEI / (ra)\n  XX v5 [6] No Recife, há pregão\n         no / re / CI / FE_HÁ / pre / GÃO\n  XX v6 [6] Feira virou zoeira\n         FEI / ra / vi / ROU / zo / EI / (ra)\n  rima B (versos [2, 4, 6]): consoante  ['eira', 'eira', 'eira']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  XX v1 [6] Veio com voz certeira\n         VEI / o / com / VOZ / cer / TEI / (ra)\n  XX v2 [6] Freguês chega animado\n         fre / GUÊS / CHE / ga_a / ni / MA / (do)\n  XX v3 [6] Pergunta por receita\n         per / GUN / ta / por / re / CEI / (ta)\n  XX v4 [6] Robô dá seu recado\n         ro / BÔ / dá / seu / re / CA / (do)\n  XX v5 [6] A voz dá seu palpite\n         a / VOZ / dá / seu / pal / PI / (te)\n  XX v6 [6] Sugere um bom guisado\n         su / GE / re_um / BOM / gui / SA / (do)\n  rima B (versos [2, 4, 6]): consoante  ['ado', 'ado', 'ado']\n  --> DESCARTE (ver acima)\n\n=== estrofe 3 ===\n  XX v1 [6] Preço ficou quebrado\n         PRE / ço / fi / COU / que / BRA / (do)\n  ok v2 [7] O desconto despencou\n         o / des / CON / to / des / pen / COU\n  ok v3 [7] Noventa por cento, sim\n         no / VEN / ta / por / CEN / to / SIM\n  ok v4 [7] O valor se desmanchou\n         o / va / LOR / se / des / man / CHOU\n  ok v5 [7] Macaxeira no balcão\n         ma / ca / XEI / ra / no / bal / CÃO\n  ok v6 [7] Só uma tarde durou\n         SÓ / U / ma / TAR / de / du / ROU\n       ? elisao opcional em 'só u' (a anterior e tonica)\n  rima B (versos [2, 4, 6]): consoante  ['ou', 'ou', 'ou']\n  --> DESCARTE (ver acima)\n\n=== estrofe 4 ===\n  ok v1 [7] Até o troco já suou\n         a / TÉ / o / TRO / co / JÁ / SUOU\n       ? suou: 'uo' pode virar hiato; elisao opcional em 'té o' (a anterior e tonica)\n  ok v2 [7] Foi pechincha de patrão\n         FOI / pe / CHIN / cha / de / pa / TRÃO\n  XX v3 [6] Quem faz conta em voz alta\n         QUEM / FAZ / CON / ta_em / VOZ / AL / (ta)\n  ok v4 [7] Derruba minha razão\n         der / RU / ba / MI / nha / ra / ZÃO\n  XX v5 [6] Bolso dá cambalhota\n         BOL / so / dá / cam / ba / LHO / (ta)\n  ok v6 [7] Macaxeira deu lição\n         ma / ca / XEI / ra / DEU / li / ÇÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\n  deixa (1º verso rima com o último da estrofe anterior):\n  ok estrofe 2: consoante ['eira', 'eira']\n  ok estrofe 3: consoante ['ado', 'ado']\n  XX estrofe 4: SEM RIMA ['ou', 'uou']"
+    },
+    {
+      "rodada": 1,
+      "estrofes": [
+        [
+          "Na praça, o sol já nasceu",
+          "Robô já vende na feira",
+          "Fruta aguarda no cesto",
+          "A banca virou besteira",
+          "Recife ouve o pregão",
+          "O balcão virou zoeira"
+        ],
+        [
+          "Chegou com fala faceira",
+          "Freguês já chega animado",
+          "Pede receita bem feita",
+          "Robô já dá seu recado",
+          "Máquina dá seu palpite",
+          "Logo sugere um guisado"
+        ],
+        [
+          "O preço foi remarcado",
+          "O desconto despencou",
+          "Noventa por cento, sim",
+          "O valor se desmanchou",
+          "Macaxeira no balcão",
+          "Só uma tarde durou"
+        ],
+        [
+          "Meu troco enfim rolou",
+          "Foi pechincha de patrão",
+          "Quem faz conta em voz bem alta",
+          "Derruba minha razão",
+          "O bolso dá cambalhota",
+          "Macaxeira deu lição"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  ok v1 [7] Na praça, o sol já nasceu\n         na / PRA / ça_o / SOL / JÁ / nas / CEU\n  ok v2 [7] Robô já vende na feira\n         ro / BÔ / JÁ / VEN / de / na / FEI / (ra)\n  XX v3 [6] Fruta aguarda no cesto\n         FRU / ta_a / GUAR / da / no / CES / (to)\n  ok v4 [7] A banca virou besteira\n         a / BAN / ca / vi / ROU / bes / TEI / (ra)\n  XX v5 [6] Recife ouve o pregão\n         re / CI / FE_OU / ve_o / pre / GÃO\n  ok v6 [7] O balcão virou zoeira\n         o / bal / CÃO / vi / ROU / zo / EI / (ra)\n  rima B (versos [2, 4, 6]): consoante  ['eira', 'eira', 'eira']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Chegou com fala faceira\n         che / GOU / com / FA / la / fa / CEI / (ra)\n  ok v2 [7] Freguês já chega animado\n         fre / GUÊS / JÁ / CHE / ga_a / ni / MA / (do)\n  ok v3 [7] Pede receita bem feita\n         PE / de / re / CEI / ta / BEM / FEI / (ta)\n  ok v4 [7] Robô já dá seu recado\n         ro / BÔ / JÁ / dá / seu / re / CA / (do)\n  ok v5 [7] Máquina dá seu palpite\n         MÁ / qui / na / dá / seu / pal / PI / (te)\n  ok v6 [7] Logo sugere um guisado\n         LO / go / su / GE / re_um / gui / SA / (do)\n  rima B (versos [2, 4, 6]): consoante  ['ado', 'ado', 'ado']\n  --> ENTRA na colecao\n\n=== estrofe 3 ===\n  ok v1 [7] O preço foi remarcado\n         o / PRE / ço / FOI / re / mar / CA / (do)\n  ok v2 [7] O desconto despencou\n         o / des / CON / to / des / pen / COU\n  ok v3 [7] Noventa por cento, sim\n         no / VEN / ta / por / CEN / to / SIM\n  ok v4 [7] O valor se desmanchou\n         o / va / LOR / se / des / man / CHOU\n  ok v5 [7] Macaxeira no balcão\n         ma / ca / XEI / ra / no / bal / CÃO\n  ok v6 [7] Só uma tarde durou\n         SÓ / U / ma / TAR / de / du / ROU\n       ? elisao opcional em 'só u' (a anterior e tonica)\n  rima B (versos [2, 4, 6]): consoante  ['ou', 'ou', 'ou']\n  --> ENTRA na colecao\n\n=== estrofe 4 ===\n  XX v1 [6] Meu troco enfim rolou\n         meu / TRO / co_en / FIM / ro / LOU\n  ok v2 [7] Foi pechincha de patrão\n         FOI / pe / CHIN / cha / de / pa / TRÃO\n  ok v3 [7] Quem faz conta em voz bem alta\n         QUEM / FAZ / CON / ta_em / VOZ / BEM / AL / (ta)\n  ok v4 [7] Derruba minha razão\n         der / RU / ba / MI / nha / ra / ZÃO\n  ok v5 [7] O bolso dá cambalhota\n         o / BOL / so / dá / cam / ba / LHO / (ta)\n  ok v6 [7] Macaxeira deu lição\n         ma / ca / XEI / ra / DEU / li / ÇÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\n  deixa (1º verso rima com o último da estrofe anterior):\n  ok estrofe 2: consoante ['eira', 'eira']\n  ok estrofe 3: consoante ['ado', 'ado']\n  ok estrofe 4: consoante ['ou', 'ou']"
+    },
+    {
+      "rodada": 2,
+      "estrofes": [
+        [
+          "Na praça, o sol já nasceu",
+          "Robô já vende na feira",
+          "A fruta aguarda no cesto",
+          "A banca virou besteira",
+          "Recife canta o pregão",
+          "O balcão virou zoeira"
+        ],
+        [
+          "Chegou com fala faceira",
+          "Freguês já chega animado",
+          "Pede receita bem feita",
+          "Robô já dá seu recado",
+          "Máquina dá seu palpite",
+          "Logo sugere um guisado"
+        ],
+        [
+          "O preço foi remarcado",
+          "O desconto despencou",
+          "Noventa por cento, sim",
+          "O valor se desmanchou",
+          "Macaxeira no balcão",
+          "Só uma tarde durou"
+        ],
+        [
+          "Meu troco enfim já voltou",
+          "Foi pechincha de patrão",
+          "Quem faz conta em voz bem alta",
+          "Derruba minha razão",
+          "O bolso dá cambalhota",
+          "Macaxeira deu lição"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  ok v1 [7] Na praça, o sol já nasceu\n         na / PRA / ça_o / SOL / JÁ / nas / CEU\n  ok v2 [7] Robô já vende na feira\n         ro / BÔ / JÁ / VEN / de / na / FEI / (ra)\n  ok v3 [7] A fruta aguarda no cesto\n         a / FRU / ta_a / GUAR / da / no / CES / (to)\n  ok v4 [7] A banca virou besteira\n         a / BAN / ca / vi / ROU / bes / TEI / (ra)\n  ok v5 [7] Recife canta o pregão\n         re / CI / fe / CAN / ta_o / pre / GÃO\n  ok v6 [7] O balcão virou zoeira\n         o / bal / CÃO / vi / ROU / zo / EI / (ra)\n  rima B (versos [2, 4, 6]): consoante  ['eira', 'eira', 'eira']\n  --> ENTRA na colecao\n\n=== estrofe 2 ===\n  ok v1 [7] Chegou com fala faceira\n         che / GOU / com / FA / la / fa / CEI / (ra)\n  ok v2 [7] Freguês já chega animado\n         fre / GUÊS / JÁ / CHE / ga_a / ni / MA / (do)\n  ok v3 [7] Pede receita bem feita\n         PE / de / re / CEI / ta / BEM / FEI / (ta)\n  ok v4 [7] Robô já dá seu recado\n         ro / BÔ / JÁ / dá / seu / re / CA / (do)\n  ok v5 [7] Máquina dá seu palpite\n         MÁ / qui / na / dá / seu / pal / PI / (te)\n  ok v6 [7] Logo sugere um guisado\n         LO / go / su / GE / re_um / gui / SA / (do)\n  rima B (versos [2, 4, 6]): consoante  ['ado', 'ado', 'ado']\n  --> ENTRA na colecao\n\n=== estrofe 3 ===\n  ok v1 [7] O preço foi remarcado\n         o / PRE / ço / FOI / re / mar / CA / (do)\n  ok v2 [7] O desconto despencou\n         o / des / CON / to / des / pen / COU\n  ok v3 [7] Noventa por cento, sim\n         no / VEN / ta / por / CEN / to / SIM\n  ok v4 [7] O valor se desmanchou\n         o / va / LOR / se / des / man / CHOU\n  ok v5 [7] Macaxeira no balcão\n         ma / ca / XEI / ra / no / bal / CÃO\n  ok v6 [7] Só uma tarde durou\n         SÓ / U / ma / TAR / de / du / ROU\n       ? elisao opcional em 'só u' (a anterior e tonica)\n  rima B (versos [2, 4, 6]): consoante  ['ou', 'ou', 'ou']\n  --> ENTRA na colecao\n\n=== estrofe 4 ===\n  ok v1 [7] Meu troco enfim já voltou\n         meu / TRO / co_en / FIM / JÁ / vol / TOU\n  ok v2 [7] Foi pechincha de patrão\n         FOI / pe / CHIN / cha / de / pa / TRÃO\n  ok v3 [7] Quem faz conta em voz bem alta\n         QUEM / FAZ / CON / ta_em / VOZ / BEM / AL / (ta)\n  ok v4 [7] Derruba minha razão\n         der / RU / ba / MI / nha / ra / ZÃO\n  ok v5 [7] O bolso dá cambalhota\n         o / BOL / so / dá / cam / ba / LHO / (ta)\n  ok v6 [7] Macaxeira deu lição\n         ma / ca / XEI / ra / DEU / li / ÇÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> ENTRA na colecao\n\n  deixa (1º verso rima com o último da estrofe anterior):\n  ok estrofe 2: consoante ['eira', 'eira']\n  ok estrofe 3: consoante ['ado', 'ado']\n  ok estrofe 4: consoante ['ou', 'ou']"
+    }
+  ],
+  "noticia": "Startup de Recife coloca robô com IA para vender frutas numa feira livre. O robô conversa com os clientes, sugere receitas e faz troco, mas se confundiu com o preço da macaxeira e acabou dando desconto de 90% por uma tarde inteira.",
+  "origem": "texto colado",
+  "titulo": "",
+  "fonte": "",
+  "fato": {
+    "fato": "Um robô com IA vendeu frutas numa feira do Recife e deu desconto de 90% na macaxeira por uma tarde.",
+    "titulo": "Robô dá desconto de 90% na macaxeira",
+    "imagens_concretas": [
+      "Robô vendendo frutas numa feira livre do Recife",
+      "Clientes conversando com o robô",
+      "Robô sugerindo receitas aos clientes",
+      "Macaxeiras com desconto na banca"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como um causo contado na feira, com humor e exagero",
+      "plano": "Conto a novidade como causo de feira, fazendo do desconto uma pechincha tão espantosa que até o troco sua.",
+      "finais": [
+        [
+          "novidade",
+          "feira",
+          "fila",
+          "besteira",
+          "pregão",
+          "zoeira"
+        ],
+        [
+          "certeira",
+          "animado",
+          "receita",
+          "recado",
+          "palpite",
+          "guisado"
+        ],
+        [
+          "quebrado",
+          "despencou",
+          "sim",
+          "desmanchou",
+          "balcão",
+          "durou"
+        ],
+        [
+          "suou",
+          "patrão",
+          "alta",
+          "razão",
+          "cambalhota",
+          "lição"
+        ]
+      ],
+      "estrofes": [
+        [
+          "Vou contar novidade",
+          "Robô vende na feira",
+          "Fruta se põe na fila",
+          "Banca, pura besteira",
+          "No Recife, há pregão",
+          "Feira virou zoeira"
+        ],
+        [
+          "Veio com voz certeira",
+          "Freguês chega animado",
+          "Pergunta por receita",
+          "Robô dá seu recado",
+          "A voz dá seu palpite",
+          "Sugere um bom guisado"
+        ],
+        [
+          "Preço ficou quebrado",
+          "O desconto despencou",
+          "Noventa por cento, sim",
+          "O valor se desmanchou",
+          "Macaxeira no balcão",
+          "Só uma tarde durou"
+        ],
+        [
+          "Até o troco já suou",
+          "Foi pechincha de patrão",
+          "Quem faz conta em voz alta",
+          "Derruba minha razão",
+          "Bolso dá cambalhota",
+          "Macaxeira deu lição"
+        ]
+      ],
+      "entra": false,
+      "forma_ok": true,
+      "reprovados": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ]
+    }
+  ],
+  "escolhida": {
+    "indice": 0,
+    "justificativa": "única candidata com a forma pedida"
+  },
+  "erro_imagem": "module 'app.prompts' has no attribute 'prompt_xilogravura'",
+  "fim": "2026-09-28T12:56:17",
+  "entra": true,
+  "motivo": null,
+  "estrofes_finais": [
+    [
+      "Na praça, o sol já nasceu",
+      "Robô já vende na feira",
+      "A fruta aguarda no cesto",
+      "A banca virou besteira",
+      "Recife canta o pregão",
+      "O balcão virou zoeira"
+    ],
+    [
+      "Chegou com fala faceira",
+      "Freguês já chega animado",
+      "Pede receita bem feita",
+      "Robô já dá seu recado",
+      "Máquina dá seu palpite",
+      "Logo sugere um guisado"
+    ],
+    [
+      "O preço foi remarcado",
+      "O desconto despencou",
+      "Noventa por cento, sim",
+      "O valor se desmanchou",
+      "Macaxeira no balcão",
+      "Só uma tarde durou"
+    ],
+    [
+      "Meu troco enfim já voltou",
+      "Foi pechincha de patrão",
+      "Quem faz conta em voz bem alta",
+      "Derruba minha razão",
+      "O bolso dá cambalhota",
+      "Macaxeira deu lição"
+    ]
+  ],
+  "duvidas_para_o_grupo": [
+    {
+      "estrofe": 3,
+      "n": 6,
+      "duvida": "elisao opcional em 'só u' (a anterior e tonica)"
+    }
+  ],
+  "rodadas_de_correcao": 2,
+  "arquivos": {
+    "texto": "folhetos/20260928-125617-robo-da-desconto-de-90-na-macaxeira.txt"
+  },
+  "custo_estimado_usd": {
+    "texto": 0.00811,
+    "imagem": 0,
+    "total": 0.00811
+  }
+}
