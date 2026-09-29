@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Do 7 ao 6: relatório</title>
+<!-- Gerar o PDF: uv run --no-project --with playwright python relatorio/gerar_pdf.py -->
+<style>
+  /* aparência de documento do Google Docs: página branca, Arial 11, margens de 2,54 cm */
+  body { margin: 0; background: #fff; color: #000; font: 11pt/1.4 Arial, "Liberation Sans", Helvetica, sans-serif; }
+  .doc { max-width: 159.2mm; margin: 0 auto; }
+  h1 { font-size: 18pt; line-height: 1.25; text-align: center; margin: 0 0 6pt; font-weight: bold; }
+  .autoria { text-align: center; font-size: 10.5pt; margin: 0 0 18pt; color: #222; }
+  h2 { font-size: 13pt; margin: 16pt 0 6pt; font-weight: bold; break-after: avoid; }
+  p { margin: 0 0 7pt; text-align: justify; hyphens: auto; }
+  .resumo { font-size: 10pt; line-height: 1.4; margin: 0 0 6pt; }
+  .resumo b { font-weight: bold; }
+  .chave { font-size: 10pt; margin-bottom: 14pt; }
+  blockquote { margin: 8pt 0 10pt 4cm; font-size: 10pt; line-height: 1.3; text-align: justify; }
+  ol.etapas { margin: 0 0 8pt; padding-left: 1.4em; } ol.etapas li { margin-bottom: 3pt; text-align: justify; }
+  figure { margin: 10pt 0 12pt; break-inside: avoid; }
+  figure .legenda { font-size: 10pt; margin: 0 0 4pt; text-align: left; }
+  figure img { display: block; width: 100%; border: 0.5pt solid #999; }
+  figure .fonte { font-size: 9pt; margin: 3pt 0 0; text-align: left; }
+  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; break-inside: avoid; }
+  .lado.estreito { grid-template-columns: 42mm 42mm; justify-content: center; gap: 16mm; }
+  table { border-collapse: collapse; margin: 5pt auto 8pt; font-size: 9.5pt; line-height: 1.3; break-inside: avoid; }
+  caption { caption-side: top; font-size: 10pt; text-align: left; margin-bottom: 4pt; }
+  th, td { border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; padding: 2pt 10pt; text-align: center; }
+  th { font-weight: bold; }
+  table.descartes td { text-align: left; } table.descartes td:first-child { width: 42%; }
+  a { color: #1155cc; }
+  .refs p { text-align: left; padding-left: 1.2em; text-indent: -1.2em; margin-bottom: 5pt; font-size: 10.5pt; }
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Do 7 ao 6: geração e verificação automática de folhetos de cordel a partir de notícias de inteligência artificial</h1>
+<p class="autoria"><b>Grupo 6:</b> Samuel Celso (scan), Gabriel Mayerhofer (gvm), Eliseu Cordeiro (ecb2),
+  Pedro Baptista (phab), Sara Lustosa (sccl), Ana Lívia Pessoa (alcp)<br>
+  Projeto Autoral · Criatividade Computacional (IF866) · Centro de Informática, UFPE · 2026.2</p>
+
+<p class="resumo"><b>Resumo.</b> Este relatório descreve um sistema que reconta notícias semanais sobre inteligência
+  artificial na forma de folhetos de cordel. A forma poética (sextilhas de sete sílabas) e a estética visual
+  (xilogravura) são mantidas constantes, enquanto a notícia varia. Modelos de linguagem redigem os versos, e um
+  verificador de escansão, escrito pelo grupo, decide o que entra na coleção: versos reprovados são reescritos em
+  rodadas sucessivas de correção, e estrofes que permanecem fora da métrica são descartadas. Das 16 gerações feitas
+  a partir de notícias do CriaComp News, 13 foram aprovadas, cobrindo 12 notícias distintas, com média de 3,4 rodadas
+  de correção por folheto.</p>
+<p class="chave"><b>Palavras-chave:</b> literatura de cordel; geração de texto; métrica poética; criatividade computacional.</p>
+
+<h2>Sinopse</h2>
+<p>Notícias de IA da semana, tiradas do CriaComp News, recontadas como folhetos de cordel. Cada folheto é uma notícia
+  em sextilhas de sete sílabas, com rima nos versos pares e uma xilogravura na capa: a forma e a estética ficam
+  constantes, só a notícia muda. Os versos são escritos por modelos de linguagem e conferidos por um verificador que
+  conta as sílabas poéticas; o verso reprovado volta para correção, e a estrofe que continua fora da métrica vai para
+  o descarte, com o motivo registrado. Um Tamagotchi com IA, um amador que resolve um desafio de matemática, a Coreia
+  oferecendo IA grátis nos serviços públicos: a semana da inteligência artificial contada no ritmo da feira.</p>
+
+<h2>1 Introdução</h2>
+<p>A produção de texto por sistemas de inteligência artificial tende ao volume e à rapidez. O cordel, por outro lado,
+  foi historicamente um veículo de notícias no Nordeste brasileiro, com uma forma fixa que obriga a leitura lenta.
+  O projeto parte desse contraste e propõe traduzir as notícias de IA da semana para essa forma tradicional,
+  desacelerando a leitura por meio de uma forma artística popular.</p>
+
+<h2>2 Eixo</h2>
+<p>O eixo declarado da coleção é o seguinte:</p>
+<blockquote>Gerar folhetos de cordel a partir das notícias de IA da semana do CriaComp News, mantendo constantes a
+  forma (sextilhas de sete sílabas) e a estética de xilogravura, enquanto varia a notícia. Estrofes fora da métrica
+  são descartadas.</blockquote>
+<p>O que se repete em todos os folhetos é a forma: sextilhas em redondilha maior (seis versos de sete sílabas
+  poéticas, com rima nos versos pares) e a capa em xilogravura preto e branco. O que varia é a notícia. A restrição é
+  formal e verificável: qualquer pessoa pode conferi-la com o mesmo script usado pelo grupo. Fica de fora da coleção
+  todo folheto cuja estrofe permaneça fora da métrica ou da rima depois das rodadas de correção.</p>
+
+<h2>3 Método</h2>
+<p>Foi desenvolvido um site que conduz cada notícia até o folheto final. O sistema utiliza a biblioteca AI SDK para
+  Python com modelos da OpenAI: o gpt-6-luna para o texto, o gpt-5.5 no primeiro folheto e nos testes comparativos,
+  e o gpt-image-2 e o gpt-image-1-mini para as xilogravuras. O processo segue seis etapas:</p>
+<ol class="etapas">
+  <li>o grupo seleciona uma notícia da lista do CriaComp News e informa o link;</li>
+  <li>um modelo de linguagem resume o fato em uma frase;</li>
+  <li>o modelo redige a sextilha, planejando as palavras finais de cada verso;</li>
+  <li>o verificador (<i>escandir.py</i>) conta as sílabas poéticas e confere o esquema de rima;</li>
+  <li>somente os versos reprovados retornam ao modelo para correção, em até dez rodadas;</li>
+  <li>o folheto aprovado entra na coleção; o reprovado vai para o descarte, com o motivo registrado.</li>
+</ol>
+<p>Em paralelo, outro modelo gera a xilogravura a partir do mesmo fato, por meio de uma chamada de ferramenta: o modelo
+  de texto é obrigado a acionar a ferramenta de geração de imagem, e a imagem retorna junto com a resposta. Todas as
+  chamadas são registradas integralmente (prompt, saída e parâmetros) no caderno de bordo.</p>
+
+<h2>4 Resultados</h2>
+<p>A Tabela 1 resume as gerações feitas a partir de notícias do CriaComp News até 29 de setembro de 2026. Uma das
+  notícias foi gerada duas vezes; na coleção fica a versão mais recente, o que resulta em 12 folhetos. Os folhetos
+  mais recentes usam quatro estrofes.</p>
+<table>
+  <caption>Tabela 1 – Resultado das gerações a partir do CriaComp News</caption>
+  <tr><th>Gerações</th><th>Aprovadas</th><th>Descartadas</th><th>Notícias na coleção</th><th>Rodadas de correção (média)</th></tr>
+  <tr><td>16</td><td>13</td><td>3</td><td>12</td><td>3,4</td></tr>
+</table>
+<p>Para ilustrar o processo de correção, foi gerado um exemplo com duas estrofes a partir da notícia sobre um amador
+  que resolveu um problema matemático com o auxílio de IA. Na primeira versão, 10 dos 12 versos foram reprovados por
+  falha de métrica, rima ou regra do grupo (Figura 1). A cada rodada, apenas os versos reprovados foram reescritos
+  (Figura 2), e o número de versos reprovados caiu de 10 para 9, 5, 4, 2, 1 e, por fim, 0, após seis rodadas. Este
+  exemplo foi gerado para o relatório e não integra a coleção.</p>
+
+<div class="lado">
+  <figure>
+    <p class="legenda">Figura 1 – Escansão inicial exibida pelo sistema</p>
+    <img src="imagens/2-escansao.png" alt="">
+    <p class="fonte">Fonte: elaborada pelos autores (2026).</p>
+  </figure>
+  <figure>
+    <p class="legenda">Figura 2 – Primeira rodada de correção</p>
+    <img src="imagens/4-correcao.png" alt="">
+    <p class="fonte">Fonte: elaborada pelos autores (2026).</p>
+  </figure>
+</div>
+
+<p>Durante a correção, o folheto é exibido com os versos pendentes esmaecidos; ao final, é apresentado completo, com a
+  xilogravura (Figuras 3 e 4).</p>
+
+<div class="lado estreito">
+  <figure>
+    <p class="legenda">Figura 3 – Folheto durante a correção</p>
+    <img src="imagens/1-cartaz-corrigindo.png" alt="">
+    <p class="fonte">Fonte: elaborada pelos autores (2026).</p>
+  </figure>
+  <figure>
+    <p class="legenda">Figura 4 – Folheto aprovado</p>
+    <img src="imagens/3-folheto-pronto.png" alt="">
+    <p class="fonte">Fonte: elaborada pelos autores (2026).</p>
+  </figure>
+</div>
+
+<h2>5 Descarte</h2>
+<p>A coleção passou por dois critérios de descarte. O primeiro é automático: três gerações foram descartadas pelo
+  verificador, por métrica ou rima que resistiram às rodadas de correção (Tabela 2). O caso mais próximo de entrar foi o
+  primeiro da tabela: um único verso com seis sílabas, após cinco rodadas, bastou para o descarte, o que evidencia que o
+  critério é aplicado sem exceção.</p>
+<table class="descartes">
+  <caption>Tabela 2 – Folhetos descartados</caption>
+  <tr><th>Folheto</th><th>Motivo registrado pelo verificador</th></tr>
+  <tr><td>IA detecta sinais de doença cardíaca em segundos</td><td>1 verso com 6 sílabas (estrofe 3), após 5 rodadas</td></tr>
+  <tr><td>IA encontra sinais de doença cardíaca em segundos</td><td>6 versos fora da métrica (estrofes 3 a 5), após 3 rodadas</td></tr>
+  <tr><td>Coreia do Sul prepara IA grátis para todos</td><td>rima quebrada (estrofe 4) e ligação entre estrofes sem rima, após 3 rodadas</td></tr>
+</table>
+<p>O segundo critério é de curadoria e decorre do eixo: a coleção só admite notícias da lista do CriaComp News. Cinco
+  folhetos gerados durante os testes a partir de notícias de outras fontes foram retirados, ainda que quatro deles
+  tivessem passado no verificador (Tabela 3). O site passou a aplicar essa regra automaticamente, comparando o link de
+  cada notícia com a lista da disciplina; os folhetos retirados permanecem no histórico interno.</p>
+<table class="descartes">
+  <caption>Tabela 3 – Folhetos retirados por não usarem notícia do CriaComp News</caption>
+  <tr><th>Folheto</th><th>Situação no verificador</th></tr>
+  <tr><td>Meta lança Tamagotchi com inteligência artificial</td><td>aprovado (fonte: g1, fora da lista)</td></tr>
+  <tr><td>Turismo rural cresce 10% em Pernambuco</td><td>uma versão aprovada e outra descartada</td></tr>
+  <tr><td>Doze apostas de Pernambuco acertam a quadra</td><td>aprovado (notícia sem relação com IA)</td></tr>
+  <tr><td>Ônibus de Jundiaí serão gratuitos domingo</td><td>aprovado (notícia sem relação com IA)</td></tr>
+</table>
+
+<h2>6 Considerações finais</h2>
+<p>Os resultados indicam que os modelos de linguagem testados não respeitam a métrica de forma consistente na primeira
+  tentativa; a restrição formal só é garantida pela verificação automática combinada à correção iterativa. Observou-se
+  também que a aprovação métrica não assegura qualidade poética: há versos que cumprem as sete sílabas sem sentido
+  claro. Nos folhetos mais recentes, o modelo também tendeu a repetir os mesmos termos do dicionário nordestino
+  (a expressão "caixa dos peito" aparece em quatro dos seis últimos folhetos), o que mantém a curadoria do grupo
+  como etapa necessária. Quanto à imagem, a estética de xilogravura foi
+  reproduzida de forma consistente, embora o modelo ainda insira, ocasionalmente, números e letras não solicitados.</p>
+
+<h2>Referências</h2>
+<div class="refs">
+  <p>GRUPO 6. <b>Do 7 ao 6: a semana em sextilha</b> (coleção). 2026. Disponível em:
+    <a href="https://cordel-generator-production.up.railway.app">https://cordel-generator-production.up.railway.app</a>.</p>
+  <p>GRUPO 6. <b>Do7ao6</b> (apresentação). 2026. Disponível em:
+    <a href="https://cordel-generator-production.up.railway.app/static/Do7ao6.pdf">https://cordel-generator-production.up.railway.app/static/Do7ao6.pdf</a>.</p>
+  <p>GRUPO 6. <b>cordel-generator</b>: código-fonte e caderno de bordo. 2026. Disponível em:
+    <a href="https://github.com/PeterBaptista/cordel-generator">https://github.com/PeterBaptista/cordel-generator</a>.</p>
+</div>
+
+</div>
+<script>document.body.dataset.pronto = "1";</script>
+</body>
+</html>

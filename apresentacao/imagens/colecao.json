@@ -1,19 +1,5 @@
 [
  {
-  "id": "20260928-145538-meta-lanca-tamagotchi-com-inteligencia-artificia",
-  "manchete": "Meta lança Tamagotchi com inteligência artificial",
-  "estrofe": [
-   "Meu neto, guarde este mote",
-   "Na Meta se fez janela",
-   "Muse Charm cabe no bolso",
-   "Figura fala na tela",
-   "Mancebo cutuca as cores",
-   "Use encanto com cautela"
-  ],
-  "n": 1,
-  "forma": "aberta"
- },
- {
   "id": "20260928-154345-amador-resolve-desafio-matematico-com-ia",
   "manchete": "Amador resolve desafio matemático com IA",
   "estrofe": [
@@ -25,20 +11,6 @@
    "Fez do cálculo um trovão"
   ],
   "n": 1,
-  "forma": "aberta"
- },
- {
-  "id": "20260929-004835-gates-alerta-para-riscos-da-inteligencia-artific",
-  "manchete": "Gates alerta para riscos da inteligência artificial",
-  "estrofe": [
-   "Bill deu recado na feira",
-   "Pouca vaga seca o chão",
-   "IA ronda o milharal",
-   "Teclado, enxada na mão",
-   "Moço já maneja o mouse",
-   "Sem emprego, falta pão"
-  ],
-  "n": 2,
   "forma": "aberta"
  },
  {
@@ -56,17 +28,45 @@
   "forma": "corrida"
  },
  {
-  "id": "20260929-030804-modelo-aprende-a-pintar-aquarelas-com-codigo",
-  "manchete": "Modelo aprende a pintar aquarelas com código",
+  "id": "20260929-122010-lego-mantem-criacao-nas-maos-humanas",
+  "manchete": "Lego mantém criação nas mãos humanas",
   "estrofe": [
-   "Cabra da peste, pintor",
-   "Matuto fez cor cantar",
-   "A brenha traz claridade",
-   "O traço vai se firmar",
-   "O magote ouviu na feira",
-   "A tinta vem clarear"
+   "Matuto escuta com fé",
+   "Rádio deu informação",
+   "Vou no caminhão de feira",
+   "Ouvi tal explicação",
+   "Meu quengo quis reparar",
+   "Levei comigo a lição"
   ],
-  "n": 3,
+  "n": 4,
+  "forma": "aberta"
+ },
+ {
+  "id": "20260929-121912-will-i-am-ve-ia-resgatando-a-musica",
+  "manchete": "Will.i.am vê IA resgatando a música",
+  "estrofe": [
+   "Na feira, matuto, eu vi",
+   "Rádio tocou no salão",
+   "Lá no terreiro, eu parei",
+   "Guardei bem a gravação",
+   "Na caixa dos peito, um som",
+   "Despertou grande paixão"
+  ],
+  "n": 4,
+  "forma": "aberta"
+ },
+ {
+  "id": "20260929-122220-bispos-dos-eua-criam-forca-tarefa-sobre-ia",
+  "manchete": "Bispos dos EUA criam força-tarefa sobre IA",
+  "estrofe": [
+   "Com alpercata cheguei",
+   "Fui ver a grande sessão",
+   "Vi a sede em Washington,",
+   "Meu quengo viu o salão;",
+   "Eu fui dar fé lá de perto",
+   "Voltei com boa impressão"
+  ],
+  "n": 4,
   "forma": "aberta"
  }
 ]

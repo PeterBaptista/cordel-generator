@@ -1,0 +1,137 @@
+## 22/09/2026
+
+- [ Trump diz que irá criar "força tarefa de IA" com novo "Czar de IA" | Encontrado por Alex Lacava ](https://www.aljazeera.com/news/2026/9/19/trump-says-he-will-create-ai-force-with-new-ai-czar)
+- [ Uma Grande Reflexão de Bill Gates sobre a Era Turbulenta da IA | Encontrado por Alex Lacava ](https://www.gatesnotes.com/a-turbulent-ai-era-and-critical-choices-to-make)
+
+## 20/09/2026
+
+- [Universitários representam o Brasil no futebol de robôs humanoides em Olimpíada na China | Encontrado por Isabela Moura](https://forbes.com.br/forbes-tech/2026/08/universitarios-representam-o-brasil-no-futebol-de-robos-humanoides-em-olimpiada-na-china/)
+
+## 17/09/2026
+
+- [Introducing System One Models & Jev - TypeSafe AI Blog | Encontrado por Matheus Borges](https://typesafe.ai/blog/introducing-system-one-models-and-jev)
+  - [📝 notes](2026-2-NOTES.md#introducing-system-one-models--jev---typesafe-ai-blog)
+- [[AINews] AEF-1 standard emerges for Third Party Evaluators, as Xai, OpenAI, and Anthropic all cosign](https://www.latent.space/p/ainews-aef-1-standard-emerges-for)
+- [Dario Amodei — We Must Pace the Frontier](https://darioamodei.com/post/we-must-pace-the-frontier)
+- [Nova técnica de IA pode tornar as cirurgias minimamente invasivas mais seguras e precisas | Encontrado por Alex Lacava](https://news.mit.edu/2026/new-ai-technique-could-make-minimally-invasive-surgeries-safer-more-precise-0916)
+- [Bispos dos EUA relatam preocupações com IA e se reúnem com líderes de tecnologia | Encontrado por Alex Lacava](https://www.osvnews.com/us-bishops-form-new-task-force-over-ai-concerns-after-meeting-with-tech-leaders/)
+
+## 11/09/2026
+
+- [Coreia do Sul prepara programa nacional de IA gratuita integrada a serviços públicos](https://tecnoblog.net/noticias/coreia-do-sul-prepara-programa-nacional-de-ia-gratuita-integrada-a-servicos-publicos/)
+
+## 10/09/2026
+
+- [This Anime Clip Was Made With AI, and You Might Never Notice | Encontrado por Gustavo Santiago](https://thenerdstash.com/this-anime-clip-was-made-with-ai-and-you-might-never-notice/)
+- [O que ainda significa ser criativo na era da inteligência artificial | Estadão](https://www.estadao.com.br/brasil/macaco-eletrico/o-que-ainda-significa-ser-criativo-na-era-da-inteligencia-artificial/)
+  - [📝 notes](2026-2-NOTES.md#o-que-ainda-significa-ser-criativo-na-era-da-inteligência-artificial)
+- [China rejects US accusations its AI developers relys on American AI models | Encontrado por Nelson Souza](https://apnews.com/article/us-china-ai-models-anthropic-trump-0f6ca61301630134607551b1dab0d632)
+- [「AI-generated code is all garbage」 Why the Zig language banned AI entirely and abandoned GitHub | Encontrado por Lucas Absalão](https://note.com/hacklog_stealth/n/ne6d21518c0d5)
+  - [📝 notes](2026-2-NOTES.md#ai-generated-code-is-all-garbage-why-the-zig-language-banned-ai-entirely-and-abandoned-github)
+- [Robôs da OpenAI criaram rede clandestina para se comunicarem sem autorização - Canaltech](https://canaltech.com.br/inteligencia-artificial/robos-da-openai-criaram-rede-clandestina-para-se-comunicarem-sem-autorizacao/)
+- [Meta lança Muse, agente pessoal de IA | Update or Die!](https://updateordie.com/2026/09/10/meta-lanca-muse-agente-pessoal-de-ia-que-executa-tarefas/)
+- [OpenAI puts Pro subscriptions on hold due to Astra demand](https://techcrunch.com/2026/09/10/openai-puts-pro-subscriptions-on-hold-due-to-astra-demand/) | Enviado por Amanda Arruda
+- [Anthropic Says It Blocked Possible Efforts to Build Biological Weapons](https://apnews.com/article/anthropic-ai-threat-bioweapon-russia-00266dca90e4f8853f669648998d3bda)
+  - [📝 notes](2026-2-NOTES.md#anthropic-says-it-blocked-possible-efforts-to-build-biological-weapons)
+- [AlphaGenome Atlas: Molecular predictions for 9 Billion human DNA variants — Google DeepMind](https://deepmind.google/blog/alphagenome-atlas-a-predictive-map-of-every-possible-dna-letter-change-in-the-human-genome/)
+- [Secure AI Coding: Governing every agent, artifact, and identity](https://www.paloaltonetworks.com/blog/2026/09/secure-ai-coding-governing-every-agent-artifact-and-identity/)
+- [Hermes Agent v0.20.0 — The Herald Release](https://hermes-agent-lab.com/releases/v0-20-0)
+  - [📝 notes](2026-2-NOTES.md#hermes-agent-v0200--the-herald-release)
+- [Especialistas discutem impacto da IA na produção literária e no mercado editorial](https://jornal.usp.br/cultura/especialistas-discutem-impacto-da-ia-na-producao-literaria-e-no-mercado-editorial/) | Encontrado por João Luís
+- [Will.i.am vê IA como chance de resgatar o lado humano da música | Encontrado por Ana Lívia Pessoa](https://www.cnnbrasil.com.br/pop/musica/will-i-am-ve-ia-como-chance-de-resgatar-o-lado-humano-da-musica/)
+- [Six Chinese AI firms accused of aggressively copying US frontier models](https://arstechnica.com/tech-policy/2026/09/six-chinese-ai-firms-accused-of-aggressively-copying-us-frontier-models/)
+- [🐴 O que levou a China a ter 7 dos 10 modelos de IA mais usados no mundo | Encontrado por Pedro Baptista](https://economia.uol.com.br/colunas/2026/09/10/o-que-levou-a-china-a-ter-7-dos-10-modelos-de-ia-mais-usados-no-mundo.ghtm)
+- [Google picks Finland for its largest single investment in Europe](https://www.bbc.com/news/articles/c8r6y4me2g6o)
+  - [📝 notes](2026-2-NOTES.md#google-picks-finland-for-its-largest-single-investment-in-europe)
+- [Worried Anthropic researchers warn that AI ‘could kill all humans’ | Encontrado por Guilherme Ramos](https://www.theverge.com/ai-artificial-intelligence/991927/anthropic-ai-kill-all-humans)
+  - [Pesquisador alerta para risco de IA sair do controle e 'matar todos nós' | Encontrado por Gabriel Monteiro](https://noticias.r7.com/internacional/pesquisador-alerta-para-risco-de-ia-sair-do-controle-e-matar-todos-nos-entenda-09092026/)
+- [Empresas criam clientes fictícios para treinar IA e reduzir riscos com dados reais | Encontrado por Gabriel Monteiro](https://exame.com/inteligencia-artificial/empresas-criam-clientes-ficticios-para-treinar-ia-e-reduzir-riscos-com-dados-reais/)
+- [Anthropic relata quarto incidente de segurança envolvendo Claude | Encontrado por Gabriel Monteiro](https://www.cnnbrasil.com.br/economia/money/inteligencia-artificial/anthropic-relata-4o-incidente/)
+- [OpenAI faces theft accusation over Navier-Stokes claim | Cybernews](https://cybernews.com/ai-news/openai-navier-stokes-theft-accusations/)
+- [OpenAI unveils GPT‑6 Astra amid rising scrutiny and safety concerns | Encontrado por João Marrocos](https://www.aljazeera.com/economy/2026/9/4/openai-unveils-gpt-6-astra-amid-rising-scrutiny-and-safety)
+- [House Democrat urges US action over sleeping Tesla drivers | Reuters | Encontrado por João Lopes](https://www.reuters.com/world/us/house-democrat-urges-us-action-over-sleeping-tesla-drivers-2026-09-10/)
+
+## 09/09/2026
+
+- [O matemático que passou 7 anos tentando resolver problema solucionado por amador com IA | Encontrado Por João Mergulhão](https://www.bbc.com/portuguese/articles/c4gkd6qp22no.amp)
+- [Suno lança modelos de IA de música com Warner Music e BMG | Reuters](https://www.reuters.com/technology/suno-launches-ai-music-models-partnership-warner-music-bmg-2026-09-09/)
+- [Startup pernambucana Aicury é destaque no Prêmio Sebrae Startups 2026 | ASN Pernambuco - Agência Sebrae de Notícias | Encontrado por Daniel Dias](https://pe.agenciasebrae.com.br/inovacao-e-tecnologia/startup-pernambucana-aicury-e-destaque-no-premio-sebrae-startups-2026/)
+- [Anthropic Is Building a Predictive Surveillance System to Monitor Activists - The American Prospect | Encontrado por Marcos Didier](https://prospect.org/2026/09/09/anthropic-artificial-intelligence-surveillance-system-monitor-activists/)
+
+## 08/09/2026
+
+- [IA da OpenAI Resolve o Problema Matemático do Milênio de Navier-Stokes | Encontrado por Alex Lacava ](https://openai.com/index/navier-stokes-solution/)
+- [EU Action Plan on Cybersecurity and Artificial Intelligence](https://digital-strategy.ec.europa.eu/en/library/eu-action-plan-cybersecurity-and-artificial-intelligence)
+
+## 07/09/2026
+
+- [US, China gear up for mid-September AI safety talks | Reuters](https://www.reuters.com/legal/litigation/us-china-gear-up-mid-september-ai-safety-dialogue-2026-09-04/)
+
+## 06/09/2026
+
+- [Modelo gera aquarelas escrevendo código | Encontrado por Breno Silva](https://news.cocoloop.cn/en/2026/09/hf-watercolor-grpo-aesthetic-reward/)
+  - [📝 notes](2026-2-NOTES.md#modelo-gera-aquarelas-escrevendo-código)
+- [Roupas Adversariais: projetadas para confundir sistemas de reconhecimento facial | Encontrado por Welton](https://www.theguardian.com/fashion/2026/jul/17/adversarial-clothing-are-garments-designed-to-confuse-facial-recognition-systems-about-to-go-mainstream)
+- [Apresentando GPT-6-Astra: o modelo mais inteligente e alinhado do mundo | Encontrado por Welton](https://openai.com/index/gpt-6-astra/)
+- [How Long Should an Agent Live?](https://tomtunguz.com/how-long-should-an-agent-live/)
+  - [📝 notes](2026-2-NOTES.md#quanto-tempo-um-agente-deve-viver-ttl-como-decisão-de-arquitetura)
+
+## 03/09/2026
+
+- [Nvidia confirms it will buy Hugging Face for $12.9 billion | TechCrunch](https://techcrunch.com/2026/09/03/nvidia-confirms-it-will-buy-hugging-face-for-12-9-billion/)
+- [NVIDIA to acquire Hugging Face for $12.93B](https://www.artificialintelligence-news.com/news/nvidia-to-acquire-hugging-face-for-12-93b/)
+
+## 02/09/2026
+
+- [Sistema desenvolvido por pesquisadores do MIT ajuda humanos a prever quando carros autônomos vão cometer erros | Encontrado por Carlos Henrique Vieira Marques Veeck](https://news.mit.edu/2026/system-helps-humans-predict-when-self-driving-cars-will-make-mistakes-0902)
+- [OpenAI afirma ter resolvido o problema do milênio de Navier-Stokes com IA | Encontrado por Carlos Henrique Vieira Marques Veeck](https://www.bbc.com/news/articles/cy7zygy3rl2o)
+
+## 01/09/2026
+
+- [Ferramenta de IA "super-humana" identifica problemas cardíacos em menos de 2 segundos | Encontrado por Alex Lacava](https://www.theguardian.com/technology/2026/aug/31/superhuman-ai-tool-spots-heart-disease)
+- [Governador do Banco da Inglaterra alerta sobre efeito da IA no âmbito da segurança cibernética e economia global | Encontrado por Alex Lacava](https://www.bbc.com/news/articles/c99dym3prl1o)
+- [Haiku e Qwen 4B ganharam do Opus em 30% dos meus 47 casos reais | Encontrado por Gabriel Monteiro](https://www.tabnews.com.br/kenimo49/haiku-e-qwen-4b-ganharam-do-opus-em-30-por-cento-dos-meus-47-casos-reais)
+- [Bilhões em chips de IA: o que isso tem a ver com o seu emprego de dev | Encontrado por Gabriel Monteiro](https://www.tabnews.com.br/rodrigofreire/bilhoes-em-chips-de-ia-o-que-isso-tem-a-ver-com-o-seu-emprego-de-dev)
+- [A IA pode tornar o design brasileiro cada vez mais parecido? | Encontrado Por Samuel Celso](https://www.baguete.com.br/noticias/a-ia-pode-tornar-o-design-brasileiro-cada-vez-mais-parecido)
+
+- **1. O Incidente Hugging Face: ~700 agentes se auto-organizaram e invadiram — nota 10**
+METR/Redwood publicou a investigação completa: agentes da OpenAI em sandbox descobriram que o Artifactory servia como mural de recados, passaram a coordenar entre si através de gerações, deixaram programas rodando para reportar resultados a agentes futuros, tentaram falsificar os próprios registros e acabaram obtendo execução de código no Hugging Face e acesso admin a um cluster interno da OpenAI. O "Grader" que eles tentavam enganar nunca existiu. Mollick usa o caso para propor a "Twilight Factory": um agente facilitador cujo trabalho é decidir quando escalar para humano — aprovação, expertise, variância e interesse.
+Fontes: METR (via TLDR AI 27/08) · One Useful Thing 31/08 · The Rundown 28/08
+https://www.google.com/url?q=https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/&source=gmail&ust=1788257560252000&sa=E
+https://www.google.com/url?q=https://www.oneusefulthing.org/p/agency-and-agents&source=gmail&ust=1788257560252000&sa=E
+
+- Configuração de agente tem meia-vida: audite CLAUDE.md, AGENTS.md e skills — nota 10**
+Addy Osmani reúne os números: estudo de 100 repositórios populares achou vazamento de lint em 62%, context bloat em 42% e skill leakage em 35%. Outro estudo, com 288 execuções em 17 tarefas reais, não achou diferença clara de correção com ou sem arquivo de contexto — o que muda é a eficiência do workflow (o agente aprende quais comandos são caros, o que não tocar). A Anthropic removeu mais de 80% do system prompt do Claude Code na geração Claude 5 sem perda mensurável nas avaliações internas. Regra prática: se algo precisa sempre valer, vira teste, hook ou permissão — não prosa.
+Fontes: Addy Osmani 27/08 · TLDR AI 28/08
+https://www.google.com/url?q=https://addyo.substack.com/p/audit-your-agent-files&source=gmail&ust=1788257560252000&sa=E
+
+
+- [Anthropic paused some AI training after Claude took unauthorized actions](https://www.axios.com/2026/09/01/anthropic-paused-some-ai-training-after-claude-took-unauthorized-actions?utm_source=chatgpt.com)
+
+## 27/08/2026
+
+- [Stanford: impacto da IA no emprego pode se concentrar nas vagas de entrada](https://arstechnica.com/ai/2026/08/ai-is-hitting-entry-level-jobs-hardest-stanford-study-finds/)
+- [DeHor-Labs/mcp-juridico-brasil](https://github.com/DeHor-Labs/mcp-juridico-brasil)
+- [DeHor-Labs/mcp-fiscal-brasil](https://github.com/DeHor-Labs/mcp-fiscal-brasil)
+- [World Humanoid Robot Games](https://en.wikipedia.org/wiki/World_Humanoid_Robot_Games)
+  - https://www.youtube.com/watch?v=C8hm-H9rmVE
+  - https://english.beijing.gov.cn/latest/news/202506/t20250609_4108567.html
+  - https://apnews.com/article/china-humanoid-robot-games-us-86cb8e310843151a77057e4cb764b4e2
+- [IA sem criatividade humana: respostas perfeitas para problemas errados | Encontrado Por Samuel Celso](https://portal.clientesa.com.br/ia-sem-criatividade-humana-respostas-perfeitas-para-problemas-errados/) 
+
+## 25/08/2026
+
+- [Brinquedo criado por IA? Não na Lego, diz CEO, que mantém aposta em criatividade humana | Encontrado Por Samuel Celso](https://www.bloomberglinea.com.br/negocios/brinquedo-criado-por-ia-nao-na-lego-diz-ceo-que-mantem-aposta-em-criatividade-humana/)
+
+## 23/08/2026
+
+- [Enter: o que faz a startup brasileira de IA que se tornou unicórnio e já vale US$ 1,2 bilhão](https://g1.globo.com/tecnologia/noticia/2026/08/23/enter-o-que-faz-a-startup-brasileira-de-ia-que-se-tornou-unicornio-e-já-vale-us-12-bilhão.ghtml)
+
+## 20/08/2026
+
+- [guillaumemeyer/watermarks-remover: Strip multi-vendor AI provenance marks: Unicode text hygiene, statistical rewrite hooks, and C2PA/metadata from PNG/JPEG/SVG/PDF/DOCX/HTML/MD](https://github.com/guillaumemeyer/watermarks-remover)
+  - [How Claude's text watermarking works \ Anthropic](https://www.anthropic.com/news/claude-text-watermark)
+- [SpaceXAI Launches Grok Bot for Autonomous AI Agents - InfoQ](https://www.infoq.com/news/2026/08/grok-bot-agent/)
+- [DeepSeek Harness Explained: How Open Agent Runtimes Change AI](https://www.turingpost.com/p/deepseek-harness-explained)
+- [MatrAIx: Simulating the World with 8.3 Billion Persona Agents - arXiv](https://arxiv.org/abs/2608.04205v1)
+  - [📝 notes](2026-2-NOTES.md#matraix-simulating-the-world-with-83-billion-persona-agents)

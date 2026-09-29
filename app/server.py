@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import cadernos, custos, prompts
+from . import cadernos, criacomp, custos, prompts
 from .workflow import ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, PASTAS, RAIZ, Config, run_cordel
 
 app = FastAPI(title="Do 7 ao 6")
@@ -21,12 +21,12 @@ app = FastAPI(title="Do 7 ao 6")
 # com a coleção fica aberta: é o link da entrega. Sem CORDEL_SENHA, tudo aberto (uso local).
 SENHA = os.getenv("CORDEL_SENHA", "")
 PUBLICO = {"/", "/saude", "/api/colecao", "/static/home.html", "/static/folheto.css", "/static/folheto.js",
-           "/static/Do7ao6.pdf"}
+           "/static/Do7ao6.pdf", "/static/Relatorio_Do7ao6.pdf"}
 PUBLICO_PREFIXOS = ("/folhetos/", "/descarte/")  # os textos e imagens da coleção e do descarte
 
 # Quais folhetos aparecem na coleção da home, na ordem: ids dos cadernos separados por
 # vírgula (ex.: 20260928-154345-amador-resolve-desafio-matematico-com-ia). Vazio: todos
-# os que passaram no verificador.
+# os que passaram no verificador, dos mais recentes para os mais antigos.
 COLECAO = [i.strip() for i in os.getenv("CORDEL_COLECAO", "").split(",") if i.strip()]
 
 
@@ -93,14 +93,21 @@ def colecao():
             "motivo": log.get("motivo"), "rodadas": log.get("rodadas_de_correcao"),
             "forma": {k: cfg.get(k) for k in ("forma", "estrofes", "encadeamento", "narrador")},
         })
+    # o eixo: só notícias da lista do CriaComp News; o resto continua no histórico
+    itens = [i for i in itens if criacomp.tem(i["url"])]
     entraram = [i for i in itens if i["entra"]]
+    # a mesma notícia gerada mais de uma vez: na coleção fica a versão mais recente
+    recentes = {}
+    for i in sorted(entraram, key=lambda i: i["inicio"] or ""):
+        recentes[criacomp.normalizar(i["url"])] = i
+    entraram = list(recentes.values())
     if COLECAO:
         por_id = {i["id"]: i for i in entraram}
         entraram = [por_id[i] for i in COLECAO if i in por_id]
     else:
-        entraram.sort(key=lambda i: i["inicio"] or "")
-    return {"colecao": entraram, "descarte": [i for i in itens if not i["entra"]],
-            "curada": bool(COLECAO)}
+        entraram.sort(key=lambda i: i["inicio"] or "", reverse=True)  # os mais recentes primeiro
+    descarte = sorted((i for i in itens if not i["entra"]), key=lambda i: i["inicio"] or "", reverse=True)
+    return {"colecao": entraram, "descarte": descarte, "curada": bool(COLECAO)}
 
 
 @app.get("/logs")

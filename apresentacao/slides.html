@@ -91,6 +91,10 @@
   .eixo-texto { margin: 8px 0 0; font: italic 27px/1.55 "Libre Baskerville", serif; border-left: 5px solid var(--vermelho);
                 padding: 4px 0 4px 26px; }
   .eixo-texto b { font-style: normal; }
+  .tools.um { grid-template-columns: 1fr; max-width: 860px; margin-top: 34px; }
+  .tools.um .tool { padding: 24px 28px; gap: 16px; }
+  .tools.um .tool h3 { font-size: 30px; } .tools.um pre { font-size: 19px; } .tools.um .tool p { font-size: 22px; }
+  .tools.um .veredito { font-size: 20px; }
   /* versão simples */
   ul.simples { list-style: none; padding: 0; }
   ul.simples li { font-size: 25px; line-height: 1.4; margin: 0 0 22px; padding-left: 26px; position: relative; }
@@ -201,7 +205,7 @@
 <!-- 5. tool calling -->
 <section class="slide">
   <h2>Chamadas de ferramenta</h2>
-  <div class="tools dois">
+  <div class="tools um">
     <div class="tool">
       <h3>A xilogravura</h3>
 <pre>tool = image_generation(model="gpt-image-1-mini")
@@ -209,15 +213,6 @@ ai.stream(gpt_6_luna, [prompt], tools=[tool],
           tool_choice=REQUIRED)</pre>
       <p>O modelo de texto é obrigado a chamar a ferramenta de imagem. A xilogravura volta junto com a resposta.</p>
       <span class="veredito">Usado em todo folheto</span>
-    </div>
-    <div class="tool fora">
-      <h3>O verificador como ferramenta</h3>
-<pre>@ai.tool
-async def escandir_sextilha(versos): ...
-
-ai.Agent(tools=[escandir_sextilha])</pre>
-      <p>O modelo media os próprios versos. A métrica passou sempre, mas a poesia piorou: "Alunos miram jardim / Gigante chuta capim".</p>
-      <span class="veredito">Testado e deixado de fora</span>
     </div>
   </div>
   <span class="num">5</span>
@@ -227,9 +222,9 @@ ai.Agent(tools=[escandir_sextilha])</pre>
 <section class="slide">
   <h2>Resultados</h2>
   <div class="numeros tres">
-    <div><b>15</b><span>folhetos gerados</span></div>
-    <div><b>11</b><span>passaram no verificador</span></div>
-    <div><b>~3</b><span>correções por folheto</span></div>
+    <div><b>16</b><span>folhetos gerados com notícias do CriaComp News</span></div>
+    <div><b>12</b><span>notícias na coleção, depois do verificador</span></div>
+    <div><b>3,4</b><span>rodadas de correção por folheto, em média</span></div>
   </div>
   <ul class="simples achados-lista">
     <li><b>A sílaba é do verificador.</b> O modelo raramente acerta a métrica de primeira.</li>
