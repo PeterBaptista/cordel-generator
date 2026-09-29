@@ -62,9 +62,16 @@ Na página dá para escolher o modelo de texto (famílias GPT-5, 5.4, 5.5, 5.6 e
 preço ao lado), o nível de raciocínio, quantas candidatas gerar e a qualidade da
 xilogravura. O servidor só aceita os modelos da tabela em `app/custos.py`.
 A página sempre abre na configuração mais barata (gpt-6-luna, raciocínio baixo,
-xilogravura low). Escolher algo mais caro, ou gerar com algo mais caro, abre um aviso
+xilogravura mínima: gpt-image-1-mini). Escolher algo mais caro, ou gerar com algo mais caro, abre um aviso
 com o preço e a opção de voltar ao mais barato. Forma, estrofes e candidatas mudam
 sem aviso.
+
+Toda geração segue as **regras do grupo** (sem ênclise ou mesóclise, termo do dicionário
+nordestino a cada 2 versos, uma expressão por estrofe, partícula fática só na ponta do verso,
+concordância popular, narrador em 1ª pessoa…). As que dá para conferir por código reprovam o
+verso e mandam para correção; a lista completa, com o que é conferido e o que é só pedido, está
+no `CADERNO-DE-BORDO.md`. O dicionário fica em `dados/dicionario_nordestino.csv` (158 termos,
+com a fonte de cada um) e pode ser editado pelo grupo.
 
 Também dá para escolher a forma do poema:
 

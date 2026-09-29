@@ -31,7 +31,7 @@ import pydantic
 import trafilatura
 from ai.providers.openai import tools as openai_tools
 
-from . import custos, prompts
+from . import custos, dicionario, prompts
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
@@ -39,8 +39,16 @@ import escandir  # noqa: E402  (o verificador fica intocado em scripts/)
 
 dotenv.load_dotenv(RAIZ / ".env")
 
-IMAGE_HOST_MODEL = os.getenv("CORDEL_IMAGE_HOST_MODEL", "openai:gpt-5.4-mini")
-IMAGE_MODEL = os.getenv("CORDEL_IMAGE_MODEL", "gpt-image-2")
+# O hospedeiro só repassa o prompt à ferramenta de imagem e não muda o desenho: vai o
+# modelo de texto mais barato (medido: US$ 0,0004 contra US$ 0,003 do gpt-5.4-mini).
+IMAGE_HOST_MODEL = os.getenv("CORDEL_IMAGE_HOST_MODEL", "openai:gpt-6-luna")
+# opção do seletor -> (modelo de imagem, qualidade). Custos medidos em 28/09, 1536×1024,
+# com o hospedeiro gpt-6-luna: mínima ~US$ 0,004; rápida ~US$ 0,006.
+IMAGENS = {
+    "minima": ("gpt-image-1-mini", "low"),
+    "low": ("gpt-image-2", "low"),
+    "medium": ("gpt-image-2", "medium"),
+}
 
 # O que a página deixa escolher. O servidor só aceita estes valores: a API não
 # pode ser usada para chamar um modelo qualquer com a chave do grupo.
@@ -48,16 +56,17 @@ OPCOES = {
     "texto": [f"openai:{m}" for m in custos.PRECOS],
     "raciocinio": ["low", "medium", "high"],
     "candidatas": [1, 2, 3],
-    "imagem_qualidade": ["low", "medium"],
+    "imagem_qualidade": list(IMAGENS),
     "forma": list(prompts.FORMAS),
     "estrofes": [1, 2, 3, 4, 6],
     "encadeamento": ["livre", "deixa"],
+    "narrador": [*prompts.NARRADORES, "sortear"],
 }
 
 
 # A configuração mais barata. A página abre nela e pede confirmação quando alguém
 # escolhe algo mais caro. Forma, estrofes e candidatas ficam livres.
-ECONOMICO = {"texto": "openai:gpt-6-luna", "raciocinio": "low", "imagem_qualidade": "low"}
+ECONOMICO = {"texto": "openai:gpt-6-luna", "raciocinio": "low", "imagem_qualidade": "minima"}
 
 
 @dataclass(frozen=True)
@@ -72,6 +81,7 @@ class Config:
     forma: str = "aberta"         # tipo de sextilha pelo esquema de rima
     estrofes: int = 1
     encadeamento: str = "livre"   # "deixa": 1º verso rima com o último da estrofe anterior
+    narrador: str = "observador"  # regra 10 do grupo; "sortear" = um por candidata
 
     @property
     def esquema(self) -> str:
@@ -106,6 +116,7 @@ class Fato(pydantic.BaseModel):
 
 class Estrofe(pydantic.BaseModel):
     finais: list[str]
+    termos: list[str]  # termos do dicionário nordestino planejados para a estrofe
     versos: list[str]
 
 
@@ -188,8 +199,9 @@ async def uso_da_imagem(response_id: str | None) -> dict | None:
 async def gerar_xilogravura(fato: Fato, log: list, cfg: Config) -> bytes | None:
     """Imagem pela ferramenta image_generation da OpenAI (provider tool do SDK)."""
     prompt = prompts.prompt_xilogravura(fato.fato, fato.imagens_concretas)
+    modelo_imagem, qualidade = IMAGENS[cfg.imagem_qualidade]
     tool = openai_tools.image_generation(
-        model=IMAGE_MODEL, size="1536x1024", quality=cfg.imagem_qualidade, output_format="png"
+        model=modelo_imagem, size="1536x1024", quality=qualidade, output_format="png"
     )
     params = ai.InferenceRequestParams(
         tool_calling=ai.ToolCallingParams(tool_choice=ai.ToolChoiceMode.REQUIRED)
@@ -202,8 +214,8 @@ async def gerar_xilogravura(fato: Fato, log: list, cfg: Config) -> bytes | None:
         response_id = await _consumir(stream)
     log.append({
         "etapa": "xilogravura",
-        "modelo": f"{IMAGE_HOST_MODEL} + image_generation({IMAGE_MODEL}, {cfg.imagem_qualidade})",
-        "modelo_imagem": IMAGE_MODEL,
+        "modelo": f"{IMAGE_HOST_MODEL} + image_generation({modelo_imagem}, {qualidade})",
+        "modelo_imagem": modelo_imagem,
         "response_id": response_id,
         "usuario": prompt,
         "tokens": _uso(stream.usage),
@@ -305,22 +317,73 @@ def ligacoes_em_deixa(estrofes: list[list[str]]) -> list[dict]:
     return res
 
 
+# ---- regras do grupo que dá para conferir por código (as outras vão no prompt)
+# aplicadas a cada palavra com hífen inteira: "disse-me" (ênclise), "dir-lhe-ei" (mesóclise)
+CLITICOS = "me|te|se|lhe|lhes|nos|vos|o|a|os|as|lo|la|los|las|no|na|nas"
+PRONOME_COM_HIFEN = re.compile(rf"\w+(-({CLITICOS}))+(-\w+)?", re.I)
+# compostos com hífen que parecem ênclise mas são substantivos
+COMPOSTOS = {"bem-te-vi", "bem-te-vis", "disse-me-disse", "bem-me-quer", "mal-me-quer", "louva-a-deus"}
+
+
+def versos_livres(esquema: str) -> list[int]:
+    """Versos que não rimam com nenhum outro no esquema (ABCBDB -> 1, 3, 5)."""
+    return [n for n, letra in enumerate(esquema, 1) if esquema.count(letra) == 1]
+
+
+def regras_do_grupo(estrofes: list[list[str]], cfg: "Config") -> list[dict]:
+    """Regras 1, 3, 7 e 9 do grupo. Quando a falta é de um par ou de uma estrofe
+    (regras 3 e 7), marca um verso que não rima, para a correção não quebrar a rima."""
+    livres = versos_livres(cfg.esquema)
+    achados = []
+
+    def escolher(e: int, candidatos: list[int]) -> int:
+        # prefere verso livre; na deixa, o 1º verso (da 2ª estrofe em diante) está preso à rima
+        presos = {1} if cfg.encadeamento == "deixa" and e > 1 else set()
+        return next((n for n in candidatos if n in livres and n not in presos),
+                    next((n for n in candidatos if n not in presos), candidatos[0]))
+
+    for e, vs in enumerate(estrofes, 1):
+        for n, v in enumerate(vs, 1):
+            pron = [p for p in re.findall(r"\w+(?:-\w+)+", v)
+                    if p.lower() not in COMPOSTOS and PRONOME_COM_HIFEN.fullmatch(p)]
+            if pron:
+                achados.append({"estrofe": e, "n": n, "regra": 1,
+                                "motivo": f"ênclise/mesóclise: {', '.join(dict.fromkeys(pron))}"})
+            if fat := dicionario.faticas_fora_da_ponta(v):
+                achados.append({"estrofe": e, "n": n, "regra": 9,
+                                "motivo": f"partícula fática no meio do verso: {', '.join(fat)}"})
+        for a in range(0, len(vs) - 1, 2):
+            par = [a + 1, a + 2]
+            if not any(dicionario.termos_no_verso(vs[n - 1]) for n in par):
+                achados.append({"estrofe": e, "n": escolher(e, par), "regra": 3,
+                                "motivo": f"nenhum termo do dicionário nos versos {par[0]} e {par[1]}"})
+        if vs and not any(dicionario.termos_no_verso(v, ("expressao",)) for v in vs):
+            achados.append({"estrofe": e, "n": escolher(e, list(range(1, len(vs) + 1))), "regra": 7,
+                            "motivo": "a estrofe não tem nenhuma expressão de mais de uma palavra do dicionário"})
+    return achados
+
+
 def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
     """Mede cada estrofe no escandir.py com o esquema escolhido, e a deixa entre elas."""
     unica = len(estrofes) == 1
     medidas = [medir(vs, cfg.esquema, "sextilha" if unica else f"estrofe {e}")
                for e, vs in enumerate(estrofes, 1)]
     deixa = ligacoes_em_deixa(estrofes) if cfg.encadeamento == "deixa" else []
+    regras = regras_do_grupo(estrofes, cfg)
     reprovados = sorted({(e, n) for e, m in enumerate(medidas, 1) for n in versos_reprovados(m)}
-                        | {(d["estrofe"], 1) for d in deixa if not d["ok"]})
+                        | {(d["estrofe"], 1) for d in deixa if not d["ok"]}
+                        | {(r["estrofe"], r["n"]) for r in regras})
     forma_ok = len(estrofes) == cfg.estrofes and all(len(vs) == 6 for vs in estrofes)
     relatorio = "\n\n".join(m["relatorio"] for m in medidas)
     if deixa:
         relatorio += "\n\n  deixa (1º verso rima com o último da estrofe anterior):\n" + "\n".join(
             f"  {'ok' if d['ok'] else 'XX'} estrofe {d['estrofe']}: {d['estado']} {d['chaves']}"
             for d in deixa)
-    return {"medidas": medidas, "deixa": deixa, "reprovados": reprovados, "forma_ok": forma_ok,
-            "entra": forma_ok and all(m["entra"] for m in medidas) and all(d["ok"] for d in deixa),
+    if regras:
+        relatorio += "\n\n  regras do grupo:\n" + "\n".join(
+            f"  XX estrofe {r['estrofe']}, verso {r['n']} (regra {r['regra']}): {r['motivo']}" for r in regras)
+    return {"medidas": medidas, "deixa": deixa, "regras": regras, "reprovados": reprovados, "forma_ok": forma_ok,
+            "entra": forma_ok and all(m["entra"] for m in medidas) and all(d["ok"] for d in deixa) and not regras,
             "relatorio": relatorio}
 
 
@@ -338,6 +401,7 @@ def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:
                    for r in m["rimas"] if r["estado"] == "SEM RIMA"]
         partes += [f"{pref}verso {x['n']} {x['motivo']}" for x in m["extras"]]
     partes += [f"deixa da estrofe {d['estrofe']}: {d['estado']}" for d in mp["deixa"] if not d["ok"]]
+    partes += [f"estrofe {r['estrofe']}, verso {r['n']}: regra {r['regra']} ({r['motivo']})" for r in mp["regras"]]
     return "; ".join(partes) + f" — resistiu a {MAX_RODADAS} rodadas de correção."
 
 
@@ -385,7 +449,9 @@ async def run_cordel(
         yield {"etapa": "xilogravura", "status": "rodando"}
 
     # 2. candidatas: várias sextilhas em paralelo, cada uma por um ângulo
-    angulos = random.sample(prompts.ANGULOS, min(cfg.candidatas, len(prompts.ANGULOS)))
+    # narrador fixo: todas as candidatas com ele; "sortear": um diferente por candidata
+    angulos = (random.sample(list(prompts.NARRADORES.values()), min(cfg.candidatas, len(prompts.NARRADORES)))
+               if cfg.narrador == "sortear" else [prompts.NARRADORES[cfg.narrador]] * cfg.candidatas)
     yield {"etapa": "candidatas", "status": "rodando", "angulos": angulos}
     geradas = await asyncio.gather(*(
         gerar(prompts.sistema_poema(cfg.forma, cfg.estrofes, cfg.encadeamento),
@@ -445,7 +511,7 @@ async def run_cordel(
                                "relatorio": mp["relatorio"]})
         yield {"etapa": "escansao", "rodada": rodada, "estrofes": estrofes,
                "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
-               "deixa": mp["deixa"], "entra": mp["entra"], "reprovados": reprovados,
+               "deixa": mp["deixa"], "regras": mp["regras"], "entra": mp["entra"], "reprovados": reprovados,
                "relatorio": mp["relatorio"]}
         if mp["entra"] or rodada >= MAX_RODADAS or not mp["forma_ok"] or not reprovados:
             break

@@ -16,6 +16,8 @@ Não invente fatos que não estão na notícia."""
 # Os tipos de sextilha pelo esquema de rima (fontes: blogs e oficinas de cordel,
 # ver README). A "fechada" (rimam todos os versos) ficou de fora: as fontes não
 # dizem em que ordem, e o verificador precisa de um esquema exato.
+from . import dicionario
+
 FORMAS = {
     "aberta": ("ABCBDB", "os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres"),
     "solta": ("ABABCD", "o verso 1 rima com o 3 e o 2 rima com o 4; 5 e 6 são livres"),
@@ -23,6 +25,33 @@ FORMAS = {
     "desencontrada": ("ABBAAB", "os versos 1, 4 e 5 rimam entre si, e os versos 2, 3 e 6 "
                                 "rimam entre si com outra rima"),
 }
+
+
+def regras_do_grupo() -> str:
+    """As regras do grupo (as de número 1, 3, 7 e 9 o verificador confere) e o dicionário."""
+    return f"""\
+Regras do grupo, obrigatórias:
+1. Pronome sempre antes do verbo ("me disse", "se foi"). Nunca ênclise ("disse-me")
+   nem mesóclise ("dir-lhe-ei"). O verificador reprova.
+3. Pelo menos um termo do dicionário nordestino abaixo a cada 2 versos (versos 1 e 2,
+   3 e 4, 5 e 6). O verificador confere.
+4. As outras palavras no mesmo tom popular dos termos do dicionário: nada de palavra
+   difícil, técnica ou de jornal.
+5. Sem sair da formalidade do cordel: nada de gíria de internet nem palavrão.
+7. Cada estrofe tem pelo menos uma EXPRESSÃO do dicionário (as de mais de uma
+   palavra, como "caixa dos peito"). O verificador confere.
+8. Vocativo (chamar alguém: "seu moço", "minha gente", "meu fi") só no início ou no
+   fim do verso, nunca no meio.
+9. Partícula fática (né, viu, visse, tá, sabe) só no início ou no fim do verso.
+11. Use a concordância da fala popular, de propósito: plural marcado só na primeira
+   palavra ("os menino", "as coisa", "caixa dos peito"). Isso não é erro a corrigir.
+12. Cada termo do dicionário entra no sentido dado e amarrado ao resto do verso, nunca
+   solto só para constar (ruim: "Cão chupando manga, / Tem viagem que se alonga",
+   em que o termo não diz nada ali).
+
+Dicionário nordestino (termo — sentido):
+
+{dicionario.texto_para_prompt()}"""
 
 
 def sistema_poema(forma: str, estrofes: int, encadeamento: str) -> str:
@@ -41,7 +70,7 @@ diferente. O verificador confere essa ligação.
 """
     return f"""\
 Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a
-transformam em causo. Escreva {quantas} sobre o fato dado, pelo ângulo pedido.
+transformam em causo. Escreva {quantas} sobre o fato dado, na voz do narrador pedido.
 
 A forma, obrigatória em cada estrofe:
 - Sextilha: exatamente 6 versos.
@@ -52,11 +81,13 @@ A forma, obrigatória em cada estrofe:
   (igual a partir da vogal tônica).
 {narrativa}{deixa}
 Planeje antes de escrever:
-- angulo: em uma frase, como você vai contar a notícia.
+- angulo: em uma frase, como o narrador vai contar a notícia.
 - para cada estrofe, finais: as 6 palavras finais dos versos, seguindo o esquema
   {esquema}. Palavras que rimam têm que ser DIFERENTES (ex.: sertão / razão /
   clarão). Repetir a mesma palavra final é proibido: o verificador reprova.
-Depois escreva os versos terminando nessas palavras.
+- para cada estrofe, termos: os termos do dicionário que você vai usar nela (pelo
+  menos um a cada 2 versos, e pelo menos uma expressão de mais de uma palavra).
+Depois escreva os versos terminando nessas palavras e usando esses termos.
 
 Criatividade:
 - Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,
@@ -72,24 +103,33 @@ O registro:
 - Linguagem de cordel: narrativa, popular, oral.
 - Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.
 - A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.
-- Sem título, sem numeração."""
+- Sem título, sem numeração.
+
+{regras_do_grupo()}"""
 
 
-# Cada candidata sai por um ângulo diferente: é daí que vem a variedade,
-# já que os modelos de raciocínio não aceitam temperatura.
-ANGULOS = [
-    "como um causo contado na feira, com humor e exagero",
-    "pelo olhar de um sertanejo desconfiado, que compara a novidade com a vida na roça",
-    "como cantador que anuncia uma notícia de longe, com espanto e maravilha",
-    "como conselho de gente velha, terminando numa moral",
-]
+# Quem conta a notícia. "observador" é a regra 10 do grupo (narrador em 1ª pessoa,
+# roteiro fixo); os outros são os ângulos de antes. Com "sortear", cada candidata
+# sai por um diferente: é daí que vem a variedade entre candidatas, já que os
+# modelos de raciocínio não aceitam temperatura.
+NARRADORES = {
+    "observador": ("narrador observador em 1ª pessoa: um \"eu\" que presenciou o acontecimento "
+                   "e conta o que viu, sempre com o mesmo roteiro, nesta ordem, do começo ao fim "
+                   "do cordel: (1) onde eu estava; (2) o que eu vi acontecer; (3) o que ouvi o povo "
+                   "dizer; (4) o que eu penso disso. Com uma estrofe, os quatro passos cabem nela; "
+                   "com mais, distribua-os entre as estrofes, na mesma ordem"),
+    "feira": "como um causo contado na feira, com humor e exagero",
+    "sertanejo": "pelo olhar de um sertanejo desconfiado, que compara a novidade com a vida na roça",
+    "cantador": "como cantador que anuncia uma notícia de longe, com espanto e maravilha",
+    "conselho": "como conselho de gente velha, terminando numa moral",
+}
 
 
-def usuario_poema(fato: str, imagens: list[str], angulo: str) -> str:
+def usuario_poema(fato: str, imagens: list[str], narrador: str) -> str:
     return (
         f"Fato: {fato}\n"
         f"Imagens possíveis: {'; '.join(imagens)}\n"
-        f"Ângulo: {angulo}\n\n"
+        f"Narrador: {narrador}\n\n"
         "Planeje e escreva."
     )
 
@@ -107,7 +147,10 @@ Escolha UM, nesta ordem de critérios:
 1. Prefira os que o verificador aprovou. Se nenhum passou, prefira os com menos
    versos reprovados: cada verso reprovado ainda vai precisar de correção.
 2. Entre esses, o mais criativo: imagem concreta e surpreendente, comparação com o
-   mundo do cordel, nenhuma palavra repetida à toa, final com virada.
+   mundo do cordel, nenhuma palavra repetida à toa, final com virada. Pese as regras
+   do grupo que o verificador não confere: tom popular em todas as palavras, termos
+   do dicionário amarrados ao verso (não soltos só para constar) e vocativo e
+   partícula fática só na ponta do verso.
 3. Fiel ao fato da notícia, sem inventar acontecimento.
 Justifique em uma ou duas frases, citando versos."""
 
@@ -136,7 +179,12 @@ Mantenha o sentido e o registro de cordel, e não empobreça o poema:
   estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.
 - Não repita nomes e palavras de conteúdo que já estão nos outros versos.
 - Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.
-Devolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4)."""
+- Se a falta for de termo ou expressão do dicionário (regras 3 e 7), reescreva o verso
+  indicado usando um termo que caiba no sentido.
+- A concordância popular ("os menino") é de propósito: não conserte.
+Devolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).
+
+{regras_do_grupo()}"""
 
 
 def usuario_correcao(estrofes: list[list[str]], relatorio: str, reprovados: list[tuple[int, int]]) -> str:

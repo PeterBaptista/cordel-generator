@@ -1,0 +1,218 @@
+"""Monta dados/dicionario_nordestino.csv: termos escolhidos à mão, glosas escritas
+por nós, e a fonte conferida automaticamente (o termo aparece no texto da fonte)."""
+import csv, re, sys, unicodedata
+D = sys.argv[1]
+
+def norm(s):
+    s = unicodedata.normalize("NFD", s.lower())
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return re.sub(r"[^a-z0-9]+", " ", s).strip()
+
+FONTES = {
+    "albuquerque": ("quirino.txt", "Gilberto Albuquerque, Dicionário de Termos Nordestinos (publicado no site de Jessier Quirino)"),
+    "dpopular": ("dpopular.txt", "Dicionário Popular, 190 gírias e expressões nordestinas"),
+    "terra": ("terra.txt", "Terra, Dicionário de nordestinês"),
+    "madeinbrasilis": ("madeinbrasilis.txt", "Made in Brasilis, Gírias nordestinas"),
+}
+TEXTOS = {k: " " + norm(open(f"{D}/{arq}", encoding="utf-8", errors="ignore").read()) + " " for k, (arq, _) in FONTES.items()}
+
+# (termo, variantes, tipo, sentido) — sentido em palavras nossas
+T = [
+ # --- palavras
+ ("abestado", "abestada|abestados|abestalhado|abestalhada", "palavra", "bobo, tolo"),
+ ("agoniado", "agoniada|agoniados", "palavra", "aflito, com pressa ou angústia"),
+ ("aluado", "aluada|aluados", "palavra", "distraído, no mundo da lua"),
+ ("alumiar", "alumia|alumiou|alumiando", "palavra", "iluminar"),
+ ("alpercata", "alpercatas|alpargata", "palavra", "sandália de couro do sertanejo"),
+ ("aperreado", "aperreada|aperreados|aperreio|aperrear|aperreia|aperreou", "palavra", "preocupado, em apuro; aperreio é o apuro"),
+ ("apois", "", "palavra", "pois, então (começo de fala)"),
+ ("arenga", "arengas|arengar|arengando", "palavra", "briga, discussão à toa"),
+ ("arretado", "arretada|arretados|arretadas", "palavra", "muito bom, admirável; ou zangado"),
+ ("arrochado", "arrochada|arrochados", "palavra", "apertado; valente"),
+ ("arrudiar", "arrudia|arrudiou|arrodear", "palavra", "dar a volta, rodear"),
+ ("avalie", "", "palavra", "imagine só"),
+ ("avexado", "avexada|avexados|avexar|avexe", "palavra", "apressado"),
+ ("baladeira", "baladeiras", "palavra", "estilingue"),
+ ("balaio", "balaios", "palavra", "cesto de palha ou cipó"),
+ ("bexiga", "", "palavra", "usado para reforçar: da bexiga = danado, muito"),
+ ("bodega", "bodegas", "palavra", "vendinha, mercearia"),
+ ("brenha", "brenhas", "palavra", "mato fechado, lugar ermo"),
+ ("bruguelo", "bruguelos", "palavra", "criança pequena"),
+ ("bulir", "bole|buliu|bulindo", "palavra", "mexer, tocar, provocar"),
+ ("buliçoso", "buliçosa|buliçosos", "palavra", "inquieto, que mexe em tudo"),
+ ("cabra", "cabras", "palavra", "sujeito, homem"),
+ ("cabrunco", "", "palavra", "coisa ruim, danada (reforço)"),
+ ("cacimba", "cacimbas", "palavra", "poço raso de água"),
+ ("cafundó", "cafundós", "palavra", "lugar muito longe"),
+ ("candeeiro", "candeeiros", "palavra", "lamparina"),
+ ("carão", "carões", "palavra", "bronca, repreensão"),
+ ("chamego", "chamegos", "palavra", "carinho, afeto"),
+ ("cismado", "cismada|cismados|cismar", "palavra", "desconfiado"),
+ ("cuscuz", "", "palavra", "prato de milho do café sertanejo"),
+ ("danado", "danada|danados|danadas", "palavra", "esperto, ousado; ou muito (reforço)"),
+ ("desembestado", "desembestada|desembestados|desembestou", "palavra", "descontrolado, em disparada"),
+ ("desmantelo", "desmantelos|desmantelado|desmantelada", "palavra", "bagunça, estrago"),
+ ("eita", "eita que", "palavra", "interjeição de espanto"),
+ ("enfezado", "enfezada|enfezados", "palavra", "zangado"),
+ ("espiar", "espia|espiou|espiando", "palavra", "olhar, observar"),
+ ("estrupício", "estrupícios", "palavra", "coisa ou gente desajeitada, trapalhada"),
+ ("fuleiro", "fuleira|fuleiros", "palavra", "de má qualidade, sem valor"),
+ ("fuxico", "fuxicos|fuxicar|fuxiqueiro|fuxiqueira", "palavra", "fofoca"),
+ ("gaiato", "gaiata|gaiatos", "palavra", "brincalhão, engraçado"),
+ ("gastura", "", "palavra", "agonia, mal-estar"),
+ ("gazear", "gazeou|gazeando", "palavra", "faltar à aula ou ao trabalho"),
+ ("jerimum", "jerimuns", "palavra", "abóbora"),
+ ("lapada", "lapadas", "palavra", "pancada; ou gole de cachaça"),
+ ("lascado", "lascada|lascados|lascar", "palavra", "em má situação; lascar = estragar"),
+ ("lonjura", "lonjuras", "palavra", "distância grande"),
+ ("macaxeira", "macaxeiras", "palavra", "mandioca, aipim"),
+ ("magote", "magotes", "palavra", "bando, monte de gente"),
+ ("malino", "malina|malinos", "palavra", "travesso, danado"),
+ ("mangar", "mangou|mangando|mangação", "palavra", "zombar, caçoar"),
+ ("marmota", "marmotas", "palavra", "coisa estranha, esquisita"),
+ ("matuto", "matuta|matutos", "palavra", "homem da roça, sertanejo simples"),
+ ("munganga", "mungangas", "palavra", "careta, trejeito, palhaçada"),
+ ("mungunzá", "", "palavra", "canjica de milho"),
+ ("oxente", "oxe", "palavra", "interjeição de espanto"),
+ ("pantim", "pantins", "palavra", "fingimento, cena, frescura"),
+ ("pelejar", "peleja|pelejou|pelejando", "palavra", "lutar, insistir muito"),
+ ("pinoia", "", "palavra", "coisa sem valor"),
+ ("pirangueiro", "pirangueira|pirangueiros", "palavra", "pão-duro, mesquinho"),
+ ("presepada", "presepadas|presepeiro|presepeira|presepeio", "palavra", "exibição, palhaçada"),
+ ("quentura", "", "palavra", "calor"),
+ ("rebuliço", "rebuliços", "palavra", "confusão, agitação"),
+ ("reimoso", "reimosa|reimosos", "palavra", "comida que faz mal; pessoa de gênio ruim"),
+ ("rumar", "rumou|rumando", "palavra", "jogar, arremessar"),
+ ("sibito", "", "palavra", "pessoa magrinha, miúda"),
+ ("sustança", "", "palavra", "força, alimento que sustenta"),
+ ("tabaréu", "tabaréus|tabaroa", "palavra", "caipira, matuto"),
+ ("tareco", "tarecos", "palavra", "biscoito; ou traste, coisa velha"),
+ ("terreiro", "terreiros", "palavra", "quintal, pátio de terra"),
+ ("vixe", "vixi|vige", "palavra", "interjeição de espanto (Virgem!)"),
+ ("vôte", "vote", "palavra", "interjeição de nojo ou espanto"),
+ ("xodó", "xodós", "palavra", "pessoa ou coisa querida"),
+ ("zoada", "zoadas", "palavra", "barulho"),
+ ("zanzar", "zanza|zanzou|zanzando", "palavra", "andar à toa"),
+ # --- expressões (mais de uma palavra; regra 7)
+ ("caixa dos peito", "caixa do peito|caixa-do-peito", "expressao", "o peito, o tórax"),
+ ("cabra da peste", "cabra-da-peste|cabras da peste", "expressao", "sujeito valente, admirável"),
+ ("cão chupando manga", "", "expressao", "coisa ou pessoa muito feia ou terrível"),
+ ("cafundó do judas", "cafundós do judas", "expressao", "lugar longíssimo"),
+ ("baixa da égua", "", "expressao", "lugar muito distante"),
+ ("dar um carão", "deu um carão|levou um carão", "expressao", "dar uma bronca"),
+ ("de lascar o cano", "", "expressao", "demais, ao extremo"),
+ ("deu o bute", "", "expressao", "sumiu, morreu, acabou"),
+ ("fazer munganga", "fez munganga|fazendo munganga", "expressao", "fazer careta, palhaçada"),
+ ("lavar a égua", "lavou a égua|lavando a égua", "expressao", "aproveitar ao máximo, se dar muito bem"),
+ ("levar uma taboca", "levou uma taboca", "expressao", "levar um fora, ser enganado"),
+ ("que só a peste", "", "expressao", "muito, demais"),
+ ("sossegar o facho", "sossega o facho|sossegou o facho", "expressao", "acalmar-se"),
+ ("pegar o caminho da roça", "pegou o caminho da roça", "expressao", "ir embora"),
+ ("rebolar no mato", "rebolou no mato|rebola no mato", "expressao", "jogar fora"),
+ ("tá com a gota serena", "com a gota serena|da gota serena", "expressao", "furioso, fora de si; ou danado de bom"),
+ ("nas brenhas", "", "expressao", "no meio do mato, longe de tudo"),
+ ("carne de sol", "carne-de-sol", "expressao", "carne salgada e seca ao sol"),
+ ("bater fofo", "bateu fofo|bate fofo", "expressao", "falhar, não cumprir o combinado"),
+ ("pegar no tombo", "pegou no tombo", "expressao", "pegar no ar, no susto"),
+ ("caminhão de feira", "", "expressao", "pau de arara, transporte da feira"),
+ ("se avexe não", "não se avexe", "expressao", "não tenha pressa, calma"),
+ ("arriar os pneu", "arriou os pneu|arriar os pneus", "expressao", "cansar, perder as forças"),
+ ("botar boneco", "botou boneco|botando boneco", "expressao", "fazer escândalo, criar caso"),
+ ("um mói de", "um mói", "expressao", "um monte de"),
+ ("pense num", "pense numa", "expressao", "imagine um (algo extraordinário)"),
+ ("amarrar o bode", "amarrou o bode", "expressao", "ficar emburrado"),
+ ("dar no couro", "deu no couro", "expressao", "dar conta, aguentar"),
+ ("estar na pindaíba", "na pindaíba", "expressao", "estar sem dinheiro"),
+ # --- partículas fáticas (regra 9: só no início ou no fim do verso)
+ ("né", "", "fatica", "partícula de confirmação"),
+ ("visse", "", "fatica", "entendeu? (pernambucano)"),
+ ("viu", "", "fatica", "partícula de confirmação"),
+ ("tá", "", "fatica", "está bem? (confirmação)"),
+ # --- acrescentados a partir do Dicionário Popular e do Albuquerque
+ ("arribar", "arribou|arriba", "palavra", "ir embora; subir"),
+ ("armaria", "", "palavra", "interjeição de espanto (Ave Maria!)"),
+ ("arriégua", "arre-égua|arre égua", "palavra", "interjeição de espanto"),
+ ("égua", "", "palavra", "interjeição de espanto"),
+ ("bagaceira", "bagaceiras", "palavra", "bagunça, coisa de baixo nível"),
+ ("bestar", "bestando|bestou", "palavra", "ficar à toa, sem fazer nada"),
+ ("cacunda", "cacundas", "palavra", "costas, corcunda"),
+ ("cambito", "cambitos", "palavra", "perna fina"),
+ ("cangote", "cangotes", "palavra", "nuca"),
+ ("carecer", "carece|careceu", "palavra", "precisar"),
+ ("emperiquitado", "emperiquitada|emperiquitados", "palavra", "arrumado demais, enfeitado"),
+ ("enfadado", "enfadada|enfadados", "palavra", "cansado, entediado"),
+ ("escarafunchar", "escarafuncha|escarafunchou", "palavra", "fuçar, investigar"),
+ ("estribado", "estribada|estribados", "palavra", "com dinheiro, bem de vida"),
+ ("filar", "filou|filando", "palavra", "pegar do outro sem pagar"),
+ ("findar", "findou|findando", "palavra", "acabar, terminar"),
+ ("fuleragem", "fuleragens", "palavra", "coisa ruim, sacanagem"),
+ ("galalau", "galalaus", "palavra", "pessoa muito alta"),
+ ("galego", "galega|galegos", "palavra", "pessoa loura"),
+ ("gaitar", "gaitou|gaitando", "palavra", "rir alto, gargalhar"),
+ ("inhaca", "", "palavra", "mau cheiro"),
+ ("isturdia", "", "palavra", "outro dia, há pouco tempo"),
+ ("lambança", "lambanças", "palavra", "sujeira, trapalhada"),
+ ("lenga-lenga", "lenga lenga", "palavra", "conversa arrastada, repetitiva"),
+ ("leseira", "", "palavra", "moleza, preguiça, bobeira"),
+ ("maínha", "mainha", "palavra", "mãe, com carinho"),
+ ("painho", "", "palavra", "pai, com carinho"),
+ ("moído", "moída|moídos", "palavra", "cansado, dolorido"),
+ ("morgado", "morgada|morgados", "palavra", "cansado, desanimado"),
+ ("muriçoca", "muriçocas", "palavra", "pernilongo"),
+ ("pastorar", "pastora|pastorou|pastorando", "palavra", "vigiar, ficar de olho"),
+ ("pêia", "peia|peias", "palavra", "surra"),
+ ("pinote", "pinotes", "palavra", "pulo, salto; fuga"),
+ ("pitoco", "pitocos", "palavra", "coisa pequena, curta"),
+ ("quengo", "quengos", "palavra", "cabeça; esperteza"),
+ ("relar", "relou|relando", "palavra", "encostar de leve"),
+ ("salseiro", "salseiros", "palavra", "confusão, briga"),
+ ("tibungar", "tibungou|tibum", "palavra", "mergulhar"),
+ ("triscar", "triscou|triscando", "palavra", "tocar de leve"),
+ ("varapau", "varapaus", "palavra", "pessoa muito alta e magra"),
+ ("venta", "ventas", "palavra", "nariz"),
+ ("visagem", "visagens", "palavra", "assombração, aparição"),
+ ("xexeiro", "xexeira|xexeiros", "palavra", "caloteiro"),
+ ("azular", "azulou", "palavra", "sumir, dar o fora"),
+ ("pegar o beco", "pegou o beco|pega o beco", "expressao", "ir embora"),
+ ("pegar ar", "pegou ar", "expressao", "ficar zangado"),
+ ("dar fé", "deu fé|dei fé", "expressao", "perceber, notar"),
+ ("dar uma carreira", "deu uma carreira", "expressao", "sair correndo"),
+ ("caçar conversa", "caçando conversa", "expressao", "provocar briga"),
+ ("comer água", "comendo água", "expressao", "beber (cachaça)"),
+ ("fique peixe", "", "expressao", "fique tranquilo"),
+ ("quando é fé", "", "expressao", "de repente, quando se vê"),
+ ("para o ano", "", "expressao", "no ano que vem"),
+ ("miolo de pote", "", "expressao", "conversa fiada, besteira"),
+ ("nem xite", "", "expressao", "nem um pouco, de jeito nenhum"),
+ ("não vale o que o gato enterra", "", "expressao", "não vale nada"),
+ ("eita pega", "eta pega", "expressao", "interjeição de espanto"),
+ ("pai d'égua", "pai d egua|paidégua", "expressao", "muito bom"),
+ ("por riba", "", "expressao", "por cima"),
+ ("a pulso", "apuço", "expressao", "à força, contra a vontade"),
+ ("capar o gato", "capou o gato", "expressao", "ir embora depressa"),
+ ("dar vencimento a", "deu vencimento", "expressao", "dar conta de"),
+ ("se aviar", "se avie|se aviou", "expressao", "apressar-se"),
+ ("sabe", "", "fatica", "partícula de confirmação"),
+]
+
+linhas, faltam = [], []
+for termo, var, tipo, sentido in T:
+    formas = [termo] + [v for v in var.split("|") if v]
+    achadas = [k for k in FONTES if any(f" {norm(f)} " in TEXTOS[k] for f in formas)]
+    if not achadas and tipo != "fatica":
+        faltam.append(termo); continue
+    linhas.append({"termo": termo, "variantes": var, "tipo": tipo, "sentido": sentido,
+                   "fonte": "; ".join(achadas) if achadas else "marcador conversacional da fala"})
+with open(sys.argv[2], "w", newline="", encoding="utf-8") as f:
+    f.write("# Dicionário nordestino do gerador (regras 3, 7, 9 e 12). Montado pelo assistente de IA\n")
+    f.write("# em 28/09/2026 a partir das fontes abaixo, PARA O GRUPO REVISAR: tirem, acrescentem ou\n")
+    f.write("# corrijam à vontade. O sentido é uma glosa curta escrita pelo assistente, não copiada.\n")
+    f.write("# A coluna fonte diz em qual texto o termo (ou uma variante) foi encontrado; só entrou\n")
+    f.write("# termo achado em pelo menos uma fonte (partículas fáticas: marcadores da fala). Fontes:\n")
+    for k, (_, desc) in FONTES.items():
+        f.write(f"#   {k}: {desc}\n")
+    w = csv.DictWriter(f, fieldnames=["termo", "variantes", "tipo", "sentido", "fonte"])
+    w.writeheader(); w.writerows(linhas)
+from collections import Counter
+print(len(linhas), "termos:", Counter(l["tipo"] for l in linhas))
+print("sem fonte (fora):", faltam)

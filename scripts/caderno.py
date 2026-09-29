@@ -110,8 +110,10 @@ def secao(num: int, f: Path, log: dict, sistemas: Sistemas) -> str:
         ("Candidatas", cfg.get("candidatas", "—")),
         ("Sextilha", f"{forma} ({ESQUEMAS.get(forma, '?')})"),
         ("Estrofes", f"{cfg.get('estrofes', 1)}" + (", em deixa" if cfg.get("encadeamento") == "deixa" else "")),
+        ("Narrador", {"observador": "observador em 1ª pessoa (regra 10)", "sortear": "sorteado entre os ângulos"}
+         .get(cfg.get("narrador"), cfg.get("narrador") or "—")),
         ("Xilogravura", "não gerada" if cfg.get("com_imagem") is False
-         else f"gpt-image-2, qualidade {cfg.get('imagem_qualidade') or '—'}, 1536×1024"),
+         else f"{ {'minima': 'gpt-image-1-mini, qualidade low', 'low': 'gpt-image-2, qualidade low', 'medium': 'gpt-image-2, qualidade medium'}.get(cfg.get('imagem_qualidade'), cfg.get('imagem_qualidade') or '—') }, 1536×1024"),
     ]
     a("\n".join(f"| {k} | {v} |" for k, v in linhas))
     a("")

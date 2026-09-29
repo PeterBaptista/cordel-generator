@@ -24,6 +24,7 @@ PRECOS = {
 PRECOS_IMAGEM = {
     # modelo: (texto de entrada, imagem de entrada, imagem de saída)
     "gpt-image-2": (5.00, 8.00, 30.00),
+    "gpt-image-1-mini": (2.00, 2.50, 8.00),
 }
 
 ETAPAS = {

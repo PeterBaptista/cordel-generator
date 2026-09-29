@@ -1,0 +1,168 @@
+# Dicionário nordestino do gerador (regras 3, 7, 9 e 12). Montado pelo assistente de IA
+# em 28/09/2026 a partir das fontes abaixo, PARA O GRUPO REVISAR: tirem, acrescentem ou
+# corrijam à vontade. O sentido é uma glosa curta escrita pelo assistente, não copiada.
+# A coluna fonte diz em qual texto o termo (ou uma variante) foi encontrado; só entrou
+# termo achado em pelo menos uma fonte (partículas fáticas: marcadores da fala). Fontes:
+#   albuquerque: Gilberto Albuquerque, Dicionário de Termos Nordestinos (publicado no site de Jessier Quirino)
+#   dpopular: Dicionário Popular, 190 gírias e expressões nordestinas
+#   terra: Terra, Dicionário de nordestinês
+#   madeinbrasilis: Made in Brasilis, Gírias nordestinas
+termo,variantes,tipo,sentido,fonte
+abestado,abestada|abestados|abestalhado|abestalhada,palavra,"bobo, tolo",albuquerque; dpopular; terra; madeinbrasilis
+agoniado,agoniada|agoniados,palavra,"aflito, com pressa ou angústia",albuquerque
+aluado,aluada|aluados,palavra,"distraído, no mundo da lua",dpopular
+alumiar,alumia|alumiou|alumiando,palavra,iluminar,albuquerque
+alpercata,alpercatas|alpargata,palavra,sandália de couro do sertanejo,albuquerque; terra
+aperreado,aperreada|aperreados|aperreio|aperrear|aperreia|aperreou,palavra,"preocupado, em apuro; aperreio é o apuro",albuquerque; dpopular; madeinbrasilis
+apois,,palavra,"pois, então (começo de fala)",albuquerque
+arenga,arengas|arengar|arengando,palavra,"briga, discussão à toa",albuquerque; dpopular; terra; madeinbrasilis
+arretado,arretada|arretados|arretadas,palavra,"muito bom, admirável; ou zangado",albuquerque; dpopular; terra; madeinbrasilis
+arrochado,arrochada|arrochados,palavra,apertado; valente,albuquerque; terra
+arrudiar,arrudia|arrudiou|arrodear,palavra,"dar a volta, rodear",albuquerque; dpopular; terra; madeinbrasilis
+avalie,,palavra,imagine só,albuquerque; dpopular; terra
+avexado,avexada|avexados|avexar|avexe,palavra,apressado,albuquerque; dpopular; terra; madeinbrasilis
+baladeira,baladeiras,palavra,estilingue,albuquerque
+balaio,balaios,palavra,cesto de palha ou cipó,albuquerque; terra
+bexiga,,palavra,"usado para reforçar: da bexiga = danado, muito",albuquerque; dpopular; terra
+brenha,brenhas,palavra,"mato fechado, lugar ermo",albuquerque; terra
+bruguelo,bruguelos,palavra,criança pequena,albuquerque
+bulir,bole|buliu|bulindo,palavra,"mexer, tocar, provocar",albuquerque; dpopular; terra; madeinbrasilis
+buliçoso,buliçosa|buliçosos,palavra,"inquieto, que mexe em tudo",albuquerque; dpopular; terra; madeinbrasilis
+cabra,cabras,palavra,"sujeito, homem",albuquerque; dpopular; terra; madeinbrasilis
+cabrunco,,palavra,"coisa ruim, danada (reforço)",albuquerque; dpopular
+cafundó,cafundós,palavra,lugar muito longe,albuquerque
+carão,carões,palavra,"bronca, repreensão",albuquerque; dpopular; terra
+cismado,cismada|cismados|cismar,palavra,desconfiado,albuquerque; terra
+cuscuz,,palavra,prato de milho do café sertanejo,albuquerque
+danado,danada|danados|danadas,palavra,"esperto, ousado; ou muito (reforço)",albuquerque
+desembestado,desembestada|desembestados|desembestou,palavra,"descontrolado, em disparada",albuquerque; dpopular
+eita,eita que,palavra,interjeição de espanto,albuquerque; dpopular; madeinbrasilis
+espiar,espia|espiou|espiando,palavra,"olhar, observar",albuquerque; madeinbrasilis
+estrupício,estrupícios,palavra,"coisa ou gente desajeitada, trapalhada",albuquerque
+fuleiro,fuleira|fuleiros,palavra,"de má qualidade, sem valor",terra
+fuxico,fuxicos|fuxicar|fuxiqueiro|fuxiqueira,palavra,fofoca,dpopular; terra
+gaiato,gaiata|gaiatos,palavra,"brincalhão, engraçado",albuquerque; madeinbrasilis
+gastura,,palavra,"agonia, mal-estar",albuquerque; dpopular; terra; madeinbrasilis
+gazear,gazeou|gazeando,palavra,faltar à aula ou ao trabalho,albuquerque; dpopular; terra
+jerimum,jerimuns,palavra,abóbora,albuquerque; terra
+lapada,lapadas,palavra,pancada; ou gole de cachaça,albuquerque
+lascado,lascada|lascados|lascar,palavra,em má situação; lascar = estragar,albuquerque; dpopular; madeinbrasilis
+lonjura,lonjuras,palavra,distância grande,albuquerque; dpopular
+macaxeira,macaxeiras,palavra,"mandioca, aipim",albuquerque; terra
+magote,magotes,palavra,"bando, monte de gente",albuquerque
+malino,malina|malinos,palavra,"travesso, danado",albuquerque
+mangar,mangou|mangando|mangação,palavra,"zombar, caçoar",albuquerque; dpopular; terra; madeinbrasilis
+marmota,marmotas,palavra,"coisa estranha, esquisita",albuquerque
+matuto,matuta|matutos,palavra,"homem da roça, sertanejo simples",albuquerque; dpopular; terra
+munganga,mungangas,palavra,"careta, trejeito, palhaçada",albuquerque; dpopular; terra; madeinbrasilis
+mungunzá,,palavra,canjica de milho,albuquerque
+oxente,oxe,palavra,interjeição de espanto,albuquerque; dpopular; terra; madeinbrasilis
+pantim,pantins,palavra,"fingimento, cena, frescura",terra
+pelejar,peleja|pelejou|pelejando,palavra,"lutar, insistir muito",albuquerque; terra
+pirangueiro,pirangueira|pirangueiros,palavra,"pão-duro, mesquinho",dpopular; terra; madeinbrasilis
+presepada,presepadas|presepeiro|presepeira|presepeio,palavra,"exibição, palhaçada",albuquerque; terra
+quentura,,palavra,calor,albuquerque; dpopular
+reimoso,reimosa|reimosos,palavra,comida que faz mal; pessoa de gênio ruim,albuquerque
+rumar,rumou|rumando,palavra,"jogar, arremessar",albuquerque
+sibito,,palavra,"pessoa magrinha, miúda",dpopular
+sustança,,palavra,"força, alimento que sustenta",albuquerque
+tabaréu,tabaréus|tabaroa,palavra,"caipira, matuto",albuquerque; dpopular
+tareco,tarecos,palavra,"biscoito; ou traste, coisa velha",albuquerque
+terreiro,terreiros,palavra,"quintal, pátio de terra",albuquerque
+vixe,vixi|vige,palavra,interjeição de espanto (Virgem!),albuquerque; terra; madeinbrasilis
+vôte,vote,palavra,interjeição de nojo ou espanto,albuquerque; dpopular; terra; madeinbrasilis
+zoada,zoadas,palavra,barulho,albuquerque; dpopular; terra
+caixa dos peito,caixa do peito|caixa-do-peito,expressao,"o peito, o tórax",albuquerque; terra
+cabra da peste,cabra-da-peste|cabras da peste,expressao,"sujeito valente, admirável",albuquerque; madeinbrasilis
+cão chupando manga,,expressao,coisa ou pessoa muito feia ou terrível,albuquerque; terra
+cafundó do judas,cafundós do judas,expressao,lugar longíssimo,albuquerque
+baixa da égua,,expressao,lugar muito distante,albuquerque; dpopular
+dar um carão,deu um carão|levou um carão,expressao,dar uma bronca,albuquerque; dpopular
+de lascar o cano,,expressao,"demais, ao extremo",albuquerque
+deu o bute,,expressao,"sumiu, morreu, acabou",albuquerque
+fazer munganga,fez munganga|fazendo munganga,expressao,"fazer careta, palhaçada",dpopular
+lavar a égua,lavou a égua|lavando a égua,expressao,"aproveitar ao máximo, se dar muito bem",albuquerque; dpopular
+levar uma taboca,levou uma taboca,expressao,"levar um fora, ser enganado",albuquerque
+que só a peste,,expressao,"muito, demais",albuquerque
+sossegar o facho,sossega o facho|sossegou o facho,expressao,acalmar-se,albuquerque
+pegar o caminho da roça,pegou o caminho da roça,expressao,ir embora,albuquerque
+rebolar no mato,rebolou no mato|rebola no mato,expressao,jogar fora,albuquerque; dpopular; terra
+tá com a gota serena,com a gota serena|da gota serena,expressao,"furioso, fora de si; ou danado de bom",albuquerque; dpopular
+nas brenhas,,expressao,"no meio do mato, longe de tudo",albuquerque
+carne de sol,carne-de-sol,expressao,carne salgada e seca ao sol,albuquerque
+bater fofo,bateu fofo|bate fofo,expressao,"falhar, não cumprir o combinado",albuquerque; dpopular
+pegar no tombo,pegou no tombo,expressao,"pegar no ar, no susto",albuquerque
+caminhão de feira,,expressao,"pau de arara, transporte da feira",albuquerque
+se avexe não,não se avexe,expressao,"não tenha pressa, calma",terra
+botar boneco,botou boneco|botando boneco,expressao,"fazer escândalo, criar caso",dpopular
+amarrar o bode,amarrou o bode,expressao,ficar emburrado,madeinbrasilis
+dar no couro,deu no couro,expressao,"dar conta, aguentar",albuquerque
+estar na pindaíba,na pindaíba,expressao,estar sem dinheiro,madeinbrasilis
+né,,fatica,partícula de confirmação,albuquerque; dpopular; madeinbrasilis
+visse,,fatica,entendeu? (pernambucano),terra; madeinbrasilis
+viu,,fatica,partícula de confirmação,albuquerque; dpopular; terra; madeinbrasilis
+tá,,fatica,está bem? (confirmação),albuquerque; dpopular; terra; madeinbrasilis
+arribar,arribou|arriba,palavra,ir embora; subir,albuquerque; dpopular; terra
+armaria,,palavra,interjeição de espanto (Ave Maria!),dpopular
+arriégua,arre-égua|arre égua,palavra,interjeição de espanto,albuquerque; dpopular; madeinbrasilis
+égua,,palavra,interjeição de espanto,albuquerque; dpopular; terra; madeinbrasilis
+bagaceira,bagaceiras,palavra,"bagunça, coisa de baixo nível",dpopular
+bestar,bestando|bestou,palavra,"ficar à toa, sem fazer nada",albuquerque; dpopular; terra
+cacunda,cacundas,palavra,"costas, corcunda",albuquerque; dpopular
+cambito,cambitos,palavra,perna fina,albuquerque; dpopular; terra
+cangote,cangotes,palavra,nuca,albuquerque; dpopular
+carecer,carece|careceu,palavra,precisar,albuquerque; dpopular
+emperiquitado,emperiquitada|emperiquitados,palavra,"arrumado demais, enfeitado",albuquerque; dpopular
+enfadado,enfadada|enfadados,palavra,"cansado, entediado",albuquerque; dpopular
+escarafunchar,escarafuncha|escarafunchou,palavra,"fuçar, investigar",dpopular; terra
+estribado,estribada|estribados,palavra,"com dinheiro, bem de vida",albuquerque; dpopular; terra; madeinbrasilis
+filar,filou|filando,palavra,pegar do outro sem pagar,dpopular; terra
+findar,findou|findando,palavra,"acabar, terminar",albuquerque; dpopular
+fuleragem,fuleragens,palavra,"coisa ruim, sacanagem",dpopular
+galalau,galalaus,palavra,pessoa muito alta,albuquerque; dpopular; terra
+galego,galega|galegos,palavra,pessoa loura,albuquerque; dpopular; terra
+gaitar,gaitou|gaitando,palavra,"rir alto, gargalhar",albuquerque; dpopular
+inhaca,,palavra,mau cheiro,albuquerque; dpopular; terra
+isturdia,,palavra,"outro dia, há pouco tempo",dpopular
+lambança,lambanças,palavra,"sujeira, trapalhada",dpopular; terra
+lenga-lenga,lenga lenga,palavra,"conversa arrastada, repetitiva",albuquerque; dpopular
+leseira,,palavra,"moleza, preguiça, bobeira",albuquerque; dpopular
+maínha,mainha,palavra,"mãe, com carinho",albuquerque; dpopular; terra; madeinbrasilis
+painho,,palavra,"pai, com carinho",albuquerque; dpopular; terra; madeinbrasilis
+moído,moída|moídos,palavra,"cansado, dolorido",albuquerque; dpopular
+morgado,morgada|morgados,palavra,"cansado, desanimado",dpopular
+muriçoca,muriçocas,palavra,pernilongo,albuquerque; dpopular; terra; madeinbrasilis
+pastorar,pastora|pastorou|pastorando,palavra,"vigiar, ficar de olho",albuquerque
+pêia,peia|peias,palavra,surra,albuquerque; dpopular
+pinote,pinotes,palavra,"pulo, salto; fuga",albuquerque; dpopular
+pitoco,pitocos,palavra,"coisa pequena, curta",albuquerque; terra
+quengo,quengos,palavra,cabeça; esperteza,albuquerque; dpopular; madeinbrasilis
+relar,relou|relando,palavra,encostar de leve,albuquerque; dpopular; terra
+salseiro,salseiros,palavra,"confusão, briga",albuquerque; dpopular
+tibungar,tibungou|tibum,palavra,mergulhar,albuquerque; dpopular
+triscar,triscou|triscando,palavra,tocar de leve,albuquerque; dpopular; terra
+varapau,varapaus,palavra,pessoa muito alta e magra,albuquerque; dpopular
+venta,ventas,palavra,nariz,albuquerque; dpopular
+visagem,visagens,palavra,"assombração, aparição",albuquerque; dpopular
+xexeiro,xexeira|xexeiros,palavra,caloteiro,albuquerque; dpopular; terra
+azular,azulou,palavra,"sumir, dar o fora",albuquerque
+pegar o beco,pegou o beco|pega o beco,expressao,ir embora,albuquerque; dpopular; madeinbrasilis
+pegar ar,pegou ar,expressao,ficar zangado,dpopular
+dar fé,deu fé|dei fé,expressao,"perceber, notar",albuquerque; dpopular
+dar uma carreira,deu uma carreira,expressao,sair correndo,dpopular
+caçar conversa,caçando conversa,expressao,provocar briga,dpopular
+comer água,comendo água,expressao,beber (cachaça),albuquerque; dpopular
+fique peixe,,expressao,fique tranquilo,dpopular
+quando é fé,,expressao,"de repente, quando se vê",dpopular
+para o ano,,expressao,no ano que vem,albuquerque; dpopular
+miolo de pote,,expressao,"conversa fiada, besteira",albuquerque; dpopular; terra
+nem xite,,expressao,"nem um pouco, de jeito nenhum",albuquerque; dpopular
+não vale o que o gato enterra,,expressao,não vale nada,albuquerque; dpopular
+eita pega,eta pega,expressao,interjeição de espanto,albuquerque; dpopular
+pai d'égua,pai d egua|paidégua,expressao,muito bom,albuquerque; dpopular; terra; madeinbrasilis
+por riba,,expressao,por cima,dpopular
+a pulso,apuço,expressao,"à força, contra a vontade",albuquerque; dpopular; terra
+capar o gato,capou o gato,expressao,ir embora depressa,albuquerque
+dar vencimento a,deu vencimento,expressao,dar conta de,albuquerque
+se aviar,se avie|se aviou,expressao,apressar-se,albuquerque; dpopular
+sabe,,fatica,partícula de confirmação,albuquerque; terra

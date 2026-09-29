@@ -64,3 +64,20 @@ chama a ferramenta.
   teto de US$ 0,10 por geração. O gpt-6-luna **não entrou neste experimento**: a
   conta ficou sem crédito logo depois, e ele foi adotado sem comparação cega
   com os outros.
+
+## Imagem abaixo de `low` (28/09, mais tarde)
+
+A ferramenta de imagem não tem qualidade abaixo de `low`. O custo caiu por outros dois
+caminhos, medidos lendo o `tool_usage` de cada resposta (mesmo prompt, notícia do Trump):
+
+| Modelo de imagem | Tamanho | Hospedeiro | Tokens de imagem | Total |
+|---|---|---|---|---|
+| gpt-image-2 low (padrão anterior) | 1536×1024 | gpt-5.4-mini | ~158 | ~US$ 0,0088 |
+| gpt-image-2 low | 1024×1024 | gpt-5.4-mini | 196 | US$ 0,0095 |
+| gpt-image-1-mini low | 1024×1024 | gpt-5.4-mini | 272 | US$ 0,0052 |
+| gpt-image-1-mini low | 1536×1024 | gpt-5.4-mini | 400 | US$ 0,0067 |
+| **gpt-image-1-mini low** | **1536×1024** | **gpt-6-luna** | 400 | **US$ 0,0043** |
+
+O modelo que "hospeda" a ferramenta só repassa o prompt, mas era metade do custo; trocá-lo
+pelo gpt-6-luna não mudou o desenho. O 1024×1024 sairia cortado no cartaz 3:2. Ficou como
+opção "mínima" e padrão: gpt-image-1-mini, low, 1536×1024, hospedeiro gpt-6-luna.

@@ -130,6 +130,7 @@
       <label>Tipo <select id="c-forma"></select></label>
       <label>Estrofes <select id="c-estrofes"></select></label>
       <label>Encadeamento <select id="c-encadeamento"></select></label>
+      <label>Narrador <select id="c-narrador"></select></label>
       <div class="estimativa" id="regra"></div>
     </fieldset>
     <div class="acoes">
@@ -180,14 +181,18 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 document.querySelectorAll("[data-ex]").forEach((a) => a.onclick = () => { $("noticia").value = EXEMPLOS[a.dataset.ex]; $("url").value = ""; });
 // ---- seletores de modelo
 const NOMES = { low: "baixo", medium: "médio", high: "alto" };
-const ROTULOS_IMAGEM = { low: "rápida (low)", medium: "detalhada (medium)" };
+const ROTULOS_IMAGEM = { minima: "mínima (gpt-image-1-mini)", low: "rápida (gpt-image-2 low)", medium: "detalhada (gpt-image-2 medium)" };
+// custo medido por xilogravura (28/09, 1536×1024, hospedeiro gpt-6-luna); a detalhada não foi medida
+const CUSTO_IMAGEM = { minima: "~US$ 0,004", low: "~US$ 0,006", medium: "mais que a rápida (não medido)" };
 // custo real de texto medido em 4 notícias de teste com 3 candidatas (28/09/2026);
 // com menos candidatas sai mais barato, e o valor exato de cada geração fica em Logs
 const MEDIDO = {
   "openai:gpt-5.4-mini|medium": 0.12, "openai:gpt-5.4-mini|high": 0.29,
   "openai:gpt-5.5|low": 0.13, "openai:gpt-5.5|medium": 0.36,
 };
-const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento"];
+const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento", "narrador"];
+const ROTULOS_NARRADOR = { observador: "observador em 1ª pessoa (roteiro fixo)", feira: "causo de feira",
+  sertanejo: "sertanejo desconfiado", cantador: "cantador", conselho: "conselho de gente velha", sortear: "sortear (um por candidata)" };
 const NUMERICOS = ["candidatas", "estrofes"];
 const ROTULOS_ENCADEAMENTO = { livre: "livre", deixa: "em deixa (cantoria)" };
 let PRECOS = {}, FORMAS = {};
@@ -244,7 +249,8 @@ function porqueCusta(k, v) {
   if (k === "raciocinio")
     return `Raciocínio <b>${esc(NOMES[v] ?? v)}</b>: o modelo gasta mais tokens pensando antes de escrever, e eles são cobrados. `
       + `Num teste com o GPT-5.5, 91% do custo do texto foi raciocínio.`;
-  return `Xilogravura <b>${esc(ROTULOS_IMAGEM[v] ?? v)}</b>: mais tokens de imagem que a rápida (low), que custa uns US$ 0,01 por folheto.`;
+  return `Xilogravura <b>${esc(ROTULOS_IMAGEM[v] ?? v)}</b>: ${esc(CUSTO_IMAGEM[v] ?? "mais cara")} por imagem, `
+    + `contra ${esc(CUSTO_IMAGEM[ECONOMICO.imagem_qualidade])} da ${esc(ROTULOS_IMAGEM[ECONOMICO.imagem_qualidade])}.`;
 }
 
 // Abre o diálogo e devolve o valor do botão escolhido (Esc devolve "aoFechar").
@@ -272,7 +278,7 @@ async function confirmarOpcaoCara(k, sel) {
   if (!manter) sel.value = ECONOMICO[k];
 }
 
-fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, imagem, precos, formas, economico }) => {
+fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, precos, formas, economico }) => {
   PRECOS = precos; FORMAS = formas; ECONOMICO = economico;
   // opções livres voltam como estavam; as de custo sempre abrem no mais barato
   let salvo = {}, refazer = null;
@@ -286,11 +292,11 @@ fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, imagem,
       : opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
           k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : NUMERICOS.includes(k) ? v
           : k === "forma" ? `${v} (${formas[v].esquema})` : k === "encadeamento" ? ROTULOS_ENCADEAMENTO[v]
+          : k === "narrador" ? ROTULOS_NARRADOR[v] ?? v
           : NOMES[v] ?? v)}${CAROS.includes(k) && v === economico[k] ? " (mais barato)" : ""}</option>`).join("");
     sel.value = CAROS.includes(k) ? economico[k] : opcoes[k].includes(salvo[k]) ? salvo[k] : padrao[k];
     sel.onchange = async () => { await confirmarOpcaoCara(k, sel); estimativa(); };
   }
-  $("cfg").textContent = `imagem: ${imagem}`;
   estimativa();
   const carosDoHistorico = refazer ? CAROS.filter((k) => opcoes[k].includes(refazer[k]) && refazer[k] !== economico[k]) : [];
   if (carosDoHistorico.length) {
@@ -329,7 +335,8 @@ function tabelaEscansao(ev) {
   const total = ev.medidas.length;
   const deixa = ev.deixa.map((d) => `<div>deixa estrofe ${d.estrofe}:
     <span class="${d.ok ? "bom" : "mau"}">${esc(d.estado)}</span> <span class="sil">${esc(d.chaves.join(" · "))}</span></div>`).join("");
-  return ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + `
+  const regras = (ev.regras || []).map((r) => `<div class="mau">${rotuloVerso(r.estrofe, r.n, total)} · regra ${r.regra}: ${esc(r.motivo)}</div>`).join("");
+  return ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + regras + `
     <div>${ev.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados: ${listaReprovados(ev.reprovados, total) || "—"}</span>`}</div>
     <details><summary>relatório do escandir.py</summary><pre>${esc(ev.relatorio)}</pre></details>`;
 }

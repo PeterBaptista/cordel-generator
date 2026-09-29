@@ -102,7 +102,7 @@ const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, "");
 const NOMES = { low: "baixo", medium: "médio", high: "alto" };
 const modelo = (id) => (id || "—").replace("openai:", "");
 // só estes campos voltam para o gerador (os mesmos que o servidor aceita)
-const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento"];
+const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento", "narrador"];
 let ITENS = [], FORMAS = {};
 
 function ficha(i) {
@@ -113,7 +113,9 @@ function ficha(i) {
     ["Candidatas", c.candidatas],
     ["Sextilha", f ? `${c.forma} (${f.esquema})` : c.forma],
     ["Estrofes", c.estrofes + (c.estrofes > 1 ? (c.encadeamento === "deixa" ? ", em deixa" : ", livres") : "")],
-    ["Xilogravura", c.com_imagem === false ? "não gerada" : (c.imagem_qualidade ?? "—")],
+    ["Narrador", { observador: "observador em 1ª pessoa", sortear: "sorteado" }[c.narrador] ?? c.narrador ?? "—"],
+    ["Xilogravura", c.com_imagem === false ? "não gerada"
+      : ({ minima: "mínima (gpt-image-1-mini)", low: "rápida (gpt-image-2 low)", medium: "detalhada (gpt-image-2 medium)" }[c.imagem_qualidade] ?? c.imagem_qualidade ?? "—")],
     ["Correções", i.rodadas ?? "—"],
     ["Custo", usd(i.custo)],
   ];

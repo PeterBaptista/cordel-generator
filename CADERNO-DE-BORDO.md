@@ -24,11 +24,12 @@ as 5 gerações do grupo registradas até agora vão de 11:54 a 21:11 (horário 
 | Item | Valor |
 |---|---|
 | Modelo / versão (texto) | **gpt-6-luna** (padrão atual), raciocínio médio. O folheto 01 usou **gpt-5.5** com 3 candidatas, antes da troca. O modelo de cada chamada está no registro; o snapshot exato de cada resposta aparece no painel de logs da OpenAI, pelo `response_id`. |
-| Modelo / versão (imagem) | **gpt-image-2**, qualidade `low`, 1536×1024, chamado como ferramenta (`image_generation`) pelo **gpt-5.4-mini** |
+| Modelo / versão (imagem) | Padrão atual: **gpt-image-1-mini**, qualidade `low`, 1536×1024 (opção "mínima", ~US$ 0,004 por imagem), chamado como ferramenta (`image_generation`) pelo **gpt-6-luna**. Os folhetos 01 a 05 usaram **gpt-image-2** `low` chamado pelo **gpt-5.4-mini** (~US$ 0,009). As opções "rápida" (gpt-image-2 low) e "detalhada" (gpt-image-2 medium) continuam no seletor. |
 | Interface | API da OpenAI via **AI SDK para Python** (pacote `ai` 0.7.0), num site próprio (FastAPI) rodando localmente e no Railway |
 | Temperatura / top_p | Não configurados. Os modelos de raciocínio da OpenAI não aceitam temperatura. O painel da OpenAI registrou `top_p` 0,98 na chamada da imagem, que é o padrão do serviço, não uma escolha nossa. |
-| Semente fixa | **Não há.** A API usada não aceita semente para esses modelos: a mesma notícia gera versos diferentes a cada vez. A variedade é controlada pelo **ângulo** sorteado (4 opções, no prompt) e a reprodutibilidade vem de registrar tudo (prompt, saída bruta, `response_id`), não de repetir a geração. |
-| Script verificador | `scripts/escandir.py` (métrica e rima), mais dois critérios no gerador: palavra final repetida e ligação em deixa |
+| Semente fixa | **Não há.** A API usada não aceita semente para esses modelos: a mesma notícia gera versos diferentes a cada vez. A variedade é controlada pelo **narrador** escolhido (seletor; com "sortear", um ângulo por candidata) e a reprodutibilidade vem de registrar tudo (prompt, saída bruta, `response_id`), não de repetir a geração. |
+| Script verificador | `scripts/escandir.py` (métrica e rima), mais critérios no gerador: palavra final repetida, ligação em deixa e as regras 1, 3, 7 e 9 do grupo (ver "Regras do grupo" abaixo) |
+| Dicionário nordestino | `dados/dicionario_nordestino.csv`: 158 termos (108 palavras, 45 expressões, 5 partículas fáticas), com a fonte de cada um |
 | Rodou offline? | O verificador sim (Python puro). A geração não: depende da API paga da OpenAI, a uns **US$ 0,01 a 0,02 por folheto** com o padrão atual (custos em `/logs` e no registro). |
 
 **Por que esta ferramenta e não outra:** precisávamos de quatro capacidades.
@@ -53,9 +54,9 @@ Uma notícia até o folheto pronto, no site (`/`):
 | 0 | **Escolher a notícia** e colar o link (o servidor extrai o texto com `trafilatura`) ou o texto | **Manual** (grupo) |
 | 0b | **Escolher os parâmetros** no site: modelo, raciocínio, candidatas, tipo de sextilha, estrofes, encadeamento, qualidade da imagem | **Manual** (grupo) |
 | 1 | **Fato**: o modelo resume a notícia em uma frase, uma manchete e 3 a 5 imagens concretas | Automático |
-| 2 | **Poema**: o modelo planeja as palavras finais de cada estrofe e escreve os versos, pelo ângulo sorteado. Com mais de uma candidata, elas rodam em paralelo, cada uma por um ângulo | Automático |
+| 2 | **Poema**: o modelo planeja as palavras finais e os termos do dicionário de cada estrofe e escreve os versos, na voz do narrador escolhido, seguindo as regras do grupo. Com mais de uma candidata, elas rodam em paralelo | Automático |
 | 2b | **Júri** (só com 2 ou 3 candidatas): o modelo escolhe a melhor, preferindo as aprovadas pelo verificador | Automático |
-| 3 | **Verificador**: `escandir.py` mede cada estrofe (7 sílabas, esquema de rima), mais palavra final repetida e, no modo em deixa, a ligação entre estrofes | Automático |
+| 3 | **Verificador**: `escandir.py` mede cada estrofe (7 sílabas, esquema de rima), mais palavra final repetida, a ligação em deixa e as regras 1, 3, 7 e 9 do grupo | Automático |
 | 4 | **Correção**: o modelo reescreve **só os versos reprovados** (os aprovados são bloqueados), até 3 rodadas ou até o teto de custo | Automático |
 | 5 | **Xilogravura**: gerada em paralelo com o texto, a partir do fato | Automático |
 | 6 | **Registro**: aprovado vai para `folhetos/`, reprovado para `descarte/` com o motivo na primeira linha; tudo no `caderno/<id>.json` | Automático |
@@ -109,6 +110,35 @@ versos 2, 4 e 6 com a mesma palavra ("Pequim") para acertar a rima; o critério 
 criado por causa disso e fica no gerador (`app/workflow.py`, `palavras_repetidas`),
 fora do verificador.
 
+**Regras do grupo** (enviadas por um colega em 28/09, valem para toda geração a partir de
+então; ✍️ Grupo: citem-nas no EIXO.md, que é de vocês). As que o código confere reprovam o
+verso e mandam para correção, como a métrica; as outras vão no prompt e nos critérios do júri.
+
+| # | Regra | Como é aplicada |
+|---|---|---|
+| 1 | Sem mesóclise nem ênclise | **verificada**: palavra com hífen + pronome ("disse-me", "dir-lhe-ei"); compostos como "bem-te-vi" não contam |
+| 2 | Não gerar imagem | a xilogravura já é opcional (caixa "gerar xilogravura"); a modalidade é decisão do grupo |
+| 3 | ≥1 termo do dicionário nordestino a cada 2 versos | **verificada** contra o dicionário, par a par (1–2, 3–4, 5–6) |
+| 4 | As outras palavras no mesmo tom | prompt + júri |
+| 5 | Não desviar da formalidade do cordel | prompt |
+| 6 | 6 estrofes | seletor Estrofes (de 1 a 6) |
+| 7 | Cada estrofe com um termo de mais de uma palavra | **verificada**: ≥1 expressão do dicionário por estrofe |
+| 8 | Vocativo só no início ou fim do verso | prompt + júri (detectar vocativo exigiria análise sintática) |
+| 9 | Partícula fática só no início ou fim do verso | **verificada** para "né" e "visse"; "viu", "tá" e "sabe" também são verbos comuns, então ficam só no prompt |
+| 10 | Narrador observador em 1ª pessoa, roteiro fixo | seletor Narrador; padrão "observador" (onde eu estava → o que vi → o que ouvi dizer → o que penso) |
+| 11 | Erros de flexão de número de propósito | prompt; a correção é instruída a não "consertá-los" |
+| 12 | Termo do dicionário em contexto, nunca solto | prompt (cada termo vai com o sentido) + júri |
+
+O **dicionário** foi montado pelo assistente de IA **para o grupo revisar** (✍️ Grupo: tirem,
+acrescentem, corrijam). Fontes: Gilberto Albuquerque, *Dicionário de Termos Nordestinos*
+(publicado no site de Jessier Quirino); Dicionário Popular, "190 gírias e expressões
+nordestinas"; Terra, "Dicionário de nordestinês"; Made in Brasilis, "Gírias nordestinas". Só
+entrou termo encontrado em pelo menos uma fonte (13 lembrados de memória ficaram de fora,
+como "xodó" e "chamego"); o sentido é uma glosa curta escrita pelo assistente, não copiada.
+Termos vulgares ou pejorativos das fontes foram excluídos, assim como palavras que em
+português comum significam outra coisa ("abuso", "pisa"). O script está em
+`desenvolvimento/dicionario/montar.py`.
+
 **Testes de desenvolvimento.** Enquanto o gerador era construído, 9 gerações de teste e
 um experimento de modelos foram rodados com notícias de exemplo. Não são artefatos da
 coleção e ficam em [`desenvolvimento/`](desenvolvimento/); o experimento está descrito
@@ -161,6 +191,12 @@ Observado nos registros e nos experimentos de 28/09 (números em
   mais próxima da xilogravura.
 - **Custo no raciocínio.** No folheto 01 (gpt-5.5), 91% do custo de texto foram tokens
   de raciocínio, não os versos.
+
+- **Termo presente não é termo com sentido.** As regras 3 e 7 são conferidas pela
+  presença do termo, e o modelo às vezes enfia o termo só para passar: no primeiro
+  teste com as regras (gpt-6-luna, raciocínio baixo), saiu "Robô tem caixa dos peito" e
+  "Na feira, caixa dos peito espanta". Isso fere a regra 12, que o código não consegue
+  conferir; só o júri pesa, e o júri só roda com 2 ou mais candidatas.
 
 ✍️ Grupo: acrescentem o que vocês viram nas gerações da coleção.
 

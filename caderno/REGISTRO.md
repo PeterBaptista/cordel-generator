@@ -1,6 +1,6 @@
 # Registro por artefato
 
-> Gerado por `scripts/caderno.py` a partir de `caderno/*.json` em 28/09/2026 21:17. **Não edite à mão**: rode o script de novo. O que só o grupo sabe fica no [CADERNO-DE-BORDO.md](../CADERNO-DE-BORDO.md).
+> Gerado por `scripts/caderno.py` a partir de `caderno/*.json` em 28/09/2026 23:44. **Não edite à mão**: rode o script de novo. O que só o grupo sabe fica no [CADERNO-DE-BORDO.md](../CADERNO-DE-BORDO.md).
 
 5 gerações, custo total estimado US$ 0,4127.
 
@@ -32,6 +32,7 @@
 | Candidatas | 3 |
 | Sextilha | aberta (ABCBDB) |
 | Estrofes | 1 |
+| Narrador | sorteado entre os ângulos |
 | Xilogravura | gpt-image-2, qualidade medium, 1536×1024 |
 
 **Fato extraído (etapa 1)**
@@ -296,6 +297,7 @@ Use encanto com cautela
 | Candidatas | 1 |
 | Sextilha | aberta (ABCBDB) |
 | Estrofes | 1 |
+| Narrador | sorteado entre os ângulos |
 | Xilogravura | gpt-image-2, qualidade low, 1536×1024 |
 
 **Fato extraído (etapa 1)**
@@ -712,6 +714,7 @@ Fez do cálculo um trovão
 | Candidatas | 1 |
 | Sextilha | aberta (ABCBDB) |
 | Estrofes | 4 |
+| Narrador | sorteado entre os ângulos |
 | Xilogravura | gpt-image-2, qualidade low, 1536×1024 |
 
 **Fato extraído (etapa 1)**
@@ -1623,6 +1626,7 @@ Tela não colhe feijão
 | Candidatas | 1 |
 | Sextilha | aberta (ABCBDB) |
 | Estrofes | 1 |
+| Narrador | sorteado entre os ângulos |
 | Xilogravura | gpt-image-2, qualidade low, 1536×1024 |
 
 **Fato extraído (etapa 1)**
@@ -1918,6 +1922,7 @@ Quem bem recebe, tem pão
 | Candidatas | 1 |
 | Sextilha | aberta (ABCBDB) |
 | Estrofes | 3 |
+| Narrador | sorteado entre os ângulos |
 | Xilogravura | gpt-image-2, qualidade low, 1536×1024 |
 
 **Fato extraído (etapa 1)**

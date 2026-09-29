@@ -22,7 +22,8 @@ def config(log: dict) -> tuple[dict, bool]:
     aí deduz das chamadas registradas e avisa (segundo valor = deduzida)."""
     if log.get("config"):
         # configs de antes dos tipos de sextilha: só existia 1 estrofe aberta e livre
-        return {"forma": "aberta", "estrofes": 1, "encadeamento": "livre", **log["config"]}, False
+        return {"forma": "aberta", "estrofes": 1, "encadeamento": "livre", "narrador": "sortear",
+                **log["config"]}, False
     chamadas = log.get("chamadas", [])
     texto = next((c for c in chamadas if "image_generation" not in c.get("modelo", "")), {})
     xilo = next((c for c in chamadas if "image_generation" in c.get("modelo", "")), None)
@@ -32,7 +33,7 @@ def config(log: dict) -> tuple[dict, bool]:
         qualidade = m.group(1) if m else "medium"  # antes do seletor, era sempre medium
     return {"texto": texto.get("modelo"), "raciocinio": texto.get("reasoning_effort"),
             "candidatas": len(log.get("candidatas") or []) or 1, "imagem_qualidade": qualidade,
-            "forma": "aberta", "estrofes": 1, "encadeamento": "livre",
+            "forma": "aberta", "estrofes": 1, "encadeamento": "livre", "narrador": "sortear",
             "com_imagem": xilo is not None}, True
 
 
