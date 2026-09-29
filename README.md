@@ -18,8 +18,10 @@ O parágrafo completo está em [`EIXO.md`](EIXO.md).
 |---|---|
 | `folhetos/` | os artefatos que entraram na coleção |
 | `descarte/` | o que ficou de fora, com o motivo no topo de cada arquivo |
-| `scripts/` | `escandir.py`, o verificador de métrica e rima |
-| `CADERNO-DE-BORDO.md` | prompts na íntegra, sementes, parâmetros, o que foi na mão |
+| `scripts/` | `escandir.py`, o verificador de métrica e rima; `caderno.py`, que gera `caderno/REGISTRO.md` |
+| `CADERNO-DE-BORDO.md` | ferramentas, encadeamento, o que a máquina não deu conta, e os campos do grupo |
+| `caderno/` | um JSON por geração, `REGISTRO.md` (registro por artefato, gerado) e `metrica.csv` |
+| `desenvolvimento/` | gerações de teste e experimentos de modelo feitos ao construir o gerador (não são coleção) |
 
 ## Verificador
 

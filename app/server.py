@@ -2,8 +2,6 @@
 
 import base64
 import json
-import re
-from datetime import datetime
 import os
 import secrets
 import traceback
@@ -13,7 +11,7 @@ from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import custos, prompts
+from . import cadernos, custos, prompts
 from .workflow import IMAGE_MODEL, OPCOES, PASTAS, RAIZ, Config, run_cordel
 
 app = FastAPI(title="Do 7 ao 6")
@@ -64,42 +62,7 @@ def logs_pagina():
 
 
 def _cadernos():
-    """Os cadernos de bordo, do mais novo ao mais antigo."""
-    for f in sorted(PASTAS["caderno"].glob("*.json"), reverse=True):
-        try:
-            yield f, json.loads(f.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-
-
-def _config(log: dict) -> tuple[dict, bool]:
-    """Os parâmetros da geração. Cadernos anteriores aos seletores não os guardavam:
-    aí deduz das chamadas registradas e avisa (segundo valor = deduzida)."""
-    if log.get("config"):
-        # configs de antes dos tipos de sextilha: só existia 1 estrofe aberta e livre
-        return {"forma": "aberta", "estrofes": 1, "encadeamento": "livre", **log["config"]}, False
-    chamadas = log.get("chamadas", [])
-    texto = next((c for c in chamadas if "image_generation" not in c.get("modelo", "")), {})
-    xilo = next((c for c in chamadas if "image_generation" in c.get("modelo", "")), None)
-    qualidade = None
-    if xilo:
-        m = re.search(r"image_generation\([^,)]+, (\w+)\)", xilo["modelo"])
-        qualidade = m.group(1) if m else "medium"  # antes do seletor, era sempre medium
-    return {"texto": texto.get("modelo"), "raciocinio": texto.get("reasoning_effort"),
-            "candidatas": len(log.get("candidatas") or []) or 1, "imagem_qualidade": qualidade,
-            "forma": "aberta", "estrofes": 1, "encadeamento": "livre",
-            "com_imagem": xilo is not None}, True
-
-
-def _hora(iso: str | None) -> str | None:
-    """Cadernos antigos guardavam a hora sem fuso, no relógio da máquina que os
-    escreveu (esta mesma): completa com o fuso daqui para o navegador converter."""
-    if not iso:
-        return None
-    try:
-        return datetime.fromisoformat(iso).astimezone().isoformat(timespec="seconds")
-    except ValueError:
-        return iso
+    return cadernos.ler(PASTAS["caderno"])
 
 
 def _arquivos(f, log: dict) -> dict:
@@ -122,9 +85,9 @@ def logs():
                 "custo": cc["total"], "imagem_medida": cc["imagem_medida"],
                 "segundos": c.get("segundos"), "response_id": c.get("response_id"),
             })
-        config, _ = _config(log)
+        config, _ = cadernos.config(log)
         geracoes.append({
-            "id": f.stem, "inicio": _hora(log.get("inicio")), "fim": _hora(log.get("fim")),
+            "id": f.stem, "inicio": cadernos.hora(log.get("inicio")), "fim": cadernos.hora(log.get("fim")),
             "config": config,
             "manchete": (log.get("fato") or {}).get("titulo") or f.stem,
             "url": log.get("url"), "entra": log.get("entra"),
@@ -148,14 +111,14 @@ def historico():
     """As sextilhas geradas, com os parâmetros que as produziram."""
     itens = []
     for f, log in _cadernos():
-        config, deduzida = _config(log)
+        config, deduzida = cadernos.config(log)
         fato = log.get("fato") or {}
         # antes das várias estrofes, o caderno guardava uma lista plana de versos
         estrofes = log.get("estrofes_finais") or ([log["versos_finais"]] if log.get("versos_finais") else [])
         escolhida = (log.get("escolhida") or {}).get("indice")
         candidatas = log.get("candidatas") or []
         itens.append({
-            "id": f.stem, "inicio": _hora(log.get("inicio")),
+            "id": f.stem, "inicio": cadernos.hora(log.get("inicio")),
             "manchete": fato.get("titulo") or f.stem, "fato": fato.get("fato"),
             "url": log.get("url"), "fonte": log.get("fonte"), "origem": log.get("origem"),
             "config": config, "config_deduzida": deduzida,
