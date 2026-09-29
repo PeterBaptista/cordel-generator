@@ -1,0 +1,231 @@
+{
+  "inicio": "2026-09-28T15:42:31+00:00",
+  "url": "https://www.bbc.com/portuguese/articles/c4gkd6qp22no.amp",
+  "config": {
+    "texto": "openai:gpt-6-luna",
+    "raciocinio": "medium",
+    "candidatas": 1,
+    "imagem_qualidade": "low",
+    "com_imagem": true
+  },
+  "chamadas": [
+    {
+      "etapa": "fato",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_02e9511ba456102d006aba8ae7f14087d28afdb6a7ed3b39a6",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "O matemático que passou 7 anos tentando resolver problema solucionado por amador com IA - BBC News Brasil\n\nO matemático que passou 7 anos tentando resolver problema solucionado por amador com IA\n  - Author, Charlotte McDonald e Josh McMinn\n  - Role, Programa More or Less, BBC Radio 4\n- Published\n- Tempo de leitura: 6 min\nHá centenas de anos, matemáticos quebram a cabeça com problemas extremamente difíceis que ninguém conseguia resolver.\nEles refletem sobre essas questões, discutem entre si e publicam artigos a respeito. Chegar a uma solução pode ocupar uma vida inteira de trabalho.\nMas, no dia 13/4 deste ano, foi a inteligência artificial (IA) que resolveu um problema matemático que até então ninguém havia conseguido solucionar: o problema 1196 de Erdős.\nEspecialistas na área ficaram surpresos e, claro, muito interessados.\n\"Depois de talvez uma hora lendo e conferindo o resultado bruto produzido pela IA, ficou muito claro para mim que estava correto e que a ideia era muito boa\", afirma o matemático Jared Duker Lichtman, da Universidade Stanford, nos Estados Unidos.\nLichtman trabalhava havia sete anos nesse problema, que acabara de ser resolvido por um entusiasta da matemática que inseriu um único prompt (comando enviado ao sistema de IA) em uma ferramenta de IA.\nMas em que consiste esse problema? E o que significa para a matemática uma IA ter conseguido resolvê-lo?\nSe você acha que já sabe onde esta história vai dar, vale lembrar que, no mundo da matemática, as respostas costumam surpreender.\nUm gênio itinerante\nProblemas matemáticos que continuam sem solução têm uma certa aura de mistério.\nO mais conhecido talvez seja o último teorema de Fermat, que apareceu em uma anotação manuscrita na margem de uma página de um livro do matemático do século 17 Pierre de Fermat (1601-65).\nAlém do enigma que deixou para a posteridade, Fermat escreveu: \"Tenho uma solução, mas ela é longa demais para caber na margem.\"\nAté onde se sabe, Fermat levou essa solução para o túmulo.\n\"Foi preciso esperar vários séculos até que o problema finalmente fosse resolvido, em 1994, e o matemático que conseguiu isso usou áreas da matemática que nem sequer existiam na época de Fermat\", afirma a matemática Katie Steckles.\nE há muitos outros, com todo tipo de nome curioso: a conjectura de Collatz, a hipótese de Riemann, os problemas de Hilbert e os problemas do milênio...\n\"Ah, há muitos!\", exclama Steckles. \"E encontramos mais a cada dia. Cada área da matemática tem suas grandes questões\", disse ela ao programa More or Less, da Rádio 4 da BBC.\nEntre esses desafios está uma enorme coleção conhecida como \"problemas de Erdős\", formulados por uma das figuras mais prolíficas e afáveis da matemática.\nO húngaro Paul Erdős (1913–96) foi um gênio extraordinário, não apenas pelas diversas contribuições que deixou para a matemática, mas também pelo modo como viveu.\nNunca teve casa nem posses além de uma mala quase vazia. Erdős queria era ser uma espécie de viajante da matemática, indo a qualquer lugar do mundo onde houvesse algo interessante acontecendo e espaço para pensar e trocar ideias.\nDurante décadas viajando e trabalhando com outros matemáticos, Erdős não apenas formulou mais de 1,2 mil problemas, como também resolveu muitos deles e encontrou demonstrações surpreendentemente simples para teoremas que já eram considerados solucionados.\nO problema\nEm 2023, essa enorme coleção de problemas foi reunida em um site para que matemáticos pudessem ver quais ainda estavam em aberto e compartilhar suas demonstrações.\n\"A primeira vez que ouvi falar da conjectura de Erdős sobre conjuntos primitivos, eu estava no último ano da faculdade\", lembra Lichtman.\n\"E fiquei completamente fascinado pelo problema.\"\nOs problemas de Erdős abordados nesta história envolvem os chamados conjuntos primitivos.\nVocê provavelmente conhece os números primos: números inteiros que só podem ser divididos exatamente por 1 e por eles mesmos. Um conjunto primitivo segue uma lógica parecida: escolhem-se números de modo que nenhum deles possa ser dividido exatamente por outro, embora eles não precisem ser números primos.\nPor exemplo, 4, 5 e 6 formam um conjunto primitivo: não é possível dividir 4 por 5 ou por 6 e obter um número inteiro. O mesmo vale para 5 e 6.\nNão é preciso avançar mais na matemática por trás desses problemas de Erdős: daí em diante, tudo fica complexo demais.\nVoltemos à história.\n\"No meu tempo livre e à noite, eu continuava pensando nesse problema e não conseguia deixá-lo de lado. Acabei resolvendo depois de quatro anos me recusando a desistir\", conta Lichtman.\nO problema que levou todos esses anos para resolver era o 164 de Erdős, que mais tarde serviria de base para sua tese de doutorado.\nMas esse não era o único que despertava seu interesse. Havia outros problemas de Erdős relacionados a ele, entre os quais o problema 1196.\nLichtman também vinha pensando nele durante todo esse período.\n\"O que acontece se todos os números de um conjunto primitivo forem maiores que X e quisermos entender como sua pontuação pode crescer à medida que X tende ao infinito?\"\nEle continuou pensando no assunto e trabalhando no problema por mais três anos.\nAté que, certa manhã, acordou e encontrou um email em seu computador.\nA mensagem dizia que um entusiasta da matemática havia apresentado o problema ao GPT-5.4 Pro, um modelo de IA, e obtido resultados que, segundo ele, poderiam constituir uma solução.\n\"Comecei a ler o que ele havia produzido. O resultado parecia muito preliminar e bastante desorganizado\", lembra Lichtman.\nA demonstração havia sido obtida por Liam Price, britânico de 23 anos sem formação universitária em matemática.\n\"Usei uma IA da OpenAI para resolver o problema 1196 de Erdős\", contou Price.\n\"Pensei em um prompt engenhoso, dei a instrução à IA e, depois de cerca de 80 minutos de processamento, ela me apresentou uma solução. Então passei o resultado para outra versão do modelo e disse: 'Aqui está a solução. Você pode conferir e verificar se está correta?'. A resposta foi que, em essência, ela (a IA) não havia encontrado nenhum erro no raciocínio\", acrescentou Price.\nLichtman ficou ao mesmo tempo perplexo e feliz.\nO saber\nA IA já havia ajudado a resolver outros problemas de Erdős — na verdade, várias dezenas. Mas muitos eram problemas relativamente simples e pouco conhecidos.\nO problema 1196 era diferente. Além de desafiar matemáticos há décadas, o GPT-5.4 Pro encontrou uma nova forma de abordá-lo, por meio de um método que havia passado despercebido pela literatura matemática durante todo esse tempo. E o método não resolveu apenas o problema 1196, mas também outras questões relacionadas.\nLichtman não se incomodou com o fato de um modelo de IA ter chegado à solução antes dele. \"Se outro matemático resolve um problema que interessa a você, não acho que alguém vá perguntar se isso incomoda\", explica.\n\"Você simplesmente quer saber a resposta e ter acesso a ela, independentemente de como ela foi obtida\", acrescenta.\nAlém disso, a IA precisou de alguém como Lichtman, com conhecimento profundo o bastante de matemática para olhar aquele resultado ainda bruto e perceber que havia ali algo valioso.\n\"Fiquei imediatamente muito feliz e, na verdade, comecei a trabalhar nesses outros grupos de problemas para ver se conseguia aplicar essa ideia\", conta Lichtman.\nLogo surgiram outros avanços. Poucas semanas depois, um modelo da OpenAI refutou uma conjectura de Erdős que permanecia sem solução havia quase 80 anos.\nNo dia 1º/8, a empresa anunciou outros dez avanços em problemas matemáticos que estavam em aberto havia muito tempo. Os trabalhos tiveram a participação de matemáticos, que ajudaram a analisar, desenvolver e formalizar os resultados.\n\"Acho que chegamos a um ponto em que a IA consegue trazer ideias e intuições, como faria um colega de confiança, e às vezes essas ideias realmente dão resultado\", afirma Lichtman.\n\"Estamos numa fase em que a IA começa a funcionar, de certa forma, como um colaborador com quem podemos trocar ideias e de quem podemos receber comentários.\"\n*Esta reportagem foi adaptada do programa More or Less, da BBC R",
+      "saida_bruta": "{\"fato\":\"Um entusiasta britânico usou IA para resolver o problema 1196 de Erdős, que Jared Lichtman estudava havia sete anos.\",\"titulo\":\"Amador resolve desafio matemático com IA\",\"imagens_concretas\":[\"Liam Price diante de um computador, digitando um comando para a IA\",\"Uma tela com a demonstração matemática gerada pelo GPT-5.4 Pro\",\"Jared Lichtman lendo no computador o resultado recebido por email\",\"Cadernos de matemática abertos sobre uma mesa\"]}",
+      "tokens": {
+        "input_tokens": 2024,
+        "output_tokens": 231,
+        "reasoning_tokens": 112,
+        "cache_read_tokens": 0
+      },
+      "segundos": 4.0
+    },
+    {
+      "etapa": "xilogravura",
+      "modelo": "openai:gpt-5.4-mini + image_generation(gpt-image-2, low)",
+      "modelo_imagem": "gpt-image-2",
+      "response_id": "resp_0ce48d18c22d8c5a006aba8aebb40887d2bd3fc130abf54f5b",
+      "usuario": "Gere uma imagem horizontal: ilustração de folheto de cordel em xilogravura tradicional nordestina. Preto e branco puro, alto contraste, tinta preta chapada sobre papel branco, sem cinza, sem degradê, sem sombreado suave. Traço grosso de goiva, céu e chão preenchidos com linhas paralelas entalhadas, figuras em silhueta com poucos detalhes, borda retangular preta ao redor da cena. ABSOLUTAMENTE NENHUM texto, letra, palavra, número, placa, logotipo ou marca de empresa na imagem. Cena: Um entusiasta britânico usou IA para resolver o problema 1196 de Erdős, que Jared Lichtman estudava havia sete anos. Elementos: Liam Price diante de um computador, digitando um comando para a IA; Uma tela com a demonstração matemática gerada pelo GPT-5.4 Pro; Jared Lichtman lendo no computador o resultado recebido por email; Cadernos de matemática abertos sobre uma mesa.",
+      "tokens": {
+        "input_tokens": 2612,
+        "output_tokens": 201,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "tokens_imagem": {
+        "texto_entrada": 188,
+        "imagem_entrada": 0,
+        "imagem_saida": 158
+      },
+      "segundos": 23.2
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_05332a7e20c06494006aba8aebc50087d28002cedda30cf314",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Rima ABCBDB: os versos 2, 4 e 6 rimam entre si (de preferência rima consoante,\n  igual a partir da vogal tônica). Os versos 1, 3 e 5 são livres.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- rimas: as TRÊS palavras finais dos versos 2, 4 e 6. Têm que ser palavras\n  DIFERENTES que rimam entre si (ex.: sertão / razão / clarão). Repetir a mesma\n  palavra na rima é proibido: o verificador reprova.\nDepois escreva os 6 versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo na estrofe:\n  nome de lugar, pessoa ou empresa aparece no máximo UMA vez.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: Um entusiasta britânico usou IA para resolver o problema 1196 de Erdős, que Jared Lichtman estudava havia sete anos.\nImagens possíveis: Liam Price diante de um computador, digitando um comando para a IA; Uma tela com a demonstração matemática gerada pelo GPT-5.4 Pro; Jared Lichtman lendo no computador o resultado recebido por email; Cadernos de matemática abertos sobre uma mesa\nÂngulo: como cantador que anuncia uma notícia de longe, com espanto e maravilha\n\nPlaneje e escreva a sextilha.",
+      "saida_bruta": "{\"angulo\":\"Anuncio de além-mar, como cantador espantado com uma máquina que virou trovão de feira.\",\"rimas\":[\"clarão\",\"questão\",\"trovão\"],\"versos\":[\"De além-mar vem a notícia\",\"Britânico fez clarão\",\"IA já lhe traçou a prova\",\"Sete anos nessa questão\",\"Jared leu tal resultado\",\"Fez do cálculo um trovão\"]}",
+      "tokens": {
+        "input_tokens": 687,
+        "output_tokens": 3641,
+        "reasoning_tokens": 3545,
+        "cache_read_tokens": 0
+      },
+      "segundos": 45.2
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_035cd710403686c4006aba8b18e5c487d2b92deb55f51bbd6f",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige sextilhas de cordel (7 sílabas poéticas, rima ABCBDB).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça a estrofe:\n- A palavra final do verso corrigido não pode repetir nenhuma outra palavra final\n  da estrofe. Para a rima B, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com o número dele (1 a 6).",
+      "usuario": "Sextilha atual:\n1. De além-mar vem a notícia\n2. Britânico fez clarão\n3. IA já lhe traçou a prova\n4. Sete anos nessa questão\n5. Jared leu tal resultado\n6. Fez do cálculo um trovão\n\nRelatório do verificador:\n=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  XX v3 [8] IA já lhe traçou a prova\n         I / a / JÁ / lhe / tra / ÇOU / a / PRO / (va)\n       ? elisao opcional em 'çou a' (a anterior e tonica)\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos 3.",
+      "saida_bruta": "{\"versos\":[{\"n\":3,\"verso\":\"Máquina deu resposta\"}]}",
+      "tokens": {
+        "input_tokens": 666,
+        "output_tokens": 733,
+        "reasoning_tokens": 704,
+        "cache_read_tokens": 0
+      },
+      "segundos": 8.8
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0ac0c6da3b93d613006aba8b21aaf887d29f6461f8a778e081",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige sextilhas de cordel (7 sílabas poéticas, rima ABCBDB).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça a estrofe:\n- A palavra final do verso corrigido não pode repetir nenhuma outra palavra final\n  da estrofe. Para a rima B, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com o número dele (1 a 6).",
+      "usuario": "Sextilha atual:\n1. De além-mar vem a notícia\n2. Britânico fez clarão\n3. Máquina deu resposta\n4. Sete anos nessa questão\n5. Jared leu tal resultado\n6. Fez do cálculo um trovão\n\nRelatório do verificador:\n=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  XX v3 [6] Máquina deu resposta\n         MÁ / qui / na / DEU / res / POS / (ta)\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos 3.",
+      "saida_bruta": "{\"versos\":[{\"n\":3,\"verso\":\"O invento deu resposta\"}]}",
+      "tokens": {
+        "input_tokens": 635,
+        "output_tokens": 665,
+        "reasoning_tokens": 635,
+        "cache_read_tokens": 0
+      },
+      "segundos": 9.5
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0520ef1f36c948b1006aba8b2b40b087d280aa2b2b7f08c765",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige sextilhas de cordel (7 sílabas poéticas, rima ABCBDB).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça a estrofe:\n- A palavra final do verso corrigido não pode repetir nenhuma outra palavra final\n  da estrofe. Para a rima B, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com o número dele (1 a 6).",
+      "usuario": "Sextilha atual:\n1. De além-mar vem a notícia\n2. Britânico fez clarão\n3. O invento deu resposta\n4. Sete anos nessa questão\n5. Jared leu tal resultado\n6. Fez do cálculo um trovão\n\nRelatório do verificador:\n=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  XX v3 [6] O invento deu resposta\n         o_in / VEN / to / DEU / res / POS / (ta)\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos 3.",
+      "saida_bruta": "{\"versos\":[{\"n\":3,\"verso\":\"Uma máquina vingou\"}]}",
+      "tokens": {
+        "input_tokens": 639,
+        "output_tokens": 375,
+        "reasoning_tokens": 346,
+        "cache_read_tokens": 0
+      },
+      "segundos": 6.3
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "versos": [
+        "De além-mar vem a notícia",
+        "Britânico fez clarão",
+        "IA já lhe traçou a prova",
+        "Sete anos nessa questão",
+        "Jared leu tal resultado",
+        "Fez do cálculo um trovão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  XX v3 [8] IA já lhe traçou a prova\n         I / a / JÁ / lhe / tra / ÇOU / a / PRO / (va)\n       ? elisao opcional em 'çou a' (a anterior e tonica)\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 1,
+      "versos": [
+        "De além-mar vem a notícia",
+        "Britânico fez clarão",
+        "Máquina deu resposta",
+        "Sete anos nessa questão",
+        "Jared leu tal resultado",
+        "Fez do cálculo um trovão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  XX v3 [6] Máquina deu resposta\n         MÁ / qui / na / DEU / res / POS / (ta)\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 2,
+      "versos": [
+        "De além-mar vem a notícia",
+        "Britânico fez clarão",
+        "O invento deu resposta",
+        "Sete anos nessa questão",
+        "Jared leu tal resultado",
+        "Fez do cálculo um trovão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  XX v3 [6] O invento deu resposta\n         o_in / VEN / to / DEU / res / POS / (ta)\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 3,
+      "versos": [
+        "De além-mar vem a notícia",
+        "Britânico fez clarão",
+        "Uma máquina vingou",
+        "Sete anos nessa questão",
+        "Jared leu tal resultado",
+        "Fez do cálculo um trovão"
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] De além-mar vem a notícia\n         de_a / LÉM / mar / VEM / a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Britânico fez clarão\n         bri / TÂ / ni / co / FEZ / cla / RÃO\n  ok v3 [7] Uma máquina vingou\n         U / ma / MÁ / qui / na / vin / GOU\n  ok v4 [7] Sete anos nessa questão\n         SE / TE_A / nos / NES / sa / ques / TÃO\n  ok v5 [7] Jared leu tal resultado\n         JA / red / LEU / TAL / re / sul / TA / (do)\n  ok v6 [7] Fez do cálculo um trovão\n         FEZ / do / CÁL / cu / lo_um / tro / VÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "O matemático que passou 7 anos tentando resolver problema solucionado por amador com IA - BBC News Brasil\n\nO matemático que passou 7 anos tentando resolver problema solucionado por amador com IA\n  - Author, Charlotte McDonald e Josh McMinn\n  - Role, Programa More or Less, BBC Radio 4\n- Published\n- Tempo de leitura: 6 min\nHá centenas de anos, matemáticos quebram a cabeça com problemas extremamente difíceis que ninguém conseguia resolver.\nEles refletem sobre essas questões, discutem entre si e publicam artigos a respeito. Chegar a uma solução pode ocupar uma vida inteira de trabalho.\nMas, no dia 13/4 deste ano, foi a inteligência artificial (IA) que resolveu um problema matemático que até então ninguém havia conseguido solucionar: o problema 1196 de Erdős.\nEspecialistas na área ficaram surpresos e, claro, muito interessados.\n\"Depois de talvez uma hora lendo e conferindo o resultado bruto produzido pela IA, ficou muito claro para mim que estava correto e que a ideia era muito boa\", afirma o matemático Jared Duker Lichtman, da Universidade Stanford, nos Estados Unidos.\nLichtman trabalhava havia sete anos nesse problema, que acabara de ser resolvido por um entusiasta da matemática que inseriu um único prompt (comando enviado ao sistema de IA) em uma ferramenta de IA.\nMas em que consiste esse problema? E o que significa para a matemática uma IA ter conseguido resolvê-lo?\nSe você acha que já sabe onde esta história vai dar, vale lembrar que, no mundo da matemática, as respostas costumam surpreender.\nUm gênio itinerante\nProblemas matemáticos que continuam sem solução têm uma certa aura de mistério.\nO mais conhecido talvez seja o último teorema de Fermat, que apareceu em uma anotação manuscrita na margem de uma página de um livro do matemático do século 17 Pierre de Fermat (1601-65).\nAlém do enigma que deixou para a posteridade, Fermat escreveu: \"Tenho uma solução, mas ela é longa demais para caber na margem.\"\nAté onde se sabe, Fermat levou essa solução para o túmulo.\n\"Foi preciso esperar vários séculos até que o problema finalmente fosse resolvido, em 1994, e o matemático que conseguiu isso usou áreas da matemática que nem sequer existiam na época de Fermat\", afirma a matemática Katie Steckles.\nE há muitos outros, com todo tipo de nome curioso: a conjectura de Collatz, a hipótese de Riemann, os problemas de Hilbert e os problemas do milênio...\n\"Ah, há muitos!\", exclama Steckles. \"E encontramos mais a cada dia. Cada área da matemática tem suas grandes questões\", disse ela ao programa More or Less, da Rádio 4 da BBC.\nEntre esses desafios está uma enorme coleção conhecida como \"problemas de Erdős\", formulados por uma das figuras mais prolíficas e afáveis da matemática.\nO húngaro Paul Erdős (1913–96) foi um gênio extraordinário, não apenas pelas diversas contribuições que deixou para a matemática, mas também pelo modo como viveu.\nNunca teve casa nem posses além de uma mala quase vazia. Erdős queria era ser uma espécie de viajante da matemática, indo a qualquer lugar do mundo onde houvesse algo interessante acontecendo e espaço para pensar e trocar ideias.\nDurante décadas viajando e trabalhando com outros matemáticos, Erdős não apenas formulou mais de 1,2 mil problemas, como também resolveu muitos deles e encontrou demonstrações surpreendentemente simples para teoremas que já eram considerados solucionados.\nO problema\nEm 2023, essa enorme coleção de problemas foi reunida em um site para que matemáticos pudessem ver quais ainda estavam em aberto e compartilhar suas demonstrações.\n\"A primeira vez que ouvi falar da conjectura de Erdős sobre conjuntos primitivos, eu estava no último ano da faculdade\", lembra Lichtman.\n\"E fiquei completamente fascinado pelo problema.\"\nOs problemas de Erdős abordados nesta história envolvem os chamados conjuntos primitivos.\nVocê provavelmente conhece os números primos: números inteiros que só podem ser divididos exatamente por 1 e por eles mesmos. Um conjunto primitivo segue uma lógica parecida: escolhem-se números de modo que nenhum deles possa ser dividido exatamente por outro, embora eles não precisem ser números primos.\nPor exemplo, 4, 5 e 6 formam um conjunto primitivo: não é possível dividir 4 por 5 ou por 6 e obter um número inteiro. O mesmo vale para 5 e 6.\nNão é preciso avançar mais na matemática por trás desses problemas de Erdős: daí em diante, tudo fica complexo demais.\nVoltemos à história.\n\"No meu tempo livre e à noite, eu continuava pensando nesse problema e não conseguia deixá-lo de lado. Acabei resolvendo depois de quatro anos me recusando a desistir\", conta Lichtman.\nO problema que levou todos esses anos para resolver era o 164 de Erdős, que mais tarde serviria de base para sua tese de doutorado.\nMas esse não era o único que despertava seu interesse. Havia outros problemas de Erdős relacionados a ele, entre os quais o problema 1196.\nLichtman também vinha pensando nele durante todo esse período.\n\"O que acontece se todos os números de um conjunto primitivo forem maiores que X e quisermos entender como sua pontuação pode crescer à medida que X tende ao infinito?\"\nEle continuou pensando no assunto e trabalhando no problema por mais três anos.\nAté que, certa manhã, acordou e encontrou um email em seu computador.\nA mensagem dizia que um entusiasta da matemática havia apresentado o problema ao GPT-5.4 Pro, um modelo de IA, e obtido resultados que, segundo ele, poderiam constituir uma solução.\n\"Comecei a ler o que ele havia produzido. O resultado parecia muito preliminar e bastante desorganizado\", lembra Lichtman.\nA demonstração havia sido obtida por Liam Price, britânico de 23 anos sem formação universitária em matemática.\n\"Usei uma IA da OpenAI para resolver o problema 1196 de Erdős\", contou Price.\n\"Pensei em um prompt engenhoso, dei a instrução à IA e, depois de cerca de 80 minutos de processamento, ela me apresentou uma solução. Então passei o resultado para outra versão do modelo e disse: 'Aqui está a solução. Você pode conferir e verificar se está correta?'. A resposta foi que, em essência, ela (a IA) não havia encontrado nenhum erro no raciocínio\", acrescentou Price.\nLichtman ficou ao mesmo tempo perplexo e feliz.\nO saber\nA IA já havia ajudado a resolver outros problemas de Erdős — na verdade, várias dezenas. Mas muitos eram problemas relativamente simples e pouco conhecidos.\nO problema 1196 era diferente. Além de desafiar matemáticos há décadas, o GPT-5.4 Pro encontrou uma nova forma de abordá-lo, por meio de um método que havia passado despercebido pela literatura matemática durante todo esse tempo. E o método não resolveu apenas o problema 1196, mas também outras questões relacionadas.\nLichtman não se incomodou com o fato de um modelo de IA ter chegado à solução antes dele. \"Se outro matemático resolve um problema que interessa a você, não acho que alguém vá perguntar se isso incomoda\", explica.\n\"Você simplesmente quer saber a resposta e ter acesso a ela, independentemente de como ela foi obtida\", acrescenta.\nAlém disso, a IA precisou de alguém como Lichtman, com conhecimento profundo o bastante de matemática para olhar aquele resultado ainda bruto e perceber que havia ali algo valioso.\n\"Fiquei imediatamente muito feliz e, na verdade, comecei a trabalhar nesses outros grupos de problemas para ver se conseguia aplicar essa ideia\", conta Lichtman.\nLogo surgiram outros avanços. Poucas semanas depois, um modelo da OpenAI refutou uma conjectura de Erdős que permanecia sem solução havia quase 80 anos.\nNo dia 1º/8, a empresa anunciou outros dez avanços em problemas matemáticos que estavam em aberto havia muito tempo. Os trabalhos tiveram a participação de matemáticos, que ajudaram a analisar, desenvolver e formalizar os resultados.\n\"Acho que chegamos a um ponto em que a IA consegue trazer ideias e intuições, como faria um colega de confiança, e às vezes essas ideias realmente dão resultado\", afirma Lichtman.\n\"Estamos numa fase em que a IA começa a funcionar, de certa forma, como um colaborador com quem podemos trocar ideias e de quem podemos receber comentários.\"\n*Esta reportagem foi adaptada do programa More or Less, da BBC R",
+  "origem": "link",
+  "titulo": "O matemático que passou 7 anos tentando resolver problema solucionado por amador com IA - BBC News Brasil",
+  "fonte": "",
+  "data": "2026-09-07",
+  "fato": {
+    "fato": "Um entusiasta britânico usou IA para resolver o problema 1196 de Erdős, que Jared Lichtman estudava havia sete anos.",
+    "titulo": "Amador resolve desafio matemático com IA",
+    "imagens_concretas": [
+      "Liam Price diante de um computador, digitando um comando para a IA",
+      "Uma tela com a demonstração matemática gerada pelo GPT-5.4 Pro",
+      "Jared Lichtman lendo no computador o resultado recebido por email",
+      "Cadernos de matemática abertos sobre uma mesa"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como cantador que anuncia uma notícia de longe, com espanto e maravilha",
+      "plano": "Anuncio de além-mar, como cantador espantado com uma máquina que virou trovão de feira.",
+      "rimas": [
+        "clarão",
+        "questão",
+        "trovão"
+      ],
+      "versos": [
+        "De além-mar vem a notícia",
+        "Britânico fez clarão",
+        "IA já lhe traçou a prova",
+        "Sete anos nessa questão",
+        "Jared leu tal resultado",
+        "Fez do cálculo um trovão"
+      ],
+      "entra": false,
+      "reprovados": [
+        3
+      ]
+    }
+  ],
+  "escolhida": {
+    "indice": 0,
+    "justificativa": "única candidata com 6 versos"
+  },
+  "fim": "2026-09-28T15:43:45+00:00",
+  "entra": true,
+  "motivo": null,
+  "versos_finais": [
+    "De além-mar vem a notícia",
+    "Britânico fez clarão",
+    "Uma máquina vingou",
+    "Sete anos nessa questão",
+    "Jared leu tal resultado",
+    "Fez do cálculo um trovão"
+  ],
+  "duvidas_para_o_grupo": [
+    {
+      "n": 1,
+      "duvida": "notícia: 'ia' pode virar hiato"
+    }
+  ],
+  "rodadas_de_correcao": 3,
+  "arquivos": {
+    "texto": "folhetos/20260928-154345-amador-resolve-desafio-matematico-com-ia.txt",
+    "imagem": "folhetos/20260928-154345-amador-resolve-desafio-matematico-com-ia.png"
+  },
+  "custo_estimado_usd": {
+    "texto": 0.00329,
+    "imagem": 0.00854,
+    "total": 0.01183
+  }
+}

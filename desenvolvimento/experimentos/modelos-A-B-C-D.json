@@ -1,0 +1,322 @@
+[
+ {
+  "cfg": "A",
+  "noticia": "O Robô da Feira e a Macaxeira ",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 1,
+  "custo": 0.39845,
+  "tin": 2836,
+  "tout": 12809,
+  "seg": 173.6,
+  "versos": [
+   "Empresa nova em Recife",
+   "Pôs IA vender na feira",
+   "Robô cuidou do balaio",
+   "Desconto na macaxeira",
+   "Tarde: noventa por cento",
+   "Máquina fez brincadeira"
+  ],
+  "manchete": "Robô erra preço da macaxeira"
+ },
+ {
+  "cfg": "A",
+  "noticia": "O Robô Leitor que Deu Mate no ",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 2,
+  "custo": 0.396205,
+  "tin": 2801,
+  "tout": 12740,
+  "seg": 181.4,
+  "versos": [
+   "De longe vem meu recado",
+   "Chegou num velho jornal",
+   "Modelo leu tanta prosa",
+   "Fez do torneio arraial",
+   "Grão-mestres levaram mate",
+   "Sem treino venceu geral"
+  ],
+  "manchete": "Robô vence mestres no xadrez"
+ },
+ {
+  "cfg": "A",
+  "noticia": "Google Testa Chip de IA no Esp",
+  "entra": true,
+  "rodadas": 1,
+  "candidatas_passaram": 0,
+  "custo": 0.24516500000000002,
+  "tin": 3925,
+  "tout": 7518,
+  "seg": 109.2,
+  "versos": [
+   "Google põe chip no céu",
+   "qual semente no sertão",
+   "Foguete risca o terreiro",
+   "satélite no alforjão",
+   "Tubo frio doma brasa",
+   "bode não crê no clarão"
+  ],
+  "manchete": "Google testa chips no espaço"
+ },
+ {
+  "cfg": "A",
+  "noticia": "Brasil joga futebol de robôs n",
+  "entra": true,
+  "rodadas": 1,
+  "candidatas_passaram": 0,
+  "custo": 0.41516000000000003,
+  "tin": 3964,
+  "tout": 13178,
+  "seg": 184.7,
+  "versos": [
+   "Brasileiros em Pequim",
+   "Treinam robô no salão",
+   "Eu, cabra, fico de esguelha",
+   "Vendo chute por botão",
+   "Contra gringo na peleja",
+   "Craque sem comer feijão"
+  ],
+  "manchete": "Brasil disputa futebol de robôs na China"
+ },
+ {
+  "cfg": "B",
+  "noticia": "O Robô da Feira e a Macaxeira ",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 1,
+  "custo": 0.12493499999999999,
+  "tin": 2823,
+  "tout": 3694,
+  "seg": 60.0,
+  "versos": [
+   "Recife soltou robô",
+   "numa barraca de feira",
+   "Fruta sorriu no balaio",
+   "baixou tanto a macaxeira",
+   "Freguês puxou fila torta",
+   "troco virou brincadeira"
+  ],
+  "manchete": "Robô erra preço da macaxeira"
+ },
+ {
+  "cfg": "B",
+  "noticia": "O Robô Leitor que Deu Mate no ",
+  "entra": true,
+  "rodadas": 1,
+  "candidatas_passaram": 0,
+  "custo": 0.108025,
+  "tin": 3413,
+  "tout": 3032,
+  "seg": 56.4,
+  "versos": [
+   "Trago espanto da lonjura",
+   "Computador no sertão",
+   "Sem cartilha de xadrez",
+   "Vence sábio em turbilhão",
+   "Bispo corre que nem bode",
+   "Rei tomou boa lição"
+  ],
+  "manchete": "Máquina vence mestres no xadrez"
+ },
+ {
+  "cfg": "B",
+  "noticia": "Google Testa Chip de IA no Esp",
+  "entra": true,
+  "rodadas": 1,
+  "candidatas_passaram": 0,
+  "custo": 0.146475,
+  "tin": 3897,
+  "tout": 4233,
+  "seg": 71.7,
+  "versos": [
+   "Cantador ouve de longe",
+   "Google acende trovão",
+   "Chip pequeno sobe ao astro",
+   "Foguete corta o sertão",
+   "Tubo frio guarda brasa",
+   "A placa pensa em rojão"
+  ],
+  "manchete": "Google testa chips de IA no espaço"
+ },
+ {
+  "cfg": "B",
+  "noticia": "Brasil joga futebol de robôs n",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 1,
+  "custo": 0.125775,
+  "tin": 3327,
+  "tout": 3638,
+  "seg": 58.8,
+  "versos": [
+   "Pequim viu moço da roça",
+   "Na feira vira lição",
+   "Com robô de perna fina",
+   "Dá chute pela nação",
+   "O teclado vira enxada",
+   "Sem tino perde razão"
+  ],
+  "manchete": "Brasil joga bola com robôs na China"
+ },
+ {
+  "cfg": "C",
+  "noticia": "O Robô da Feira e a Macaxeira ",
+  "entra": true,
+  "rodadas": 2,
+  "candidatas_passaram": 0,
+  "custo": 0.107529,
+  "tin": 4172,
+  "tout": 23200,
+  "seg": 125.4,
+  "versos": [
+   "Eu, sertanejo, fiquei",
+   "Na feira vi um sertão",
+   "Na banca eu comprei beiju",
+   "Robô perdeu a razão",
+   "Dez por cento me valeu",
+   "Meu bolso fez um clarão"
+  ],
+  "manchete": "Robô vende frutas e erra troco"
+ },
+ {
+  "cfg": "C",
+  "noticia": "O Robô Leitor que Deu Mate no ",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 1,
+  "custo": 0.09684749999999999,
+  "tin": 2788,
+  "tout": 21057,
+  "seg": 113.9,
+  "versos": [
+   "Na feira corria a voz",
+   "Venceu mestres sem parar",
+   "Sem lição, jogou demais",
+   "Fez rei até vacilar",
+   "Tela, modelo jogou",
+   "E fez doutor gargalhar"
+  ],
+  "manchete": "IA vence campeonato de xadrez"
+ },
+ {
+  "cfg": "C",
+  "noticia": "Google Testa Chip de IA no Esp",
+  "entra": true,
+  "rodadas": 2,
+  "candidatas_passaram": 0,
+  "custo": 0.15923775,
+  "tin": 4579,
+  "tout": 34623,
+  "seg": 186.5,
+  "versos": [
+   "Na feira, corre pavor",
+   "vai partir como trovão",
+   "Google solta o protótipo",
+   "testa os chips com precisão",
+   "o frio lhe faz vigia",
+   "O céu cabe num balão"
+  ],
+  "manchete": "Google testa chips de IA no espaço"
+ },
+ {
+  "cfg": "C",
+  "noticia": "Brasil joga futebol de robôs n",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 1,
+  "custo": 0.11439975,
+  "tin": 3295,
+  "tout": 24873,
+  "seg": 129.4,
+  "versos": [
+   "Moços da facul na China",
+   "Parece rês no sertão",
+   "Robôs chutam bola viva",
+   "Qual enxada risca chão",
+   "Vaqueiro vê ferro-boi",
+   "Mais juízo que peão"
+  ],
+  "manchete": "Brasileiros disputam futebol de robôs na China"
+ },
+ {
+  "cfg": "D",
+  "noticia": "O Robô da Feira e a Macaxeira ",
+  "entra": false,
+  "rodadas": 3,
+  "candidatas_passaram": 0,
+  "custo": 0.28255949999999996,
+  "tin": 4740,
+  "tout": 62001,
+  "seg": 317.6,
+  "versos": [
+   "Do Recife vem milagre",
+   "Chegou robô no momento",
+   "Fez ar de gente na banca",
+   "Na feira trouxe aumento",
+   "A macaxeira sorriu",
+   "Saiu noventa por cento"
+  ],
+  "manchete": "Robô vende frutas e erra preço"
+ },
+ {
+  "cfg": "D",
+  "noticia": "O Robô Leitor que Deu Mate no ",
+  "entra": true,
+  "rodadas": 0,
+  "candidatas_passaram": 1,
+  "custo": 0.23283674999999998,
+  "tin": 2727,
+  "tout": 51287,
+  "seg": 249.5,
+  "versos": [
+   "Na feira correu espanto",
+   "Sem treino, bicho ganhou",
+   "Máquina sem professor",
+   "Grandes mestres derrubou",
+   "Bispo rodou feito vento",
+   "Quem duvidou, se lascou"
+  ],
+  "manchete": "Modelo de IA vence no xadrez"
+ },
+ {
+  "cfg": "D",
+  "noticia": "Google Testa Chip de IA no Esp",
+  "entra": false,
+  "rodadas": 3,
+  "candidatas_passaram": 0,
+  "custo": 0.33581324999999995,
+  "tin": 5395,
+  "tout": 73726,
+  "seg": 369.9,
+  "versos": [
+   "Do rádio chega o aviso",
+   "Semana que vem pro céu",
+   "Google põe um satélite",
+   "Vai girando feito pneu",
+   "Chips de IA no éter já vão",
+   "Duvidou? ganha chapéu"
+  ],
+  "manchete": "Google testa chip de IA no espaço"
+ },
+ {
+  "cfg": "D",
+  "noticia": "Brasil joga futebol de robôs n",
+  "entra": false,
+  "rodadas": 3,
+  "candidatas_passaram": 0,
+  "custo": 0.2938207500000001,
+  "tin": 5235,
+  "tout": 64421,
+  "seg": 321.8,
+  "versos": [
+   "Da feira nasce assombro",
+   "Em Pequim, vejo clarão",
+   "Brasucas moldam robô",
+   "Humanoide deu balão",
+   "Faixas cercam este palco",
+   "Ferro tem seu coração"
+  ],
+  "manchete": "Brasileiros disputam futebol de robôs na China"
+ }
+]

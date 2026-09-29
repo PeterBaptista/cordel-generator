@@ -1,0 +1,401 @@
+{
+  "inicio": "2026-09-29T00:11:25+00:00",
+  "url": "https://noticias.r7.com/record-news/record-news-rural/video/turismo-rural-cresce-no-interior-de-pernambuco-10082026/",
+  "config": {
+    "texto": "openai:gpt-6-luna",
+    "raciocinio": "low",
+    "candidatas": 1,
+    "imagem_qualidade": "low",
+    "forma": "aberta",
+    "estrofes": 3,
+    "encadeamento": "livre",
+    "com_imagem": true
+  },
+  "chamadas": [
+    {
+      "etapa": "fato",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_03de7d9ac73dd24a006abb022d8aa087d297f4f2fa268bc6e7",
+      "reasoning_effort": "low",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Turismo rural cresce no interior de Pernambuco\n\nTurismo rural cresce no interior de Pernambuco\nRoteiros no Agreste oferecem contato com a natureza, ambientes aconchegantes e clima agradável\nRecord News Rural|Do R7\nO turismo rural em Pernambuco apresentou um crescimento de 10% na receita de 2024 para 2025. O Agreste se destaca na atividade que une o verde do mato com o colorido das flores em uma paisagem que encanta pelo clima e pelas belezas naturais. \nAnálises, entrevistas e as notícias do Brasil e do mundo estão na RECORD NEWS. Acesse o site aqui e confira os principais conteúdos em texto e vídeo!\nÚltimas\n- Entenda resultado da cúpula entre Xi Jinping e TrumpPresidente dos Estados Unidos recebeu líder chinês na semana passada\n- Produtores enfrentam problemas para comercializar a laranjaCom pomares sustentáveis e mudas não enxertadas, árvores demoram até 10 anos para produzirem\n- Entenda o cenário atual do algodão brasileiroSetor foca em ciência aplicada, inovação, mercado e estratégia de competitividade\n- Calor eleva teor alcoólico de champagne na FrançaAltas temperaturas e seca deixam as uvas com mais açúcar, alterando processo de fermentação\n- Em meio a incertezas quanto à safra, cotações do trigo seguem em altaClima desfavorável ao longo do ciclo tem comprometido o desenvolvimento das lavouras\n- Saiba como a crise interna no STF pode impactar o agroPelo menos 19 processos de interesse do setor dependem de análises dos ministros\n- Brasil atinge número recorde no volume de bovinos abatidosEsse é o melhor resultado desde 1997 com o início da série histórica do IBGE\n- Produção de grãos pode bater novo recorde na safra 2026/27Área plantada deve crescer, enquanto milho avança e produção de arroz recua no ciclo\n- Embrapa desenvolve ferramenta para ajudar o produtor ruralEquipe vai ouvir profissionais e produtores para avaliar as soluções no campo\n- Preços do arroz em casca seguem firmes no Rio Grande do SulCenário é atribuído à concorrência entre mercados interno e externo\n- Manga amadurece mais rápido com calor e ganha espaço no mercado internoTemperaturas elevadas aceleram maturação dos frutos e aumentam disponibilidade no semiárido\n- Raça se adapta ao clima do Nordeste e mostra potencialCriador investe no melhoramento do rebanho e coleciona títulos e premiações\n- Safra do tomate: mercado e clima definem o resultado para o produtorChuvas atrasaram o trabalho no campo e afetaram o desenvolvimento da lavoura\n- Disponibilidade restrita mantém cotações da mandioca em altaDemanda pela fécula perdeu força nos últimos dias, mesmo com estoques em baixa\n- Número de pessoas empregadas no agronegócio recuaPesquisa sobre primeiro trimestre foi realizada pelo Cepea em parceria com a CNA",
+      "saida_bruta": "{\"fato\":\"A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025.\",\"titulo\":\"Turismo rural cresce 10% em Pernambuco\",\"imagens_concretas\":[\"Paisagem verde do Agreste\",\"Flores coloridas pelo campo\",\"Visitantes em um roteiro rural\",\"Ambiente aconchegante no interior\"]}",
+      "tokens": {
+        "input_tokens": 841,
+        "output_tokens": 82,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "segundos": 2.3
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_04954118e91e7955006abb022fb76487d28d4c2a7c0ac36c4a",
+      "reasoning_effort": "low",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva 3 sextilhas sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória em cada estrofe:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Sextilha aberta, rima ABCBDB: os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres. De preferência rima consoante\n  (igual a partir da vogal tônica).\n\nCom 3 estrofes, conte a notícia como história de folheto: a primeira abre\ncomo o cantador abre (anuncia a novidade), as do meio desenvolvem o fato com\nimagens novas, e a última fecha com virada, graça ou moral. Cada estrofe traz\ninformação nova: não repita a mesma ideia em estrofes diferentes.\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- para cada estrofe, finais: as 6 palavras finais dos versos, seguindo o esquema\n  ABCBDB. Palavras que rimam têm que ser DIFERENTES (ex.: sertão / razão /\n  clarão). Repetir a mesma palavra final é proibido: o verificador reprova.\nDepois escreva os versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo: nome de lugar,\n  pessoa ou empresa aparece no máximo UMA vez por estrofe.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso do poema dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025.\nImagens possíveis: Paisagem verde do Agreste; Flores coloridas pelo campo; Visitantes em um roteiro rural; Ambiente aconchegante no interior\nÂngulo: como conselho de gente velha, terminando numa moral\n\nPlaneje e escreva.",
+      "saida_bruta": "{\"angulo\":\"Um conselho de gente velha anuncia o crescimento da receita do turismo rural e fecha com a moral de cuidar do que dá sustento.\",\"estrofes\":[{\"finais\":[\"recado\",\"rendeu\",\"campo\",\"cresceu\",\"conta\",\"floresceu\"],\"versos\":[\"Ouçam, povo, o recado\",\"Dez por cento mais rendeu\",\"Turismo rural no campo\",\"De um ano ao outro, cresceu\",\"De vinte e quatro a cinco, a conta\",\"Qual roçado, floresceu\"]},{\"finais\":[\"roteiro\",\"passar\",\"Agreste\",\"olhar\",\"canteiro\",\"passear\"],\"versos\":[\"Visitante toma o roteiro\",\"Pelas veredas, a andar\",\"No verde vivo do Agreste\",\"Há flor de toda cor no olhar\",\"A casa acolhe o viajante\",\"Com gosto de se demorar\"]},{\"finais\":[\"velhinho\",\"plantar\",\"conselho\",\"guardar\",\"riqueza\",\"cuidar\"],\"versos\":[\"Diz o velho, bem baixinho\",\"Não basta só festejar\",\"Quem recebe, cuide da terra\",\"E do saber de acolher\",\"Pois riqueza sem cuidado\",\"Vira poeira no terreiro\"]}]}",
+      "tokens": {
+        "input_tokens": 775,
+        "output_tokens": 1179,
+        "reasoning_tokens": 919,
+        "cache_read_tokens": 0
+      },
+      "segundos": 13.7
+    },
+    {
+      "etapa": "xilogravura",
+      "modelo": "openai:gpt-5.4-mini + image_generation(gpt-image-2, low)",
+      "modelo_imagem": "gpt-image-2",
+      "response_id": "resp_060b61c16fbfa23e006abb022fb81c87d2b0b4792d6a7baac5",
+      "usuario": "Gere uma imagem horizontal: ilustração de folheto de cordel em xilogravura tradicional nordestina. Preto e branco puro, alto contraste, tinta preta chapada sobre papel branco, sem cinza, sem degradê, sem sombreado suave. Traço grosso de goiva, céu e chão preenchidos com linhas paralelas entalhadas, figuras em silhueta com poucos detalhes, borda retangular preta ao redor da cena. ABSOLUTAMENTE NENHUM texto, letra, palavra, número, placa, logotipo ou marca de empresa na imagem. Cena: A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025. Elementos: Paisagem verde do Agreste; Flores coloridas pelo campo; Visitantes em um roteiro rural; Ambiente aconchegante no interior.",
+      "tokens": {
+        "input_tokens": 2595,
+        "output_tokens": 220,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "tokens_imagem": {
+        "texto_entrada": 205,
+        "imagem_entrada": 0,
+        "imagem_saida": 158
+      },
+      "segundos": 16.6
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0a348e65f028a4c0006abb023d639087d28cd84b7bc6ae1332",
+      "reasoning_effort": "low",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Ouçam, povo, o recado\nE1.2 Dez por cento mais rendeu\nE1.3 Turismo rural no campo\nE1.4 De um ano ao outro, cresceu\nE1.5 De vinte e quatro a cinco, a conta\nE1.6 Qual roçado, floresceu\n\nE2.1 Visitante toma o roteiro\nE2.2 Pelas veredas, a andar\nE2.3 No verde vivo do Agreste\nE2.4 Há flor de toda cor no olhar\nE2.5 A casa acolhe o viajante\nE2.6 Com gosto de se demorar\n\nE3.1 Diz o velho, bem baixinho\nE3.2 Não basta só festejar\nE3.3 Quem recebe, cuide da terra\nE3.4 E do saber de acolher\nE3.5 Pois riqueza sem cuidado\nE3.6 Vira poeira no terreiro\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [6] Ouçam, povo, o recado\n         OU / çam / PO / vo_o / re / CA / (do)\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  XX v5 [8] De vinte e quatro a cinco, a conta\n         de / VIN / te_e / QUA / tro_a / CIN / co_a / CON / (ta)\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  XX v1 [8] Visitante toma o roteiro\n         vi / si / TAN / te / TO / ma_o / ro / TEI / (ro)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  XX v4 [8] Há flor de toda cor no olhar\n         HÁ / FLOR / de / TO / da / COR / no_o / LHAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  XX v6 [8] Com gosto de se demorar\n         com / GOS / to / de / se / de / mo / RAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> DESCARTE (ver acima)\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] Não basta só festejar\n         NÃO / BAS / ta / SÓ / fes / te / JAR\n  XX v3 [8] Quem recebe, cuide da terra\n         QUEM / re / CE / be / CUI / de / da / TER / (ra)\n  ok v4 [7] E do saber de acolher\n         e / do / sa / BER / de_a / co / LHER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  XX v6 [8] Vira poeira no terreiro\n         VI / ra / po / EI / ra / no / ter / REI / (ro)\n  rima B (versos [2, 4, 6]): SEM RIMA  ['ar', 'er', 'eiro']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos E1.1, E1.5, E2.1, E2.4, E2.6, E3.3, E3.4, E3.6.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Povo, escute o aviso\"},{\"estrofe\":1,\"n\":5,\"verso\":\"Vinte e quatro: só cinco\"},{\"estrofe\":2,\"n\":1,\"verso\":\"Turista segue a trilha\"},{\"estrofe\":2,\"n\":4,\"verso\":\"Mil cores vêm nos saudar\"},{\"estrofe\":2,\"n\":6,\"verso\":\"E a lembrança vai ficar\"},{\"estrofe\":3,\"n\":3,\"verso\":\"Quem recebe, guarde o chão\"},{\"estrofe\":3,\"n\":4,\"verso\":\"E o respeito faz crescer\"},{\"estrofe\":3,\"n\":6,\"verso\":\"Tudo pode se perder\"}]}",
+      "tokens": {
+        "input_tokens": 1396,
+        "output_tokens": 1543,
+        "reasoning_tokens": 1374,
+        "cache_read_tokens": 0
+      },
+      "segundos": 18.8
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0a00333ceeaa1582006abb0250358087d2a3fbfc7a8330d47d",
+      "reasoning_effort": "low",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Povo, escute o aviso\nE1.2 Dez por cento mais rendeu\nE1.3 Turismo rural no campo\nE1.4 De um ano ao outro, cresceu\nE1.5 Vinte e quatro: só cinco\nE1.6 Qual roçado, floresceu\n\nE2.1 Turista segue a trilha\nE2.2 Pelas veredas, a andar\nE2.3 No verde vivo do Agreste\nE2.4 Mil cores vêm nos saudar\nE2.5 A casa acolhe o viajante\nE2.6 E a lembrança vai ficar\n\nE3.1 Diz o velho, bem baixinho\nE3.2 Não basta só festejar\nE3.3 Quem recebe, guarde o chão\nE3.4 E o respeito faz crescer\nE3.5 Pois riqueza sem cuidado\nE3.6 Tudo pode se perder\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [5] Povo, escute o aviso\n         PO / vo_es / CU / te_o_a / VI / (so)\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  XX v5 [6] Vinte e quatro: só cinco\n         VIN / te_e / QUA / tro / SÓ / CIN / (co)\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  XX v1 [6] Turista segue a trilha\n         tu / RIS / ta / SE / gue_a / TRI / (lha)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  ok v4 [7] Mil cores vêm nos saudar\n         MIL / CO / res / VÊM / nos / sau / DAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  ok v6 [7] E a lembrança vai ficar\n         e_a / lem / BRAN / ça / VAI / fi / CAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> DESCARTE (ver acima)\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] Não basta só festejar\n         NÃO / BAS / ta / SÓ / fes / te / JAR\n  ok v3 [7] Quem recebe, guarde o chão\n         QUEM / re / CE / be / GUAR / de_o / CHÃO\n  ok v4 [7] E o respeito faz crescer\n         e_o / res / PEI / to / FAZ / cres / CER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  ok v6 [7] Tudo pode se perder\n         TU / do / PO / de / se / per / DER\n  rima B (versos [2, 4, 6]): SEM RIMA  ['ar', 'er', 'er']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos E1.1, E1.5, E2.1, E3.2.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Povo, ouça a notícia\"},{\"estrofe\":1,\"n\":5,\"verso\":\"Vinte e quatro: minguou\"},{\"estrofe\":2,\"n\":1,\"verso\":\"Pela trilha vai o povo\"},{\"estrofe\":3,\"n\":2,\"verso\":\"Não basta só celebrar\"}]}",
+      "tokens": {
+        "input_tokens": 1339,
+        "output_tokens": 93,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "segundos": 2.4
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0531532cf17bf85b006abb025297a887d2a2aefa10e88349e9",
+      "reasoning_effort": "low",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Povo, ouça a notícia\nE1.2 Dez por cento mais rendeu\nE1.3 Turismo rural no campo\nE1.4 De um ano ao outro, cresceu\nE1.5 Vinte e quatro: minguou\nE1.6 Qual roçado, floresceu\n\nE2.1 Pela trilha vai o povo\nE2.2 Pelas veredas, a andar\nE2.3 No verde vivo do Agreste\nE2.4 Mil cores vêm nos saudar\nE2.5 A casa acolhe o viajante\nE2.6 E a lembrança vai ficar\n\nE3.1 Diz o velho, bem baixinho\nE3.2 Não basta só celebrar\nE3.3 Quem recebe, guarde o chão\nE3.4 E o respeito faz crescer\nE3.5 Pois riqueza sem cuidado\nE3.6 Tudo pode se perder\n\nRelatório do verificador:\n=== estrofe 1 ===\n  XX v1 [5] Povo, ouça a notícia\n         PO / VO_OU / ça_a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  XX v5 [6] Vinte e quatro: minguou\n         VIN / te_e / QUA / tro / min / GUOU\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Pela trilha vai o povo\n         PE / la / TRI / lha / VAI / o / PO / (vo)\n       ? elisao opcional em 'vai o' (a anterior e tonica)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  ok v4 [7] Mil cores vêm nos saudar\n         MIL / CO / res / VÊM / nos / sau / DAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  ok v6 [7] E a lembrança vai ficar\n         e_a / lem / BRAN / ça / VAI / fi / CAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> ENTRA na colecao\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] Não basta só celebrar\n         NÃO / BAS / ta / SÓ / ce / le / BRAR\n  ok v3 [7] Quem recebe, guarde o chão\n         QUEM / re / CE / be / GUAR / de_o / CHÃO\n  ok v4 [7] E o respeito faz crescer\n         e_o / res / PEI / to / FAZ / cres / CER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  ok v6 [7] Tudo pode se perder\n         TU / do / PO / de / se / per / DER\n  rima B (versos [2, 4, 6]): SEM RIMA  ['ar', 'er', 'er']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos E1.1, E1.5, E3.2.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Chega ao povo a novidade\"},{\"estrofe\":1,\"n\":5,\"verso\":\"Em vinte e quatro, baixou\"},{\"estrofe\":3,\"n\":2,\"verso\":\"É preciso proteger\"}]}",
+      "tokens": {
+        "input_tokens": 1365,
+        "output_tokens": 601,
+        "reasoning_tokens": 529,
+        "cache_read_tokens": 0
+      },
+      "segundos": 9.1
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "estrofes": [
+        [
+          "Ouçam, povo, o recado",
+          "Dez por cento mais rendeu",
+          "Turismo rural no campo",
+          "De um ano ao outro, cresceu",
+          "De vinte e quatro a cinco, a conta",
+          "Qual roçado, floresceu"
+        ],
+        [
+          "Visitante toma o roteiro",
+          "Pelas veredas, a andar",
+          "No verde vivo do Agreste",
+          "Há flor de toda cor no olhar",
+          "A casa acolhe o viajante",
+          "Com gosto de se demorar"
+        ],
+        [
+          "Diz o velho, bem baixinho",
+          "Não basta só festejar",
+          "Quem recebe, cuide da terra",
+          "E do saber de acolher",
+          "Pois riqueza sem cuidado",
+          "Vira poeira no terreiro"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [6] Ouçam, povo, o recado\n         OU / çam / PO / vo_o / re / CA / (do)\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  XX v5 [8] De vinte e quatro a cinco, a conta\n         de / VIN / te_e / QUA / tro_a / CIN / co_a / CON / (ta)\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  XX v1 [8] Visitante toma o roteiro\n         vi / si / TAN / te / TO / ma_o / ro / TEI / (ro)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  XX v4 [8] Há flor de toda cor no olhar\n         HÁ / FLOR / de / TO / da / COR / no_o / LHAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  XX v6 [8] Com gosto de se demorar\n         com / GOS / to / de / se / de / mo / RAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> DESCARTE (ver acima)\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] Não basta só festejar\n         NÃO / BAS / ta / SÓ / fes / te / JAR\n  XX v3 [8] Quem recebe, cuide da terra\n         QUEM / re / CE / be / CUI / de / da / TER / (ra)\n  ok v4 [7] E do saber de acolher\n         e / do / sa / BER / de_a / co / LHER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  XX v6 [8] Vira poeira no terreiro\n         VI / ra / po / EI / ra / no / ter / REI / (ro)\n  rima B (versos [2, 4, 6]): SEM RIMA  ['ar', 'er', 'eiro']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 1,
+      "estrofes": [
+        [
+          "Povo, escute o aviso",
+          "Dez por cento mais rendeu",
+          "Turismo rural no campo",
+          "De um ano ao outro, cresceu",
+          "Vinte e quatro: só cinco",
+          "Qual roçado, floresceu"
+        ],
+        [
+          "Turista segue a trilha",
+          "Pelas veredas, a andar",
+          "No verde vivo do Agreste",
+          "Mil cores vêm nos saudar",
+          "A casa acolhe o viajante",
+          "E a lembrança vai ficar"
+        ],
+        [
+          "Diz o velho, bem baixinho",
+          "Não basta só festejar",
+          "Quem recebe, guarde o chão",
+          "E o respeito faz crescer",
+          "Pois riqueza sem cuidado",
+          "Tudo pode se perder"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [5] Povo, escute o aviso\n         PO / vo_es / CU / te_o_a / VI / (so)\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  XX v5 [6] Vinte e quatro: só cinco\n         VIN / te_e / QUA / tro / SÓ / CIN / (co)\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  XX v1 [6] Turista segue a trilha\n         tu / RIS / ta / SE / gue_a / TRI / (lha)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  ok v4 [7] Mil cores vêm nos saudar\n         MIL / CO / res / VÊM / nos / sau / DAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  ok v6 [7] E a lembrança vai ficar\n         e_a / lem / BRAN / ça / VAI / fi / CAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> DESCARTE (ver acima)\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] Não basta só festejar\n         NÃO / BAS / ta / SÓ / fes / te / JAR\n  ok v3 [7] Quem recebe, guarde o chão\n         QUEM / re / CE / be / GUAR / de_o / CHÃO\n  ok v4 [7] E o respeito faz crescer\n         e_o / res / PEI / to / FAZ / cres / CER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  ok v6 [7] Tudo pode se perder\n         TU / do / PO / de / se / per / DER\n  rima B (versos [2, 4, 6]): SEM RIMA  ['ar', 'er', 'er']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 2,
+      "estrofes": [
+        [
+          "Povo, ouça a notícia",
+          "Dez por cento mais rendeu",
+          "Turismo rural no campo",
+          "De um ano ao outro, cresceu",
+          "Vinte e quatro: minguou",
+          "Qual roçado, floresceu"
+        ],
+        [
+          "Pela trilha vai o povo",
+          "Pelas veredas, a andar",
+          "No verde vivo do Agreste",
+          "Mil cores vêm nos saudar",
+          "A casa acolhe o viajante",
+          "E a lembrança vai ficar"
+        ],
+        [
+          "Diz o velho, bem baixinho",
+          "Não basta só celebrar",
+          "Quem recebe, guarde o chão",
+          "E o respeito faz crescer",
+          "Pois riqueza sem cuidado",
+          "Tudo pode se perder"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [5] Povo, ouça a notícia\n         PO / VO_OU / ça_a / no / TÍ / (cia)\n       ? notícia: 'ia' pode virar hiato\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  XX v5 [6] Vinte e quatro: minguou\n         VIN / te_e / QUA / tro / min / GUOU\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Pela trilha vai o povo\n         PE / la / TRI / lha / VAI / o / PO / (vo)\n       ? elisao opcional em 'vai o' (a anterior e tonica)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  ok v4 [7] Mil cores vêm nos saudar\n         MIL / CO / res / VÊM / nos / sau / DAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  ok v6 [7] E a lembrança vai ficar\n         e_a / lem / BRAN / ça / VAI / fi / CAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> ENTRA na colecao\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] Não basta só celebrar\n         NÃO / BAS / ta / SÓ / ce / le / BRAR\n  ok v3 [7] Quem recebe, guarde o chão\n         QUEM / re / CE / be / GUAR / de_o / CHÃO\n  ok v4 [7] E o respeito faz crescer\n         e_o / res / PEI / to / FAZ / cres / CER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  ok v6 [7] Tudo pode se perder\n         TU / do / PO / de / se / per / DER\n  rima B (versos [2, 4, 6]): SEM RIMA  ['ar', 'er', 'er']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 3,
+      "estrofes": [
+        [
+          "Chega ao povo a novidade",
+          "Dez por cento mais rendeu",
+          "Turismo rural no campo",
+          "De um ano ao outro, cresceu",
+          "Em vinte e quatro, baixou",
+          "Qual roçado, floresceu"
+        ],
+        [
+          "Pela trilha vai o povo",
+          "Pelas veredas, a andar",
+          "No verde vivo do Agreste",
+          "Mil cores vêm nos saudar",
+          "A casa acolhe o viajante",
+          "E a lembrança vai ficar"
+        ],
+        [
+          "Diz o velho, bem baixinho",
+          "É preciso proteger",
+          "Quem recebe, guarde o chão",
+          "E o respeito faz crescer",
+          "Pois riqueza sem cuidado",
+          "Tudo pode se perder"
+        ]
+      ],
+      "relatorio": "=== estrofe 1 ===\n  XX v1 [8] Chega ao povo a novidade\n         CHE / GA_A / o / PO / vo_a / no / vi / DA / (de)\n  ok v2 [7] Dez por cento mais rendeu\n         DEZ / por / CEN / to / MAIS / ren / DEU\n  ok v3 [7] Turismo rural no campo\n         tu / RIS / mo / ru / RAL / no / CAM / (po)\n  ok v4 [7] De um ano ao outro, cresceu\n         de_um / A / NO_A / O_OU / tro / cres / CEU\n  ok v5 [7] Em vinte e quatro, baixou\n         em / VIN / te_e / QUA / tro / bai / XOU\n  ok v6 [7] Qual roçado, floresceu\n         QUAL / ro / ÇA / do / flo / res / CEU\n  rima B (versos [2, 4, 6]): consoante  ['eu', 'eu', 'eu']\n  --> DESCARTE (ver acima)\n\n=== estrofe 2 ===\n  ok v1 [7] Pela trilha vai o povo\n         PE / la / TRI / lha / VAI / o / PO / (vo)\n       ? elisao opcional em 'vai o' (a anterior e tonica)\n  ok v2 [7] Pelas veredas, a andar\n         PE / las / ve / RE / das / a_an / DAR\n  ok v3 [7] No verde vivo do Agreste\n         no / VER / de / VI / vo / do_a / GRES / (te)\n  ok v4 [7] Mil cores vêm nos saudar\n         MIL / CO / res / VÊM / nos / sau / DAR\n  ok v5 [7] A casa acolhe o viajante\n         a / CA / sa_a / CO / lhe_o / via / JAN / (te)\n       ? viajante: 'ia' pode virar hiato\n  ok v6 [7] E a lembrança vai ficar\n         e_a / lem / BRAN / ça / VAI / fi / CAR\n  rima B (versos [2, 4, 6]): consoante  ['ar', 'ar', 'ar']\n  --> ENTRA na colecao\n\n=== estrofe 3 ===\n  ok v1 [7] Diz o velho, bem baixinho\n         DIZ / o / VE / lho / BEM / bai / XI / (nho)\n  ok v2 [7] É preciso proteger\n         é / pre / CI / so / pro / te / GER\n  ok v3 [7] Quem recebe, guarde o chão\n         QUEM / re / CE / be / GUAR / de_o / CHÃO\n  ok v4 [7] E o respeito faz crescer\n         e_o / res / PEI / to / FAZ / cres / CER\n  ok v5 [7] Pois riqueza sem cuidado\n         POIS / ri / QUE / za / SEM / cui / DA / (do)\n  ok v6 [7] Tudo pode se perder\n         TU / do / PO / de / se / per / DER\n  rima B (versos [2, 4, 6]): consoante  ['er', 'er', 'er']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "Turismo rural cresce no interior de Pernambuco\n\nTurismo rural cresce no interior de Pernambuco\nRoteiros no Agreste oferecem contato com a natureza, ambientes aconchegantes e clima agradável\nRecord News Rural|Do R7\nO turismo rural em Pernambuco apresentou um crescimento de 10% na receita de 2024 para 2025. O Agreste se destaca na atividade que une o verde do mato com o colorido das flores em uma paisagem que encanta pelo clima e pelas belezas naturais. \nAnálises, entrevistas e as notícias do Brasil e do mundo estão na RECORD NEWS. Acesse o site aqui e confira os principais conteúdos em texto e vídeo!\nÚltimas\n- Entenda resultado da cúpula entre Xi Jinping e TrumpPresidente dos Estados Unidos recebeu líder chinês na semana passada\n- Produtores enfrentam problemas para comercializar a laranjaCom pomares sustentáveis e mudas não enxertadas, árvores demoram até 10 anos para produzirem\n- Entenda o cenário atual do algodão brasileiroSetor foca em ciência aplicada, inovação, mercado e estratégia de competitividade\n- Calor eleva teor alcoólico de champagne na FrançaAltas temperaturas e seca deixam as uvas com mais açúcar, alterando processo de fermentação\n- Em meio a incertezas quanto à safra, cotações do trigo seguem em altaClima desfavorável ao longo do ciclo tem comprometido o desenvolvimento das lavouras\n- Saiba como a crise interna no STF pode impactar o agroPelo menos 19 processos de interesse do setor dependem de análises dos ministros\n- Brasil atinge número recorde no volume de bovinos abatidosEsse é o melhor resultado desde 1997 com o início da série histórica do IBGE\n- Produção de grãos pode bater novo recorde na safra 2026/27Área plantada deve crescer, enquanto milho avança e produção de arroz recua no ciclo\n- Embrapa desenvolve ferramenta para ajudar o produtor ruralEquipe vai ouvir profissionais e produtores para avaliar as soluções no campo\n- Preços do arroz em casca seguem firmes no Rio Grande do SulCenário é atribuído à concorrência entre mercados interno e externo\n- Manga amadurece mais rápido com calor e ganha espaço no mercado internoTemperaturas elevadas aceleram maturação dos frutos e aumentam disponibilidade no semiárido\n- Raça se adapta ao clima do Nordeste e mostra potencialCriador investe no melhoramento do rebanho e coleciona títulos e premiações\n- Safra do tomate: mercado e clima definem o resultado para o produtorChuvas atrasaram o trabalho no campo e afetaram o desenvolvimento da lavoura\n- Disponibilidade restrita mantém cotações da mandioca em altaDemanda pela fécula perdeu força nos últimos dias, mesmo com estoques em baixa\n- Número de pessoas empregadas no agronegócio recuaPesquisa sobre primeiro trimestre foi realizada pelo Cepea em parceria com a CNA",
+  "origem": "link",
+  "titulo": "Turismo rural cresce no interior de Pernambuco",
+  "fonte": "",
+  "data": "2026-08-10",
+  "fato": {
+    "fato": "A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025.",
+    "titulo": "Turismo rural cresce 10% em Pernambuco",
+    "imagens_concretas": [
+      "Paisagem verde do Agreste",
+      "Flores coloridas pelo campo",
+      "Visitantes em um roteiro rural",
+      "Ambiente aconchegante no interior"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como conselho de gente velha, terminando numa moral",
+      "plano": "Um conselho de gente velha anuncia o crescimento da receita do turismo rural e fecha com a moral de cuidar do que dá sustento.",
+      "finais": [
+        [
+          "recado",
+          "rendeu",
+          "campo",
+          "cresceu",
+          "conta",
+          "floresceu"
+        ],
+        [
+          "roteiro",
+          "passar",
+          "Agreste",
+          "olhar",
+          "canteiro",
+          "passear"
+        ],
+        [
+          "velhinho",
+          "plantar",
+          "conselho",
+          "guardar",
+          "riqueza",
+          "cuidar"
+        ]
+      ],
+      "estrofes": [
+        [
+          "Ouçam, povo, o recado",
+          "Dez por cento mais rendeu",
+          "Turismo rural no campo",
+          "De um ano ao outro, cresceu",
+          "De vinte e quatro a cinco, a conta",
+          "Qual roçado, floresceu"
+        ],
+        [
+          "Visitante toma o roteiro",
+          "Pelas veredas, a andar",
+          "No verde vivo do Agreste",
+          "Há flor de toda cor no olhar",
+          "A casa acolhe o viajante",
+          "Com gosto de se demorar"
+        ],
+        [
+          "Diz o velho, bem baixinho",
+          "Não basta só festejar",
+          "Quem recebe, cuide da terra",
+          "E do saber de acolher",
+          "Pois riqueza sem cuidado",
+          "Vira poeira no terreiro"
+        ]
+      ],
+      "entra": false,
+      "forma_ok": true,
+      "reprovados": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          6
+        ]
+      ]
+    }
+  ],
+  "escolhida": {
+    "indice": 0,
+    "justificativa": "única candidata com a forma pedida"
+  },
+  "fim": "2026-09-29T00:12:11+00:00",
+  "entra": false,
+  "motivo": "estrofe 1, verso 1 com 8 sílabas — resistiu a 3 rodadas de correção.",
+  "estrofes_finais": [
+    [
+      "Chega ao povo a novidade",
+      "Dez por cento mais rendeu",
+      "Turismo rural no campo",
+      "De um ano ao outro, cresceu",
+      "Em vinte e quatro, baixou",
+      "Qual roçado, floresceu"
+    ],
+    [
+      "Pela trilha vai o povo",
+      "Pelas veredas, a andar",
+      "No verde vivo do Agreste",
+      "Mil cores vêm nos saudar",
+      "A casa acolhe o viajante",
+      "E a lembrança vai ficar"
+    ],
+    [
+      "Diz o velho, bem baixinho",
+      "É preciso proteger",
+      "Quem recebe, guarde o chão",
+      "E o respeito faz crescer",
+      "Pois riqueza sem cuidado",
+      "Tudo pode se perder"
+    ]
+  ],
+  "duvidas_para_o_grupo": [
+    {
+      "estrofe": 2,
+      "n": 1,
+      "duvida": "elisao opcional em 'vai o' (a anterior e tonica)"
+    },
+    {
+      "estrofe": 2,
+      "n": 5,
+      "duvida": "viajante: 'ia' pode virar hiato"
+    }
+  ],
+  "rodadas_de_correcao": 3,
+  "arquivos": {
+    "texto": "descarte/20260929-001211-turismo-rural-cresce-10-em-pernambuco.txt",
+    "imagem": "descarte/20260929-001211-turismo-rural-cresce-10-em-pernambuco.png"
+  },
+  "custo_estimado_usd": {
+    "texto": 0.00232,
+    "imagem": 0.0087,
+    "total": 0.01102
+  }
+}

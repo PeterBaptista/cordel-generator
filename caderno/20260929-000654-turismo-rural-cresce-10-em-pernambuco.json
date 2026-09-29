@@ -1,0 +1,224 @@
+{
+  "inicio": "2026-09-29T00:05:44+00:00",
+  "url": "https://noticias.r7.com/record-news/record-news-rural/video/turismo-rural-cresce-no-interior-de-pernambuco-10082026/",
+  "config": {
+    "texto": "openai:gpt-6-luna",
+    "raciocinio": "medium",
+    "candidatas": 1,
+    "imagem_qualidade": "low",
+    "forma": "aberta",
+    "estrofes": 1,
+    "encadeamento": "livre",
+    "com_imagem": true
+  },
+  "chamadas": [
+    {
+      "etapa": "fato",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0de550426d482726006abb00d9c0dc87d28a6fe43c6e847a90",
+      "reasoning_effort": "medium",
+      "sistema": "Você lê notícias de IA para um grupo que as reconta em cordel.\nExtraia da notícia:\n- fato: o acontecimento em UMA frase curta, concreta, sem jargão.\n- titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),\n  informativa, direta (ex.: \"Nordeste tem maior chuva dos últimos 30 anos\").\n- imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere\n  (pessoas, objetos, lugares, ações), boas para uma xilogravura. Nada abstrato.\nNão invente fatos que não estão na notícia.",
+      "usuario": "Turismo rural cresce no interior de Pernambuco\n\nTurismo rural cresce no interior de Pernambuco\nRoteiros no Agreste oferecem contato com a natureza, ambientes aconchegantes e clima agradável\nRecord News Rural|Do R7\nO turismo rural em Pernambuco apresentou um crescimento de 10% na receita de 2024 para 2025. O Agreste se destaca na atividade que une o verde do mato com o colorido das flores em uma paisagem que encanta pelo clima e pelas belezas naturais. \nAnálises, entrevistas e as notícias do Brasil e do mundo estão na RECORD NEWS. Acesse o site aqui e confira os principais conteúdos em texto e vídeo!\nÚltimas\n- Entenda resultado da cúpula entre Xi Jinping e TrumpPresidente dos Estados Unidos recebeu líder chinês na semana passada\n- Produtores enfrentam problemas para comercializar a laranjaCom pomares sustentáveis e mudas não enxertadas, árvores demoram até 10 anos para produzirem\n- Entenda o cenário atual do algodão brasileiroSetor foca em ciência aplicada, inovação, mercado e estratégia de competitividade\n- Calor eleva teor alcoólico de champagne na FrançaAltas temperaturas e seca deixam as uvas com mais açúcar, alterando processo de fermentação\n- Em meio a incertezas quanto à safra, cotações do trigo seguem em altaClima desfavorável ao longo do ciclo tem comprometido o desenvolvimento das lavouras\n- Saiba como a crise interna no STF pode impactar o agroPelo menos 19 processos de interesse do setor dependem de análises dos ministros\n- Brasil atinge número recorde no volume de bovinos abatidosEsse é o melhor resultado desde 1997 com o início da série histórica do IBGE\n- Produção de grãos pode bater novo recorde na safra 2026/27Área plantada deve crescer, enquanto milho avança e produção de arroz recua no ciclo\n- Embrapa desenvolve ferramenta para ajudar o produtor ruralEquipe vai ouvir profissionais e produtores para avaliar as soluções no campo\n- Preços do arroz em casca seguem firmes no Rio Grande do SulCenário é atribuído à concorrência entre mercados interno e externo\n- Manga amadurece mais rápido com calor e ganha espaço no mercado internoTemperaturas elevadas aceleram maturação dos frutos e aumentam disponibilidade no semiárido\n- Raça se adapta ao clima do Nordeste e mostra potencialCriador investe no melhoramento do rebanho e coleciona títulos e premiações\n- Safra do tomate: mercado e clima definem o resultado para o produtorChuvas atrasaram o trabalho no campo e afetaram o desenvolvimento da lavoura\n- Disponibilidade restrita mantém cotações da mandioca em altaDemanda pela fécula perdeu força nos últimos dias, mesmo com estoques em baixa\n- Número de pessoas empregadas no agronegócio recuaPesquisa sobre primeiro trimestre foi realizada pelo Cepea em parceria com a CNA",
+      "saida_bruta": "{\"fato\":\"A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025.\",\"titulo\":\"Turismo rural cresce 10% em Pernambuco\",\"imagens_concretas\":[\"Vegetação verde do Agreste\",\"Flores coloridas em uma paisagem rural\",\"Roteiro por áreas rurais do Agreste\",\"Ambiente aconchegante no interior de Pernambuco\"]}",
+      "tokens": {
+        "input_tokens": 841,
+        "output_tokens": 282,
+        "reasoning_tokens": 189,
+        "cache_read_tokens": 0
+      },
+      "segundos": 5.6
+    },
+    {
+      "etapa": "xilogravura",
+      "modelo": "openai:gpt-5.4-mini + image_generation(gpt-image-2, low)",
+      "modelo_imagem": "gpt-image-2",
+      "response_id": "resp_012141e4b53a2aa4006abb00deb37087d2ac7f5143869deb6e",
+      "usuario": "Gere uma imagem horizontal: ilustração de folheto de cordel em xilogravura tradicional nordestina. Preto e branco puro, alto contraste, tinta preta chapada sobre papel branco, sem cinza, sem degradê, sem sombreado suave. Traço grosso de goiva, céu e chão preenchidos com linhas paralelas entalhadas, figuras em silhueta com poucos detalhes, borda retangular preta ao redor da cena. ABSOLUTAMENTE NENHUM texto, letra, palavra, número, placa, logotipo ou marca de empresa na imagem. Cena: A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025. Elementos: Vegetação verde do Agreste; Flores coloridas em uma paisagem rural; Roteiro por áreas rurais do Agreste; Ambiente aconchegante no interior de Pernambuco.",
+      "tokens": {
+        "input_tokens": 2617,
+        "output_tokens": 233,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0
+      },
+      "tokens_imagem": {
+        "texto_entrada": 218,
+        "imagem_entrada": 0,
+        "imagem_saida": 158
+      },
+      "segundos": 20.0
+    },
+    {
+      "etapa": "candidata",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_085109476cd66379006abb00dea99087d282a4f61784478b16",
+      "reasoning_effort": "medium",
+      "sistema": "Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a\ntransformam em causo. Escreva UMA sextilha sobre o fato dado, pelo ângulo pedido.\n\nA forma, obrigatória em cada estrofe:\n- Sextilha: exatamente 6 versos.\n- Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última\n  sílaba tônica; vogal final de uma palavra se funde com a vogal (ou H) inicial da\n  seguinte; ditongo vale uma sílaba.\n- Sextilha aberta, rima ABCBDB: os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres. De preferência rima consoante\n  (igual a partir da vogal tônica).\n\nPlaneje antes de escrever:\n- angulo: em uma frase, como você vai contar a notícia.\n- para cada estrofe, finais: as 6 palavras finais dos versos, seguindo o esquema\n  ABCBDB. Palavras que rimam têm que ser DIFERENTES (ex.: sertão / razão /\n  clarão). Repetir a mesma palavra final é proibido: o verificador reprova.\nDepois escreva os versos terminando nessas palavras.\n\nCriatividade:\n- Traga a notícia para o mundo de quem lê cordel: feira, roça, sertão, açude,\n  vaqueiro, rádio de pilha, romaria, seca e inverno. Use comparação e metáfora\n  concretas, não explicação.\n- Cada verso diz uma coisa nova. Não repita palavras de conteúdo: nome de lugar,\n  pessoa ou empresa aparece no máximo UMA vez por estrofe.\n- Nada de verso de enchimento (\"então\", \"lá\", \"de montão\", \"foi assim\") só para\n  fechar métrica ou rima.\n- O último verso do poema dá uma virada: graça, espanto ou moral.\n\nO registro:\n- Linguagem de cordel: narrativa, popular, oral.\n- Nada de prosa cortada em linhas. Cada verso é uma unidade de ritmo.\n- A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.\n- Sem título, sem numeração.",
+      "usuario": "Fato: A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025.\nImagens possíveis: Vegetação verde do Agreste; Flores coloridas em uma paisagem rural; Roteiro por áreas rurais do Agreste; Ambiente aconchegante no interior de Pernambuco\nÂngulo: como conselho de gente velha, terminando numa moral\n\nPlaneje e escreva.",
+      "saida_bruta": "{\"angulo\":\"Como conselho de gente velha, a roça acolhe quem chega e a boa acolhida vira moral.\",\"estrofes\":[{\"finais\":[\"roça\",\"sertão\",\"rendeu\",\"clarão\",\"porteira\",\"pão\"],\"versos\":[\"Vô diz: cuide da roça\",\"Dez por cento no sertão\",\"Turismo rural rendeu\",\"Num ano, veio o clarão\",\"Agreste abre a porteira\",\"Quem bem recebe, tem pão\"]}]}",
+      "tokens": {
+        "input_tokens": 704,
+        "output_tokens": 4341,
+        "reasoning_tokens": 4231,
+        "cache_read_tokens": 0
+      },
+      "segundos": 41.8
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0c052d19e3047689006abb0108818c87d2849710b1ed59e9cf",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Vô diz: cuide da roça\nE1.2 Dez por cento no sertão\nE1.3 Turismo rural rendeu\nE1.4 Num ano, veio o clarão\nE1.5 Agreste abre a porteira\nE1.6 Quem bem recebe, tem pão\n\nRelatório do verificador:\n=== sextilha ===\n  XX v1 [6] Vô diz: cuide da roça\n         VÔ / DIZ / CUI / de / da / RO / (ça)\n  ok v2 [7] Dez por cento no sertão\n         DEZ / por / CEN / to / no / ser / TÃO\n  ok v3 [7] Turismo rural rendeu\n         tu / RIS / mo / ru / RAL / ren / DEU\n  ok v4 [7] Num ano, veio o clarão\n         num / A / no / VEI / o_o / cla / RÃO\n  XX v5 [6] Agreste abre a porteira\n         a / GRES / TE_A / bre_a / por / TEI / (ra)\n  ok v6 [7] Quem bem recebe, tem pão\n         QUEM / BEM / re / CE / be / TEM / PÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos E1.1, E1.5.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":1,\"verso\":\"Vô manda zelar do chão\"},{\"estrofe\":1,\"n\":5,\"verso\":\"Agreste dá guarida\"}]}",
+      "tokens": {
+        "input_tokens": 706,
+        "output_tokens": 1695,
+        "reasoning_tokens": 1640,
+        "cache_read_tokens": 0
+      },
+      "segundos": 16.5
+    },
+    {
+      "etapa": "correção",
+      "modelo": "openai:gpt-6-luna",
+      "response_id": "resp_0f784f3d7120a98c006abb011916c087d285a04b9ab644679a",
+      "reasoning_effort": "medium",
+      "sistema": "Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha aberta,\nrima ABCBDB (os versos 2, 4 e 6 rimam entre si; 1, 3 e 5 são livres).\nUm verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.\nOs versos aprovados já estão certos e não podem mudar.\nNão conte sílabas de cabeça com confiança: use a escansão do verificador como guia\n(ela mostra onde o verificador separou as sílabas e onde fez elisão).\nMantenha o sentido e o registro de cordel, e não empobreça o poema:\n- A palavra final do verso corrigido não pode repetir outra palavra final da\n  estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.\n- Não repita nomes e palavras de conteúdo que já estão nos outros versos.\n- Prefira refazer o verso com outra imagem a remendar com palavra de enchimento.\nDevolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).",
+      "usuario": "Poema atual:\nE1.1 Vô manda zelar do chão\nE1.2 Dez por cento no sertão\nE1.3 Turismo rural rendeu\nE1.4 Num ano, veio o clarão\nE1.5 Agreste dá guarida\nE1.6 Quem bem recebe, tem pão\n\nRelatório do verificador:\n=== sextilha ===\n  ok v1 [7] Vô manda zelar do chão\n         VÔ / MAN / da / ze / LAR / do / CHÃO\n  ok v2 [7] Dez por cento no sertão\n         DEZ / por / CEN / to / no / ser / TÃO\n  ok v3 [7] Turismo rural rendeu\n         tu / RIS / mo / ru / RAL / ren / DEU\n  ok v4 [7] Num ano, veio o clarão\n         num / A / no / VEI / o_o / cla / RÃO\n  XX v5 [6] Agreste dá guarida\n         a / GRES / te / dá / gua / RI / (da)\n  ok v6 [7] Quem bem recebe, tem pão\n         QUEM / BEM / re / CE / be / TEM / PÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)\n\nReescreva só os versos E1.5.",
+      "saida_bruta": "{\"versos\":[{\"estrofe\":1,\"n\":5,\"verso\":\"Na serra, floresce a paz\"}]}",
+      "tokens": {
+        "input_tokens": 694,
+        "output_tokens": 538,
+        "reasoning_tokens": 500,
+        "cache_read_tokens": 0
+      },
+      "segundos": 5.2
+    }
+  ],
+  "rodadas": [
+    {
+      "rodada": 0,
+      "estrofes": [
+        [
+          "Vô diz: cuide da roça",
+          "Dez por cento no sertão",
+          "Turismo rural rendeu",
+          "Num ano, veio o clarão",
+          "Agreste abre a porteira",
+          "Quem bem recebe, tem pão"
+        ]
+      ],
+      "relatorio": "=== sextilha ===\n  XX v1 [6] Vô diz: cuide da roça\n         VÔ / DIZ / CUI / de / da / RO / (ça)\n  ok v2 [7] Dez por cento no sertão\n         DEZ / por / CEN / to / no / ser / TÃO\n  ok v3 [7] Turismo rural rendeu\n         tu / RIS / mo / ru / RAL / ren / DEU\n  ok v4 [7] Num ano, veio o clarão\n         num / A / no / VEI / o_o / cla / RÃO\n  XX v5 [6] Agreste abre a porteira\n         a / GRES / TE_A / bre_a / por / TEI / (ra)\n  ok v6 [7] Quem bem recebe, tem pão\n         QUEM / BEM / re / CE / be / TEM / PÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 1,
+      "estrofes": [
+        [
+          "Vô manda zelar do chão",
+          "Dez por cento no sertão",
+          "Turismo rural rendeu",
+          "Num ano, veio o clarão",
+          "Agreste dá guarida",
+          "Quem bem recebe, tem pão"
+        ]
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Vô manda zelar do chão\n         VÔ / MAN / da / ze / LAR / do / CHÃO\n  ok v2 [7] Dez por cento no sertão\n         DEZ / por / CEN / to / no / ser / TÃO\n  ok v3 [7] Turismo rural rendeu\n         tu / RIS / mo / ru / RAL / ren / DEU\n  ok v4 [7] Num ano, veio o clarão\n         num / A / no / VEI / o_o / cla / RÃO\n  XX v5 [6] Agreste dá guarida\n         a / GRES / te / dá / gua / RI / (da)\n  ok v6 [7] Quem bem recebe, tem pão\n         QUEM / BEM / re / CE / be / TEM / PÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> DESCARTE (ver acima)"
+    },
+    {
+      "rodada": 2,
+      "estrofes": [
+        [
+          "Vô manda zelar do chão",
+          "Dez por cento no sertão",
+          "Turismo rural rendeu",
+          "Num ano, veio o clarão",
+          "Na serra, floresce a paz",
+          "Quem bem recebe, tem pão"
+        ]
+      ],
+      "relatorio": "=== sextilha ===\n  ok v1 [7] Vô manda zelar do chão\n         VÔ / MAN / da / ze / LAR / do / CHÃO\n  ok v2 [7] Dez por cento no sertão\n         DEZ / por / CEN / to / no / ser / TÃO\n  ok v3 [7] Turismo rural rendeu\n         tu / RIS / mo / ru / RAL / ren / DEU\n  ok v4 [7] Num ano, veio o clarão\n         num / A / no / VEI / o_o / cla / RÃO\n  ok v5 [7] Na serra, floresce a paz\n         na / SER / ra / flo / RES / ce_a / PAZ\n  ok v6 [7] Quem bem recebe, tem pão\n         QUEM / BEM / re / CE / be / TEM / PÃO\n  rima B (versos [2, 4, 6]): consoante  ['am', 'am', 'am']\n  --> ENTRA na colecao"
+    }
+  ],
+  "noticia": "Turismo rural cresce no interior de Pernambuco\n\nTurismo rural cresce no interior de Pernambuco\nRoteiros no Agreste oferecem contato com a natureza, ambientes aconchegantes e clima agradável\nRecord News Rural|Do R7\nO turismo rural em Pernambuco apresentou um crescimento de 10% na receita de 2024 para 2025. O Agreste se destaca na atividade que une o verde do mato com o colorido das flores em uma paisagem que encanta pelo clima e pelas belezas naturais. \nAnálises, entrevistas e as notícias do Brasil e do mundo estão na RECORD NEWS. Acesse o site aqui e confira os principais conteúdos em texto e vídeo!\nÚltimas\n- Entenda resultado da cúpula entre Xi Jinping e TrumpPresidente dos Estados Unidos recebeu líder chinês na semana passada\n- Produtores enfrentam problemas para comercializar a laranjaCom pomares sustentáveis e mudas não enxertadas, árvores demoram até 10 anos para produzirem\n- Entenda o cenário atual do algodão brasileiroSetor foca em ciência aplicada, inovação, mercado e estratégia de competitividade\n- Calor eleva teor alcoólico de champagne na FrançaAltas temperaturas e seca deixam as uvas com mais açúcar, alterando processo de fermentação\n- Em meio a incertezas quanto à safra, cotações do trigo seguem em altaClima desfavorável ao longo do ciclo tem comprometido o desenvolvimento das lavouras\n- Saiba como a crise interna no STF pode impactar o agroPelo menos 19 processos de interesse do setor dependem de análises dos ministros\n- Brasil atinge número recorde no volume de bovinos abatidosEsse é o melhor resultado desde 1997 com o início da série histórica do IBGE\n- Produção de grãos pode bater novo recorde na safra 2026/27Área plantada deve crescer, enquanto milho avança e produção de arroz recua no ciclo\n- Embrapa desenvolve ferramenta para ajudar o produtor ruralEquipe vai ouvir profissionais e produtores para avaliar as soluções no campo\n- Preços do arroz em casca seguem firmes no Rio Grande do SulCenário é atribuído à concorrência entre mercados interno e externo\n- Manga amadurece mais rápido com calor e ganha espaço no mercado internoTemperaturas elevadas aceleram maturação dos frutos e aumentam disponibilidade no semiárido\n- Raça se adapta ao clima do Nordeste e mostra potencialCriador investe no melhoramento do rebanho e coleciona títulos e premiações\n- Safra do tomate: mercado e clima definem o resultado para o produtorChuvas atrasaram o trabalho no campo e afetaram o desenvolvimento da lavoura\n- Disponibilidade restrita mantém cotações da mandioca em altaDemanda pela fécula perdeu força nos últimos dias, mesmo com estoques em baixa\n- Número de pessoas empregadas no agronegócio recuaPesquisa sobre primeiro trimestre foi realizada pelo Cepea em parceria com a CNA",
+  "origem": "link",
+  "titulo": "Turismo rural cresce no interior de Pernambuco",
+  "fonte": "",
+  "data": "2026-08-10",
+  "fato": {
+    "fato": "A receita do turismo rural em Pernambuco cresceu 10% de 2024 para 2025.",
+    "titulo": "Turismo rural cresce 10% em Pernambuco",
+    "imagens_concretas": [
+      "Vegetação verde do Agreste",
+      "Flores coloridas em uma paisagem rural",
+      "Roteiro por áreas rurais do Agreste",
+      "Ambiente aconchegante no interior de Pernambuco"
+    ]
+  },
+  "candidatas": [
+    {
+      "angulo": "como conselho de gente velha, terminando numa moral",
+      "plano": "Como conselho de gente velha, a roça acolhe quem chega e a boa acolhida vira moral.",
+      "finais": [
+        [
+          "roça",
+          "sertão",
+          "rendeu",
+          "clarão",
+          "porteira",
+          "pão"
+        ]
+      ],
+      "estrofes": [
+        [
+          "Vô diz: cuide da roça",
+          "Dez por cento no sertão",
+          "Turismo rural rendeu",
+          "Num ano, veio o clarão",
+          "Agreste abre a porteira",
+          "Quem bem recebe, tem pão"
+        ]
+      ],
+      "entra": false,
+      "forma_ok": true,
+      "reprovados": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          5
+        ]
+      ]
+    }
+  ],
+  "escolhida": {
+    "indice": 0,
+    "justificativa": "única candidata com a forma pedida"
+  },
+  "fim": "2026-09-29T00:06:54+00:00",
+  "entra": true,
+  "motivo": null,
+  "estrofes_finais": [
+    [
+      "Vô manda zelar do chão",
+      "Dez por cento no sertão",
+      "Turismo rural rendeu",
+      "Num ano, veio o clarão",
+      "Na serra, floresce a paz",
+      "Quem bem recebe, tem pão"
+    ]
+  ],
+  "duvidas_para_o_grupo": [],
+  "rodadas_de_correcao": 2,
+  "arquivos": {
+    "texto": "folhetos/20260929-000654-turismo-rural-cresce-10-em-pernambuco.txt",
+    "imagem": "folhetos/20260929-000654-turismo-rural-cresce-10-em-pernambuco.png"
+  },
+  "custo_estimado_usd": {
+    "texto": 0.00372,
+    "imagem": 0.00884,
+    "total": 0.01256
+  }
+}
