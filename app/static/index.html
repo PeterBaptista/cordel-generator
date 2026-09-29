@@ -54,6 +54,26 @@
   .config label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--tinta-2); }
   .config select { font: 14px "Libre Baskerville", serif; color: var(--tinta); background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 5px 6px; min-width: 0; }
   .estimativa { flex-basis: 100%; font: 13px "Courier Prime", monospace; color: var(--tinta-2); }
+  /* cartaz enquanto o cordel está sendo gerado: barras onde ainda não há texto;
+     texto já gerado translúcido; versos em correção pulsando */
+  @keyframes brilho { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+  @keyframes respira { 0%, 100% { opacity: .3; } 50% { opacity: .7; } }
+  .folheto .esqueleto { height: .85em; margin: .35em 0; border-radius: 2px;
+    background: linear-gradient(90deg, #15121012 25%, #1512102e 50%, #15121012 75%) 0 0 / 200% 100%;
+    animation: brilho 1.4s linear infinite; }
+  .folheto .esqueleto.curto { width: 72%; }
+  .folheto .manchete .esqueleto { height: 1em; width: 80%; margin: .15em auto; }
+  .folheto.gerando .versos .v { opacity: .6; transition: opacity .4s; }
+  .folheto.gerando .versos .v.pendente { animation: respira 1.6s ease-in-out infinite; }
+  .folheto .xilo.carregando { background: linear-gradient(90deg, #ddd5c3 25%, #e9e2d2 50%, #ddd5c3 75%) 0 0 / 200% 100%;
+    animation: brilho 1.8s linear infinite; }
+  .folheto .status-geracao { display: none; }
+  .folheto.gerando .status-geracao { display: block; text-align: center; font: 12px "Special Elite", monospace;
+    color: var(--tinta-2); margin: 2px 0 6px; }
+  @media (prefers-reduced-motion: reduce) {
+    .folheto .esqueleto, .folheto .xilo.carregando, .folheto.gerando .versos .v.pendente { animation: none; }
+    .folheto.gerando .versos .v.pendente { opacity: .35; }
+  }
   dialog#aviso { max-width: min(480px, calc(100vw - 32px)); background: var(--papel); color: var(--tinta);
                  border: 3px solid var(--tinta); box-shadow: 8px 8px 0 var(--tinta); padding: 18px 20px; }
   dialog#aviso::backdrop { background: #15121088; }
@@ -150,6 +170,7 @@
         <div class="div" style="margin-top:0"><span class="estrela">✸</span></div>
         <div class="xilo" id="xilo"><span>a xilogravura aparece aqui</span></div>
         <div class="versos" id="versos"></div>
+        <div class="status-geracao" id="status-geracao" aria-live="polite"></div>
         <div class="rodape"><svg class="seta" viewBox="0 0 22 10" style="transform:scaleX(-1)"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg><span class="estrela">✸</span><svg class="seta" viewBox="0 0 22 10"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg></div>
         <div class="fonte" id="fonte"></div>
       </div>
@@ -195,7 +216,7 @@ const ROTULOS_NARRADOR = { observador: "observador em 1ª pessoa (roteiro fixo)"
   sertanejo: "sertanejo desconfiado", cantador: "cantador", conselho: "conselho de gente velha", sortear: "sortear (um por candidata)" };
 const NUMERICOS = ["candidatas", "estrofes"];
 const ROTULOS_ENCADEAMENTO = { livre: "livre", deixa: "em deixa (cantoria)" };
-let PRECOS = {}, FORMAS = {};
+let PRECOS = {}, FORMAS = {}, MAX_RODADAS = 10;
 const usd = (v, c = 2) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: c, maximumFractionDigits: c }).format(v);
 const nomeModelo = (id) => id.replace("openai:", "").replace(/^gpt-/, "GPT-").replace(/-(luna|sol|terra|astra|mini|nano)$/, " $1");
 const lerCfg = () => Object.fromEntries(CAMPOS.map((k) => {
@@ -278,7 +299,8 @@ async function confirmarOpcaoCara(k, sel) {
   if (!manter) sel.value = ECONOMICO[k];
 }
 
-fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, precos, formas, economico }) => {
+fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, precos, formas, economico, max_rodadas }) => {
+  MAX_RODADAS = max_rodadas;
   PRECOS = precos; FORMAS = formas; ECONOMICO = economico;
   // opções livres voltam como estavam; as de custo sempre abrem no mais barato
   let salvo = {}, refazer = null;
@@ -348,49 +370,61 @@ function htmlCandidatas(cs, escolhida = -1) {
     ${c.estrofes.map((vs) => `<div class="versos-c">${vs.map(esc).join("<br>")}</div>`).join("")}</div>`).join("");
 }
 
-const mostrarEstrofes = (estrofes) => $("versos").innerHTML = estrofes.map((vs) =>
-  `<div class="estrofe-c">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("");
+// pendentes: versos [estrofe, verso] que ainda vão ser corrigidos (pulsam no cartaz)
+function mostrarEstrofes(estrofes, pendentes = []) {
+  const p = new Set(pendentes.map(([e, n]) => `${e}.${n}`));
+  $("versos").innerHTML = estrofes.map((vs, e) => `<div class="estrofe-c">${vs.map((v, n) =>
+    `<div class="v${p.has(`${e + 1}.${n + 1}`) ? " pendente" : ""}">${esc(v)}</div>`).join("")}</div>`).join("");
+}
+const esqueletoVersos = (estrofes) => Array.from({ length: estrofes }, () =>
+  `<div class="estrofe-c">${[1, 0, 1, 0, 1, 0].map((curto) => `<div class="esqueleto${curto ? " curto" : ""}"></div>`).join("")}</div>`).join("");
+const statusCartaz = (t) => { $("status-geracao").textContent = t; };
 const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
 
 function tratar(ev) {
   switch (ev.etapa) {
     case "noticia":
-      if (ev.status === "rodando") return passo("noticia", "0 · buscando a notícia no link", "rodando", esc(ev.url));
+      if (ev.status === "rodando") { statusCartaz("lendo a notícia…"); return passo("noticia", "0 · buscando a notícia no link", "rodando", esc(ev.url)); }
       if (ev.status === "erro") { $("noticia").focus(); return passo("noticia", "0 · a notícia", "erro", esc(ev.erro)); }
       if (ev.url) $("fonte").textContent = `fonte: ${ev.fonte || dominio(ev.url)}`;
       return passo("noticia", `0 · notícia (${ev.origem}, ${ev.caracteres} caracteres)`, "ok",
         `${ev.titulo ? `<b>${esc(ev.titulo)}</b><br>` : ""}<details><summary>trecho lido</summary><pre>${esc(ev.trecho)}…</pre></details>`);
     case "fato":
-      if (ev.status === "rodando") return passo("fato", "1 · extraindo o fato", "rodando");
+      if (ev.status === "rodando") { statusCartaz("entendendo o fato…"); return passo("fato", "1 · extraindo o fato", "rodando"); }
       $("manchete").textContent = ev.titulo;
       return passo("fato", "1 · o fato", "ok", `<b>${esc(ev.titulo)}</b><br>${esc(ev.fato)}
         <div class="sil">imagens: ${esc(ev.imagens_concretas.join(" · "))}</div>`);
     case "candidatas":
+      if (ev.status === "rodando") statusCartaz("escrevendo os versos…");
       if (ev.status === "rodando")
         return passo("cand", ev.angulos.length > 1 ? `2 · escrevendo ${ev.angulos.length} candidatas em paralelo, uma por ângulo` : "2 · escrevendo o poema", "rodando");
       window.__cand = ev.candidatas;
       return passo("cand", ev.candidatas.length > 1 ? `2 · ${ev.candidatas.length} candidatas` : "2 · primeira versão", "ok", htmlCandidatas(ev.candidatas));
     case "julgamento":
-      if (ev.status === "rodando") return passo("juri", "2b · o júri está lendo", "rodando");
+      if (ev.status === "rodando") { statusCartaz("o júri está escolhendo…"); return passo("juri", "2b · o júri está lendo", "rodando"); }
       mostrarEstrofes(window.__cand[ev.escolhida].estrofes);
       if (window.__cand.length < 2) return;
       passo("cand", `2 · ${window.__cand.length} candidatas`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
       return passo("juri", `2b · júri escolheu a candidata ${ev.escolhida + 1}`, "ok", esc(ev.justificativa));
     case "escansao":
-      mostrarEstrofes(ev.estrofes);
+      mostrarEstrofes(ev.estrofes, ev.entra ? [] : ev.reprovados);
+      statusCartaz(ev.entra ? "passou no verificador" : `${ev.reprovados.length} verso(s) a corrigir…`);
       return passo(`esc${ev.rodada}`, `3 · escansão ${ev.rodada === 0 ? "inicial" : "após rodada " + ev.rodada}`,
         ev.entra ? "ok" : "erro", tabelaEscansao(ev));
     case "correcao":
+      if (ev.status === "rodando") statusCartaz(`corrigindo ${ev.reprovados.length} verso(s) (${ev.rodada}/${MAX_RODADAS})…`);
       if (ev.status === "rodando")
-        return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3 — ${listaReprovados(ev.reprovados, 2)}`, "rodando");
-      return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/3`, "ok",
+        return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/${MAX_RODADAS} — ${listaReprovados(ev.reprovados, 2)}`, "rodando");
+      return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/${MAX_RODADAS}`, "ok",
         ev.mudancas.map((m) => `${ev2(m.estrofe, m.n)}: <del>${esc(m.antes)}</del><br>&nbsp;&nbsp;&nbsp;&nbsp;<ins>${esc(m.depois)}</ins>`).join("<br>") || "nenhuma mudança");
     case "xilogravura":
-      if (ev.status === "rodando") { $("xilo").innerHTML = "<span>entalhando a xilogravura…</span>"; return passo("xilo", "5 · entalhando a xilogravura (em paralelo)", "rodando"); }
+      if (ev.status === "rodando") { $("xilo").classList.add("carregando"); $("xilo").innerHTML = "<span>entalhando a xilogravura…</span>"; return passo("xilo", "5 · entalhando a xilogravura (em paralelo)", "rodando"); }
+      $("xilo").classList.remove("carregando");
       if (ev.url) $("xilo").innerHTML = `<img alt="xilogravura" src="/${ev.url}?t=${Date.now()}">`;
       else $("xilo").innerHTML = `<span>a imagem falhou: ${esc(ev.erro)}</span>`;
       return passo("xilo", "5 · xilogravura", ev.url ? "ok" : "erro");
     case "fim": {
+      $("folheto").classList.remove("gerando");
       $("manchete").textContent = ev.titulo; mostrarEstrofes(ev.estrofes);
       if (!$("imagem").checked) $("xilo").innerHTML = "<span>sem xilogravura nesta rodada</span>";
       $("veredito").style.display = "block";
@@ -439,8 +473,12 @@ async function gerar(noticia, url) {
   $("gerar").disabled = true;
   $("linha").innerHTML = ""; for (const k in itens) delete itens[k];
   $("veredito").style.display = "none"; $("custo").textContent = "";
-  $("manchete").textContent = "…"; $("versos").innerHTML = ""; $("fonte").textContent = "";
-  $("xilo").innerHTML = "<span>a xilogravura aparece aqui</span>";
+  $("folheto").classList.add("gerando");
+  $("manchete").innerHTML = '<div class="esqueleto"></div>';
+  $("versos").innerHTML = esqueletoVersos(lerCfg().estrofes); $("fonte").textContent = "";
+  statusCartaz("começando…");
+  $("xilo").classList.toggle("carregando", $("imagem").checked);
+  $("xilo").innerHTML = $("imagem").checked ? "<span>a xilogravura vem daqui a pouco</span>" : "<span>sem xilogravura nesta rodada</span>";
   try {
     const resp = await fetch("/api/cordel", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -461,6 +499,10 @@ async function gerar(noticia, url) {
   } catch (e) {
     passo("erro", "erro de conexão", "erro", esc(e));
   } finally {
+    // terminou (bem ou mal): tira as animações; se nada foi gerado, volta o cartaz vazio
+    $("folheto").classList.remove("gerando"); $("xilo").classList.remove("carregando");
+    if ($("versos").querySelector(".esqueleto")) $("versos").innerHTML = "";
+    if ($("manchete").querySelector(".esqueleto")) $("manchete").textContent = "A manchete aparece aqui";
     $("gerar").disabled = false;
   }
 }

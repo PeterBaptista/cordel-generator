@@ -1,7 +1,7 @@
 """O laço do SKILL.md, automatizado com o AI SDK para Python.
 
 notícia -> fato -> sextilha -> escandir.py -> correção (só versos reprovados,
-no máximo 3 rodadas) -> xilogravura -> folhetos/ ou descarte/ + caderno/.
+no máximo MAX_RODADAS rodadas) -> xilogravura -> folhetos/ ou descarte/ + caderno/.
 
 `run_cordel` é um gerador assíncrono: cada etapa sai como um dict, que o
 servidor repassa ao navegador via SSE.
@@ -94,7 +94,8 @@ class Config:
         return self
 
 
-MAX_RODADAS = 3
+# rodadas de correção antes do descarte (eram 3 até 28/09; o teto de custo continua valendo)
+MAX_RODADAS = int(os.getenv("CORDEL_MAX_RODADAS", "10"))
 # Teto de gasto por geração. Passou dele, a geração não chama o júri nem faz novas
 # rodadas de correção: entrega o que tem. É um freio, não uma garantia exata — uma
 # chamada já iniciada termina — e reserva uns centavos para a xilogravura.
@@ -502,7 +503,7 @@ async def run_cordel(
            "justificativa": justificativa}
     estrofes = [list(vs) for vs in candidatas[escolhida]["estrofes"]]
 
-    # 3-4. escandir e corrigir só o que foi reprovado, no máximo 3 rodadas
+    # 3-4. escandir e corrigir só o que foi reprovado, no máximo MAX_RODADAS rodadas
     rodada = 0
     while True:
         mp = medir_poema(estrofes, cfg)

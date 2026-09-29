@@ -57,7 +57,7 @@ Uma notícia até o folheto pronto, no site (`/`):
 | 2 | **Poema**: o modelo planeja as palavras finais e os termos do dicionário de cada estrofe e escreve os versos, na voz do narrador escolhido, seguindo as regras do grupo. Com mais de uma candidata, elas rodam em paralelo | Automático |
 | 2b | **Júri** (só com 2 ou 3 candidatas): o modelo escolhe a melhor, preferindo as aprovadas pelo verificador | Automático |
 | 3 | **Verificador**: `escandir.py` mede cada estrofe (7 sílabas, esquema de rima), mais palavra final repetida, a ligação em deixa e as regras 1, 3, 7 e 9 do grupo | Automático |
-| 4 | **Correção**: o modelo reescreve **só os versos reprovados** (os aprovados são bloqueados), até 3 rodadas ou até o teto de custo | Automático |
+| 4 | **Correção**: o modelo reescreve **só os versos reprovados** (os aprovados são bloqueados), até 10 rodadas (3 até 28/09, quando os folhetos 01–05 foram gerados) ou até o teto de custo | Automático |
 | 5 | **Xilogravura**: gerada em paralelo com o texto, a partir do fato | Automático |
 | 6 | **Registro**: aprovado vai para `folhetos/`, reprovado para `descarte/` com o motivo na primeira linha; tudo no `caderno/<id>.json` | Automático |
 | 7 | **Decidir as ambiguidades `?`** que o verificador marca (seção 3) | **Manual** (grupo) |
