@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import cadernos, custos, prompts
-from .workflow import IMAGE_MODEL, OPCOES, PASTAS, RAIZ, Config, run_cordel
+from .workflow import ECONOMICO, IMAGE_MODEL, OPCOES, PASTAS, RAIZ, Config, run_cordel
 
 app = FastAPI(title="Do 7 ao 6")
 
@@ -135,7 +135,7 @@ def historico():
 @app.get("/api/config")
 def config():
     from dataclasses import asdict
-    return {"padrao": asdict(Config()), "opcoes": OPCOES, "imagem": IMAGE_MODEL,
+    return {"padrao": asdict(Config()), "economico": ECONOMICO, "opcoes": OPCOES, "imagem": IMAGE_MODEL,
             "precos": {m: {"entrada": e, "saida": o} for m, (e, _, o) in custos.PRECOS.items()},
             "formas": {nome: {"esquema": esq, "regra": regra} for nome, (esq, regra) in prompts.FORMAS.items()}}
 

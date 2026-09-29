@@ -61,6 +61,10 @@ uv run uvicorn app.server:app --reload
 Na página dá para escolher o modelo de texto (famílias GPT-5, 5.4, 5.5, 5.6 e 6, com o
 preço ao lado), o nível de raciocínio, quantas candidatas gerar e a qualidade da
 xilogravura. O servidor só aceita os modelos da tabela em `app/custos.py`.
+A página sempre abre na configuração mais barata (gpt-6-luna, raciocínio baixo,
+xilogravura low). Escolher algo mais caro, ou gerar com algo mais caro, abre um aviso
+com o preço e a opção de voltar ao mais barato. Forma, estrofes e candidatas mudam
+sem aviso.
 
 Também dá para escolher a forma do poema:
 

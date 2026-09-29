@@ -55,15 +55,20 @@ OPCOES = {
 }
 
 
+# A configuração mais barata. A página abre nela e pede confirmação quando alguém
+# escolhe algo mais caro. Forma, estrofes e candidatas ficam livres.
+ECONOMICO = {"texto": "openai:gpt-6-luna", "raciocinio": "low", "imagem_qualidade": "low"}
+
+
 @dataclass(frozen=True)
 class Config:
     """Configuração de uma geração. Viaja com a geração (não é global) para que
     duas pessoas gerando ao mesmo tempo não troquem o modelo uma da outra."""
-    texto: str = os.getenv("CORDEL_TEXT_MODEL", "openai:gpt-6-luna")
-    raciocinio: str = os.getenv("CORDEL_REASONING", "medium")
+    texto: str = os.getenv("CORDEL_TEXT_MODEL", ECONOMICO["texto"])
+    raciocinio: str = os.getenv("CORDEL_REASONING", ECONOMICO["raciocinio"])
     candidatas: int = int(os.getenv("CORDEL_CANDIDATAS", "1"))
     # em xilogravura preto e branco, "low" ficou tão bom quanto "medium" e sai mais barato
-    imagem_qualidade: str = os.getenv("CORDEL_IMAGE_QUALITY", "low")
+    imagem_qualidade: str = os.getenv("CORDEL_IMAGE_QUALITY", ECONOMICO["imagem_qualidade"])
     forma: str = "aberta"         # tipo de sextilha pelo esquema de rima
     estrofes: int = 1
     encadeamento: str = "livre"   # "deixa": 1º verso rima com o último da estrofe anterior

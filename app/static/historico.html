@@ -176,7 +176,7 @@ function render() {
   });
   document.querySelectorAll(".refazer").forEach((b) => b.onclick = () => {
     const c = ITENS[b.dataset.i].config;
-    try { localStorage.setItem("cordel-config", JSON.stringify(Object.fromEntries(CAMPOS.filter((k) => c[k] != null).map((k) => [k, c[k]])))); } catch {}
+    try { localStorage.setItem("cordel-refazer", JSON.stringify(Object.fromEntries(CAMPOS.filter((k) => c[k] != null).map((k) => [k, c[k]])))); } catch {}
     location.href = "/";
   });
 }

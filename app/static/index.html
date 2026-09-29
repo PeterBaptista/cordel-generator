@@ -54,6 +54,13 @@
   .config label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--tinta-2); }
   .config select { font: 14px "Libre Baskerville", serif; color: var(--tinta); background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 5px 6px; min-width: 0; }
   .estimativa { flex-basis: 100%; font: 13px "Courier Prime", monospace; color: var(--tinta-2); }
+  dialog#aviso { max-width: min(480px, calc(100vw - 32px)); background: var(--papel); color: var(--tinta);
+                 border: 3px solid var(--tinta); box-shadow: 8px 8px 0 var(--tinta); padding: 18px 20px; }
+  dialog#aviso::backdrop { background: #15121088; }
+  dialog#aviso h3 { font: 700 20px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 8px; color: var(--vermelho); }
+  dialog#aviso p, dialog#aviso li { font-size: 14.5px; margin: 6px 0; }
+  dialog#aviso ul { padding-left: 20px; margin: 6px 0; }
+  .aviso-botoes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 16px; }
   .exemplos { margin-top: 6px; font-size: 13px; }
   .exemplos a { color: var(--vermelho); cursor: pointer; margin-right: 10px; }
 
@@ -155,6 +162,12 @@
   </section>
 </main>
 
+<dialog id="aviso" aria-labelledby="aviso-titulo">
+  <h3 id="aviso-titulo"></h3>
+  <div id="aviso-corpo"></div>
+  <div class="aviso-botoes" id="aviso-botoes"></div>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
 <script src="/static/folheto.js"></script>
 <script>
@@ -192,7 +205,7 @@ function opcoesTexto(ids) {
   const saida = (id) => PRECOS[id.replace("openai:", "")]?.saida ?? 0;
   return Object.entries(familias).map(([fam, ms]) => `<optgroup label="${esc(fam.toUpperCase())}">${
     ms.sort((a, b) => saida(a) - saida(b)).map((id) =>
-      `<option value="${esc(id)}">${esc(nomeModelo(id))} — ${esc(usd(saida(id)))}/M saída</option>`).join("")
+      `<option value="${esc(id)}">${esc(nomeModelo(id))} — ${esc(usd(saida(id)))}/M saída${id === ECONOMICO.texto ? " (mais barato)" : ""}</option>`).join("")
   }</optgroup>`).join("");
 }
 
@@ -213,22 +226,81 @@ function estimativa() {
   try { localStorage.setItem("cordel-config", JSON.stringify(c)); } catch {}
 }
 
-fetch("/api/config").then((r) => r.json()).then(({ padrao, opcoes, imagem, precos, formas }) => {
-  PRECOS = precos; FORMAS = formas;
-  let salvo = {};
+// ---- aviso de custo: modelo, raciocínio e qualidade da imagem pedem confirmação
+// quando saem da configuração mais barata; forma, estrofes e candidatas ficam livres
+const CAROS = ["texto", "raciocinio", "imagem_qualidade"];
+let ECONOMICO = {};
+const semPrefixo = (id) => id.replace("openai:", "");
+const rotuloDe = (k, v) => k === "texto" ? nomeModelo(v) : k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : NOMES[v] ?? v;
+
+function porqueCusta(k, v) {
+  if (k === "texto") {
+    const p = PRECOS[semPrefixo(v)], b = PRECOS[semPrefixo(ECONOMICO.texto)];
+    const x = p.saida / b.saida;
+    return `Modelo <b>${esc(nomeModelo(v))}</b>: ${esc(usd(p.saida))} por 1M tokens de saída, `
+      + `${x >= 2 ? Math.round(x) : x.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}× o preço do `
+      + `${esc(nomeModelo(ECONOMICO.texto))} (${esc(usd(b.saida))}).`;
+  }
+  if (k === "raciocinio")
+    return `Raciocínio <b>${esc(NOMES[v] ?? v)}</b>: o modelo gasta mais tokens pensando antes de escrever, e eles são cobrados. `
+      + `Num teste com o GPT-5.5, 91% do custo do texto foi raciocínio.`;
+  return `Xilogravura <b>${esc(ROTULOS_IMAGEM[v] ?? v)}</b>: mais tokens de imagem que a rápida (low), que custa uns US$ 0,01 por folheto.`;
+}
+
+// Abre o diálogo e devolve o valor do botão escolhido (Esc devolve "aoFechar").
+function perguntar(titulo, corpo, botoes, aoFechar) {
+  const d = $("aviso");
+  $("aviso-titulo").textContent = titulo;
+  $("aviso-corpo").innerHTML = corpo;
+  $("aviso-botoes").innerHTML = botoes.map((b, i) =>
+    `<button type="button" data-i="${i}"${b.principal ? "" : ' class="sec"'}>${esc(b.rotulo)}</button>`).join("");
+  return new Promise((ok) => {
+    const fim = (v) => { d.close(); ok(v); };
+    $("aviso-botoes").querySelectorAll("button").forEach((el) => el.onclick = () => fim(botoes[el.dataset.i].valor));
+    d.oncancel = (e) => { e.preventDefault(); fim(aoFechar); };
+    d.showModal();
+    $("aviso-botoes").querySelector("button").focus();
+  });
+}
+
+async function confirmarOpcaoCara(k, sel) {
+  if (!CAROS.includes(k) || sel.value === ECONOMICO[k]) return;
+  const manter = await perguntar("Isso vai custar mais",
+    `<p>${porqueCusta(k, sel.value)}</p><p>A opção mais barata é <b>${esc(rotuloDe(k, ECONOMICO[k]))}</b>.</p>`,
+    [{ rotulo: "Voltar ao mais barato", valor: false, principal: true }, { rotulo: "Usar mesmo assim", valor: true }],
+    false);
+  if (!manter) sel.value = ECONOMICO[k];
+}
+
+fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, imagem, precos, formas, economico }) => {
+  PRECOS = precos; FORMAS = formas; ECONOMICO = economico;
+  // opções livres voltam como estavam; as de custo sempre abrem no mais barato
+  let salvo = {}, refazer = null;
   try { salvo = JSON.parse(localStorage.getItem("cordel-config") || "{}"); } catch {}
+  // "gerar de novo" no histórico deixa os parâmetros de uma geração, para uso único
+  try { refazer = JSON.parse(localStorage.getItem("cordel-refazer") || "null"); localStorage.removeItem("cordel-refazer"); } catch {}
+  salvo = { ...salvo, ...(refazer || {}) };
   for (const k of CAMPOS) {
     const sel = $(`c-${k}`);
     sel.innerHTML = k === "texto" ? opcoesTexto(opcoes.texto)
       : opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
           k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : NUMERICOS.includes(k) ? v
           : k === "forma" ? `${v} (${formas[v].esquema})` : k === "encadeamento" ? ROTULOS_ENCADEAMENTO[v]
-          : NOMES[v] ?? v)}</option>`).join("");
-    sel.value = opcoes[k].includes(salvo[k]) ? salvo[k] : padrao[k];
-    sel.onchange = estimativa;
+          : NOMES[v] ?? v)}${CAROS.includes(k) && v === economico[k] ? " (mais barato)" : ""}</option>`).join("");
+    sel.value = CAROS.includes(k) ? economico[k] : opcoes[k].includes(salvo[k]) ? salvo[k] : padrao[k];
+    sel.onchange = async () => { await confirmarOpcaoCara(k, sel); estimativa(); };
   }
   $("cfg").textContent = `imagem: ${imagem}`;
   estimativa();
+  const carosDoHistorico = refazer ? CAROS.filter((k) => opcoes[k].includes(refazer[k]) && refazer[k] !== economico[k]) : [];
+  if (carosDoHistorico.length) {
+    const usar = await perguntar("Os parâmetros do histórico custam mais",
+      `<p>A geração que você quer refazer usou opções acima da configuração mais barata:</p>`
+      + `<ul>${carosDoHistorico.map((k) => `<li>${porqueCusta(k, refazer[k])}</li>`).join("")}</ul>`,
+      [{ rotulo: "Manter o mais barato", valor: false, principal: true }, { rotulo: "Usar os do histórico", valor: true }],
+      false);
+    if (usar) { for (const k of carosDoHistorico) $(`c-${k}`).value = refazer[k]; estimativa(); }
+  }
 });
 
 const itens = {};
@@ -342,6 +414,21 @@ async function baixar(nome) {
 $("gerar").onclick = async () => {
   const noticia = $("noticia").value.trim(), url = $("url").value.trim();
   if (!noticia && !url) return $("url").focus();
+  const c = lerCfg(), caros = CAROS.filter((k) => c[k] !== ECONOMICO[k]);
+  if (caros.length) {
+    const escolha = await perguntar("Esta geração vai custar mais",
+      `<p>Estas opções estão acima da configuração mais barata:</p><ul>${caros.map((k) => `<li>${porqueCusta(k, c[k])}</li>`).join("")}</ul>`
+      + `<p>A mais barata é ${CAROS.map((k) => `<b>${esc(rotuloDe(k, ECONOMICO[k]))}</b>`).join(", ")}.</p>`,
+      [{ rotulo: "Gerar tudo no mais barato", valor: "barato", principal: true },
+       { rotulo: "Gerar assim mesmo", valor: "assim" }, { rotulo: "Cancelar", valor: null }],
+      null);
+    if (!escolha) return;
+    if (escolha === "barato") { for (const k of CAROS) $(`c-${k}`).value = ECONOMICO[k]; estimativa(); }
+  }
+  await gerar(noticia, url);
+};
+
+async function gerar(noticia, url) {
   $("gerar").disabled = true;
   $("linha").innerHTML = ""; for (const k in itens) delete itens[k];
   $("veredito").style.display = "none"; $("custo").textContent = "";
@@ -369,7 +456,7 @@ $("gerar").onclick = async () => {
   } finally {
     $("gerar").disabled = false;
   }
-};
+}
 </script>
 </body>
 </html>
