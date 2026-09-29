@@ -76,7 +76,7 @@
 <header>
   <h1>Histórico</h1>
   <p>As sextilhas geradas e os parâmetros que as produziram</p>
-  <nav><a href="/">Gerador</a> · <a href="/historico" aria-current="page">Histórico</a> · <a href="/logs">Logs</a></nav>
+  <nav><a href="/">Início</a> · <a href="/gerador">Gerador</a> · <a href="/historico" aria-current="page">Histórico</a> · <a href="/logs">Logs</a></nav>
 </header>
 
 <main>
@@ -179,7 +179,7 @@ function render() {
   document.querySelectorAll(".refazer").forEach((b) => b.onclick = () => {
     const c = ITENS[b.dataset.i].config;
     try { localStorage.setItem("cordel-refazer", JSON.stringify(Object.fromEntries(CAMPOS.filter((k) => c[k] != null).map((k) => [k, c[k]])))); } catch {}
-    location.href = "/";
+    location.href = "/gerador";
   });
 }
 

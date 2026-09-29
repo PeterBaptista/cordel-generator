@@ -16,14 +16,27 @@ from .workflow import ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, PASTAS, RAIZ, Con
 
 app = FastAPI(title="Do 7 ao 6")
 
-# No ar, cada folheto gasta a chave da OpenAI: com CORDEL_SENHA definida,
-# a página pede senha (HTTP Basic, qualquer usuário). Sem ela, fica aberta (uso local).
+# No ar, cada folheto gasta a chave da OpenAI: com CORDEL_SENHA definida, o gerador,
+# o histórico, os logs e os cadernos pedem senha (HTTP Basic, qualquer usuário). A home
+# com a coleção fica aberta: é o link da entrega. Sem CORDEL_SENHA, tudo aberto (uso local).
 SENHA = os.getenv("CORDEL_SENHA", "")
+PUBLICO = {"/", "/saude", "/api/colecao", "/static/home.html", "/static/folheto.css", "/static/folheto.js",
+           "/static/Do7ao6.pdf"}
+PUBLICO_PREFIXOS = ("/folhetos/", "/descarte/")  # os textos e imagens da coleção e do descarte
+
+# Quais folhetos aparecem na coleção da home, na ordem: ids dos cadernos separados por
+# vírgula (ex.: 20260928-154345-amador-resolve-desafio-matematico-com-ia). Vazio: todos
+# os que passaram no verificador.
+COLECAO = [i.strip() for i in os.getenv("CORDEL_COLECAO", "").split(",") if i.strip()]
+
+
+def publico(caminho: str) -> bool:
+    return caminho in PUBLICO or caminho.startswith(PUBLICO_PREFIXOS)
 
 
 @app.middleware("http")
 async def exigir_senha(request: Request, call_next):
-    if SENHA and request.url.path != "/saude":
+    if SENHA and not publico(request.url.path):
         auth = request.headers.get("authorization", "")
         try:
             _, _, dada = base64.b64decode(auth.removeprefix("Basic ")).decode().partition(":")
@@ -47,13 +60,47 @@ class Pedido(BaseModel):
 
 
 @app.get("/")
-def index():
+def home():
+    return FileResponse(RAIZ / "app" / "static" / "home.html")
+
+
+@app.get("/gerador")
+def gerador():
     return FileResponse(RAIZ / "app" / "static" / "index.html")
 
 
 @app.get("/saude")
 def saude():
     return {"ok": True}
+
+
+@app.get("/api/colecao")
+def colecao():
+    """O que a home pública mostra: só texto, imagem e forma, sem prompts nem custos."""
+    itens = []
+    for f, log in _cadernos():
+        cfg, _ = cadernos.config(log)
+        arq = log.get("arquivos") or {}
+        if not arq.get("texto") or not (PASTAS["caderno"].parent / arq["texto"]).exists():
+            continue
+        fato = log.get("fato") or {}
+        itens.append({
+            "id": f.stem, "inicio": cadernos.hora(log.get("inicio")), "entra": bool(log.get("entra")),
+            "manchete": fato.get("titulo") or f.stem,
+            "estrofes": cadernos.estrofes(log, "estrofes_finais"),
+            "imagem": arq.get("imagem"), "texto": arq.get("texto"),
+            "url": log.get("url"), "fonte": log.get("fonte"),
+            "motivo": log.get("motivo"), "rodadas": log.get("rodadas_de_correcao"),
+            "forma": {k: cfg.get(k) for k in ("forma", "estrofes", "encadeamento", "narrador")},
+        })
+    entraram = [i for i in itens if i["entra"]]
+    if COLECAO:
+        por_id = {i["id"]: i for i in entraram}
+        entraram = [por_id[i] for i in COLECAO if i in por_id]
+    else:
+        entraram.sort(key=lambda i: i["inicio"] or "")
+    return {"colecao": entraram, "descarte": [i for i in itens if not i["entra"]],
+            "curada": bool(COLECAO)}
 
 
 @app.get("/logs")

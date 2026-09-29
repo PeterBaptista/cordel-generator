@@ -1,21 +1,15 @@
-# Eixo declarado — rascunho para o grupo reescrever
+# Eixo declarado
 
-> ⚠️ **Este texto não é a entrega.** As skills da disciplina recusam escrever o eixo
-> do grupo, e por um motivo prático: eixo escrito por agente não sobrevive à primeira
-> pergunta da apresentação. Use isto como algo contra o que reagir, e reescreva o
-> parágrafo com as palavras de vocês antes de entregar.
+> Gerar folhetos de cordel a partir das notícias de IA da semana do CriaComp News,
+> mantendo constantes a forma (sextilhas de sete sílabas) e a estética de xilogravura,
+> enquanto varia a notícia. Estrofes fora da métrica são descartadas.
 
-## O parágrafo (modelo a reescrever)
+Slides: [`apresentacao/Do7ao6.pdf`](apresentacao/Do7ao6.pdf)
 
-> Nossa coleção reúne **cinco folhetos de cordel**, cada um recontando uma notícia
-> de IA publicada na semana. A restrição que nos impusemos é **formal e verificável**:
-> toda estrofe é uma sextilha em redondilha maior — seis versos de sete sílabas
-> poéticas, com rima ABCBDB — e nenhuma estrofe entra na coleção sem passar por um
-> verificador de escansão que escrevemos. O que se repete é a forma: a métrica, o
-> esquema de rima e o gênero do folheto. O que varia é a notícia. Fica de fora toda
-> estrofe reprovada na métrica ou na rima, toda notícia abstrata demais para virar
-> acontecimento narrável, e toda saída em que o modelo trocou o registro do cordel
-> por prosa cortada em linhas.
+---
+
+*Daqui para baixo: notas de apoio escritas antes do eixo acima, como rascunho para o
+grupo reagir. Não são o eixo; servem para preparar respostas na apresentação.*
 
 ## As três perguntas respondidas
 

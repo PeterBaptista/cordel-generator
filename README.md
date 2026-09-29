@@ -48,11 +48,12 @@ horizontal e a sextilha, com botão para baixar o cartaz em PNG.
 cp .env.example .env        # coloque a OPENAI_API_KEY
 uv sync
 uv run uvicorn app.server:app --reload
-# abra http://localhost:8000
+# abra http://localhost:8000 (home) e http://localhost:8000/gerador
 ```
 
 | Arquivo | O que faz |
 |---|---|
+| `app/static/home.html` | a home pública: a coleção no cordão, o descarte e os itens da entrega |
 | `app/workflow.py` | o laço; chama o verificador `scripts/escandir.py` sem modificá-lo |
 | `app/prompts.py` | todos os prompts, para irem na íntegra ao caderno de bordo |
 | `app/server.py` | FastAPI; `POST /api/cordel` devolve as etapas por SSE |
@@ -92,6 +93,12 @@ em que ordem.
 
 O `escandir.py` verifica arquivos com várias estrofes (separadas por linha em branco)
 e lê o esquema de uma linha `# esquema: AABCCB` no arquivo, ou de `--esquema`.
+
+**Páginas.** A home (`/`) é pública: é o link da entrega, com a coleção pendurada no cordão,
+o descarte com o motivo e os cinco itens do PA 1. O gerador (`/gerador`), o histórico, os logs
+e os cadernos pedem a senha do grupo (variável `CORDEL_SENHA`). Para escolher quais folhetos
+aparecem na home, e em que ordem, defina `CORDEL_COLECAO` com os ids separados por vírgula
+(o id é o nome do arquivo sem extensão); sem ela, aparecem todos os que passaram no verificador.
 
 Em `/historico` ficam todas as sextilhas geradas (as que entraram e as de descarte),
 cada uma no cartaz com a ficha dos parâmetros que a produziram: modelo, raciocínio,

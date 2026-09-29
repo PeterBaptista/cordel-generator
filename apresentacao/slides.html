@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Do 7 ao 6: a semana em sextilha</title>
+<!-- Fonte dos slides (Do7ao6.pdf). Gerar o PDF: uv run --no-project --with playwright python apresentacao/gerar_pdf.py -->
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root { --papel: #efe4cc; --folha: #f7f1e3; --tinta: #151210; --tinta-2: #4a3f35; --tinta-3: #6f6253;
+          --vermelho: #a3301f; --verde: #2f5d3a; --cordao: #b59a6a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #555; }
+  .slide { width: 1280px; height: 720px; position: relative; overflow: hidden; page-break-after: always;
+           background: var(--papel); color: var(--tinta); padding: 56px 72px;
+           background-image: radial-gradient(#1b161212 1px, transparent 1px); background-size: 4px 4px;
+           font: 21px/1.5 "Libre Baskerville", Georgia, serif; margin: 0 auto 20px; }
+  .slide::after { content: ""; position: absolute; inset: 18px; border: 2px solid var(--tinta); pointer-events: none; }
+  .slide::before { content: ""; position: absolute; inset: 24px; border: 1px solid #15121055; pointer-events: none; }
+  h1, h2 { font-family: "Oswald", sans-serif; font-weight: 700; margin: 0; }
+  h2 { font-size: 46px; line-height: 1.05; margin-bottom: 8px; }
+  .lide { color: var(--tinta-2); margin: 0 0 26px; font-size: 20px; }
+  .num { position: absolute; right: 44px; bottom: 34px; font: 14px "Courier Prime", monospace; color: var(--tinta-3); }
+  code, .mono { font-family: "Courier Prime", monospace; }
+  ul { margin: 0; padding-left: 1.1em; } li { margin: 0 0 12px; }
+  li::marker { color: var(--vermelho); }
+
+  /* capa */
+  .capa { display: grid; grid-template-columns: 1.15fr .85fr; gap: 44px; align-items: center; height: calc(100% - 40px); }
+  .capa h1 { font-size: 150px; line-height: .88; text-transform: uppercase; letter-spacing: -2px; }
+  .capa .sub { font: 700 30px/1.2 "Oswald", sans-serif; margin: 16px 0 18px; }
+  .capa .medida { font: 20px "Courier Prime", monospace; color: var(--tinta-2); }
+  .capa .rodape { position: absolute; left: 72px; bottom: 44px; font-size: 16px; color: var(--tinta-2); }
+  .gravura { border: 3px solid var(--tinta); box-shadow: 8px 8px 0 var(--tinta); background: var(--folha); padding: 10px; }
+  .gravura img { width: 100%; display: block; filter: grayscale(1) contrast(1.15); }
+
+  /* eixo */
+  .eixo { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: start; }
+  .grande { font: 700 56px/1.05 "Oswald", sans-serif; margin: 6px 0 22px; }
+  .sextilha { font: 19px/1.6 "Courier Prime", monospace; background: var(--folha); border: 2px solid var(--tinta);
+              padding: 14px 20px; box-shadow: 5px 5px 0 var(--tinta); }
+  .sextilha b { color: var(--vermelho); font-weight: 700; }
+  .sextilha small { display: block; font-size: 14px; color: var(--tinta-3); margin-top: 6px; }
+
+  /* grades */
+  .grade3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 26px; }
+  .peca { border-top: 3px solid var(--tinta); padding-top: 12px; }
+  .peca h3 { font: 700 24px/1.15 "Oswald", sans-serif; margin: 0 0 6px; }
+  .peca p { margin: 0; font-size: 17.5px; line-height: 1.45; color: var(--tinta-2); }
+
+  /* modelos */
+  .modelos { display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; }
+  .modelos h3 { font: 700 22px "Oswald", sans-serif; margin: 0 0 10px; color: var(--tinta-2); }
+  table { border-collapse: collapse; width: 100%; font-size: 17px; }
+  td { padding: 10px 10px 10px 0; border-top: 1.5px solid #15121033; vertical-align: top; }
+  td.m { font: 700 19px "Courier Prime", monospace; white-space: nowrap; }
+  td.p { font: 16px "Courier Prime", monospace; white-space: nowrap; color: var(--tinta-2); }
+  .tag { display: inline-block; font: 700 13px "Oswald", sans-serif; padding: 0 7px; border: 2px solid currentColor; margin-bottom: 3px; }
+  .tag.usado { color: var(--verde); } .tag.teste { color: var(--vermelho); }
+  .pe { position: absolute; left: 72px; right: 72px; bottom: 44px; font-size: 15px; color: var(--tinta-2); }
+
+  /* fluxo */
+  .fluxo { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-top: 18px; }
+  .passo { background: var(--folha); border: 2px solid var(--tinta); padding: 14px 14px 16px; position: relative; min-height: 210px; }
+  .passo:not(:last-child)::after { content: ""; position: absolute; right: -14px; top: 50%; width: 14px; height: 2px; background: var(--tinta); }
+  .passo b { display: block; font: 700 22px/1.1 "Oswald", sans-serif; margin-bottom: 8px; }
+  .passo span { font-size: 15.5px; line-height: 1.4; color: var(--tinta-2); display: block; }
+  .passo i { position: absolute; top: -13px; left: 12px; background: var(--tinta); color: var(--papel); font: 700 15px "Oswald", sans-serif;
+             font-style: normal; padding: 1px 8px; }
+  .passo.chave { background: var(--tinta); color: var(--papel); } .passo.chave span { color: #e8dcc2; }
+  .ramal { margin-top: 26px; display: grid; grid-template-columns: 2fr 4fr; gap: 14px; }
+  .ramal .passo { min-height: 0; border-style: dashed; }
+
+  /* tool calling */
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .tool { border: 2px solid var(--tinta); background: var(--folha); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .tool h3 { font: 700 23px/1.1 "Oswald", sans-serif; margin: 0; }
+  .tool pre { margin: 0; font: 13.5px/1.45 "Courier Prime", monospace; background: var(--tinta); color: #efe4cc; padding: 10px 12px; white-space: pre-wrap; }
+  .tool p { margin: 0; font-size: 15.5px; line-height: 1.45; color: var(--tinta-2); }
+  .tool .veredito { font: 700 16px "Oswald", sans-serif; color: var(--verde); }
+  .tool.fora .veredito { color: var(--vermelho); }
+
+  /* resultados */
+  .numeros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+  .numeros div { border-top: 4px solid var(--tinta); padding-top: 8px; }
+  .numeros b { display: block; font: 700 60px/1 "Oswald", sans-serif; }
+  .numeros span { font-size: 16px; color: var(--tinta-2); }
+  .achados { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 36px; font-size: 17.5px; line-height: 1.45; }
+  .achados p { margin: 0; } .achados b { font-family: "Oswald", sans-serif; font-size: 20px; }
+
+  .eixo-texto { margin: 8px 0 0; font: italic 27px/1.55 "Libre Baskerville", serif; border-left: 5px solid var(--vermelho);
+                padding: 4px 0 4px 26px; }
+  .eixo-texto b { font-style: normal; }
+  /* versão simples */
+  ul.simples { list-style: none; padding: 0; }
+  ul.simples li { font-size: 25px; line-height: 1.4; margin: 0 0 22px; padding-left: 26px; position: relative; }
+  ul.simples li::before { content: "✸"; position: absolute; left: 0; top: 1px; color: var(--vermelho); font-size: 18px; }
+  .usamos { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 26px; }
+  .usamos h3 { font: 700 26px "Oswald", sans-serif; margin: 0 0 18px; color: var(--tinta-2); border-bottom: 3px solid var(--tinta); padding-bottom: 6px; }
+  .modelos-lista code { font-weight: 700; font-size: 23px; }
+  .fluxo { margin-top: 40px; }
+  .fluxo .passo { min-height: 170px; } .fluxo .passo span { font-size: 18px; }
+  .tools.dois { grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 30px; }
+  .tools.dois .tool p { font-size: 19px; } .tools.dois pre { font-size: 15.5px; }
+  .numeros.tres { grid-template-columns: repeat(3, 1fr); margin: 26px 0 34px; }
+  .numeros.tres b { font-size: 84px; } .numeros.tres span { font-size: 20px; }
+  .achados-lista li { font-size: 22px; margin-bottom: 16px; }
+  /* coleção */
+  .corda { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; margin-top: 30px; }
+  .corda::before { content: ""; position: absolute; left: -72px; right: -72px; top: -10px; height: 3px;
+                   background: repeating-linear-gradient(90deg, var(--cordao) 0 7px, #8a7148 7px 9px); }
+  .cartaz { background: var(--folha); border: 2.5px solid var(--tinta); padding: 8px; box-shadow: 4px 4px 0 #15121055; position: relative; }
+  .cartaz:nth-child(odd) { transform: rotate(-1deg); } .cartaz:nth-child(even) { transform: rotate(.8deg); }
+  .cartaz::before { content: ""; position: absolute; top: -22px; left: 50%; margin-left: -6px; width: 12px; height: 28px;
+                    background: linear-gradient(90deg, #c8a877, #a7864f); border: 1.5px solid #6d5634; border-radius: 2px; }
+  .cartaz h4 { font: 700 14.5px/1.15 "Oswald", sans-serif; text-transform: uppercase; text-align: center; margin: 4px 0 7px; min-height: 50px; }
+  .cartaz img { width: 100%; aspect-ratio: 3/2; object-fit: cover; display: block; border: 1.5px solid var(--tinta); filter: grayscale(1) contrast(1.15); }
+  .cartaz p { font: 12.5px/1.45 "Courier Prime", monospace; margin: 8px 2px 2px; }
+  .cartaz small { display: block; font: 11.5px "Courier Prime", monospace; color: var(--tinta-3); margin-top: 4px; }
+  .link { position: absolute; left: 72px; bottom: 46px; font: 700 22px "Oswald", sans-serif; }
+  .link span { font: 17px "Libre Baskerville", serif; color: var(--tinta-2); margin-left: 10px; }
+</style>
+</head>
+<body>
+
+<!-- 1. capa -->
+<section class="slide">
+  <div class="capa">
+    <div>
+      <h1>Do 7 ao 6</h1>
+      <p class="sub">A semana em sextilha:<br>notícias de IA contadas em cordel</p>
+      <p class="medida">Sete sílabas por verso. Seis versos por estrofe.</p>
+    </div>
+    <div class="gravura"><img src="imagens/20260928-154345-amador-resolve-desafio-matematico-com-ia.png" alt=""></div>
+  </div>
+  <p class="rodape">Projeto Autoral de Criatividade Computacional (IF866), CIn/UFPE, 2026.2</p>
+</section>
+
+<!-- 2. eixo -->
+<section class="slide">
+  <h2>O eixo</h2>
+  <div class="eixo">
+    <div>
+      <p class="grande">Repete-se a forma.<br>Varia a notícia.</p>
+      <div class="sextilha">
+        De além-mar vem a notícia<br>Britânico fez <b>clarão</b><br>Uma máquina vingou<br>Sete anos nessa <b>questão</b><br>Jared leu tal resultado<br>Fez do cálculo um <b>trovão</b>
+        <small>da coleção: "Amador resolve desafio matemático com IA"</small>
+      </div>
+    </div>
+    <blockquote class="eixo-texto">Gerar folhetos de cordel a partir das notícias de IA da semana do
+      <b>CriaComp News</b>, mantendo constantes a forma (<b>sextilhas de sete sílabas</b>) e a estética de
+      <b>xilogravura</b>, enquanto varia a notícia. Estrofes fora da métrica são descartadas.</blockquote>
+  </div>
+  <span class="num">2</span>
+</section>
+
+<!-- 3. o que usamos -->
+<section class="slide">
+  <h2>O que usamos</h2>
+  <div class="usamos">
+    <div>
+      <h3>Ferramentas</h3>
+      <ul class="simples">
+        <li><b>AI SDK para Python</b>, para falar com os modelos</li>
+        <li><b>escandir.py</b>, o verificador de sílabas e rima</li>
+        <li><b>Dicionário nordestino</b>, com 158 termos</li>
+        <li><b>Um site</b> para gerar, guardar e mostrar a coleção</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Modelos</h3>
+      <ul class="simples modelos-lista">
+        <li><code>gpt-6-luna</code> escreve os versos (padrão)</li>
+        <li><code>gpt-5.5</code> no primeiro folheto e nos testes</li>
+        <li><code>gpt-image-2</code> nas primeiras xilogravuras</li>
+        <li><code>gpt-image-1-mini</code> nas xilogravuras de agora</li>
+      </ul>
+    </div>
+  </div>
+  <span class="num">3</span>
+</section>
+
+<!-- 4. como é feito -->
+<section class="slide">
+  <h2>Como um folheto é feito</h2>
+  <div class="fluxo">
+    <div class="passo"><i>1</i><b>Notícia</b><span>O grupo cola o link.</span></div>
+    <div class="passo"><i>2</i><b>Fato</b><span>O modelo resume em uma frase.</span></div>
+    <div class="passo"><i>3</i><b>Versos</b><span>O modelo escreve a sextilha.</span></div>
+    <div class="passo chave"><i>4</i><b>Verificador</b><span>Conta as sílabas e confere a rima.</span></div>
+    <div class="passo"><i>5</i><b>Correção</b><span>Só os versos reprovados voltam.</span></div>
+    <div class="passo"><i>6</i><b>Folheto</b><span>Entra na coleção ou vai ao descarte.</span></div>
+  </div>
+  <div class="ramal">
+    <div></div>
+    <div class="passo"><b>Xilogravura</b><span>Feita ao mesmo tempo, a partir do mesmo fato.</span></div>
+  </div>
+  <span class="num">4</span>
+</section>
+
+<!-- 5. tool calling -->
+<section class="slide">
+  <h2>Chamadas de ferramenta</h2>
+  <div class="tools dois">
+    <div class="tool">
+      <h3>A xilogravura</h3>
+<pre>tool = image_generation(model="gpt-image-1-mini")
+ai.stream(gpt_6_luna, [prompt], tools=[tool],
+          tool_choice=REQUIRED)</pre>
+      <p>O modelo de texto é obrigado a chamar a ferramenta de imagem. A xilogravura volta junto com a resposta.</p>
+      <span class="veredito">Usado em todo folheto</span>
+    </div>
+    <div class="tool fora">
+      <h3>O verificador como ferramenta</h3>
+<pre>@ai.tool
+async def escandir_sextilha(versos): ...
+
+ai.Agent(tools=[escandir_sextilha])</pre>
+      <p>O modelo media os próprios versos. A métrica passou sempre, mas a poesia piorou: "Alunos miram jardim / Gigante chuta capim".</p>
+      <span class="veredito">Testado e deixado de fora</span>
+    </div>
+  </div>
+  <span class="num">5</span>
+</section>
+
+<!-- 6. resultados -->
+<section class="slide">
+  <h2>Resultados</h2>
+  <div class="numeros tres">
+    <div><b>15</b><span>folhetos gerados</span></div>
+    <div><b>11</b><span>passaram no verificador</span></div>
+    <div><b>~3</b><span>correções por folheto</span></div>
+  </div>
+  <ul class="simples achados-lista">
+    <li><b>A sílaba é do verificador.</b> O modelo raramente acerta a métrica de primeira.</li>
+    <li><b>Modelo melhor erra menos o fato.</b> No júri cego, o gpt-5.5 venceu 18 de 20 comparações.</li>
+    <li><b>Termo presente não é termo com sentido.</b> O código confere a palavra, não o uso.</li>
+  </ul>
+  <span class="num">6</span>
+</section>
+
+<!-- 8. coleção -->
+<section class="slide">
+  <h2>A coleção</h2>
+  <div class="corda" id="corda"></div>
+  <p class="link">cordel-generator-production.up.railway.app<span>a coleção inteira, o descarte e o caderno de bordo</span></p>
+  <span class="num">7</span>
+</section>
+
+<script>
+// os cartazes vêm de imagens/colecao.json (textos da coleção pública do site)
+const TIPOS = { aberta: "sextilha aberta", solta: "sextilha solta", corrida: "sextilha corrida", desencontrada: "sextilha desencontrada" };
+fetch("imagens/colecao.json").then((r) => r.json()).then((itens) => {
+  document.getElementById("corda").innerHTML = itens.map((f) => `<div class="cartaz">
+      <h4>${f.manchete}</h4><img src="imagens/${f.id}.png" alt="">
+      <p>${f.estrofe.slice(0, 4).join("<br>")}</p>
+      <small>${TIPOS[f.forma] ?? "sextilha"}, ${f.n} ${f.n === 1 ? "estrofe" : "estrofes"}</small></div>`).join("");
+  document.body.dataset.pronto = "1";
+});
+</script>
+</body>
+</html>

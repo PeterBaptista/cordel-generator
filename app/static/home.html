@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do 7 ao 6: a semana em sextilha</title>
+<meta name="description" content="Notícias de inteligência artificial da semana recontadas em folhetos de cordel: sextilhas de sete sílabas com xilogravura.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/folheto.css">
+<style>
+  :root {
+    --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35; --tinta-3: #6f6253;
+    --vermelho: #a3301f; --verde: #2f5d3a; --cordao: #b59a6a; --cordao-escuro: #8a7148;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--papel); color: var(--tinta);
+    font: 17px/1.65 "Libre Baskerville", Georgia, serif;
+    background-image: radial-gradient(#1b161210 1px, transparent 1px); background-size: 4px 4px;
+  }
+  a { color: var(--tinta); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, .corda:focus-visible { outline: 3px solid var(--vermelho); outline-offset: 3px; }
+  .miolo { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  h2 { font: 700 clamp(26px, 3.4vw, 34px)/1.1 "Oswald", sans-serif; margin: 0 0 6px; letter-spacing: .3px; }
+  .lide { color: var(--tinta-2); max-width: 62ch; margin: 0 0 24px; }
+
+  /* ---- abertura */
+  .abertura { padding: 56px 0 28px; border-bottom: 3px double var(--tinta); }
+  .abertura h1 { font: 700 clamp(56px, 11vw, 132px)/.9 "Oswald", sans-serif; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
+  .abertura .sub { font: 700 clamp(20px, 3vw, 30px)/1.2 "Oswald", sans-serif; margin: 10px 0 18px; }
+  .abertura p { max-width: 60ch; margin: 0 0 12px; }
+  .abertura .eixo { margin: 0 0 16px; max-width: 58ch; font-style: italic; font-size: 19px; line-height: 1.6;
+                    border-left: 4px solid var(--vermelho); padding-left: 20px; }
+  .abertura .medida { font-family: "Courier Prime", monospace; color: var(--tinta-2); max-width: none; }
+  .botoes { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; margin-top: 22px; }
+  .botao { display: inline-block; font: 700 17px "Oswald", sans-serif; text-decoration: none; padding: 11px 22px;
+           background: var(--tinta); color: var(--papel); border: 2px solid var(--tinta); box-shadow: 4px 4px 0 var(--vermelho); }
+  .botao.leve { background: transparent; color: var(--tinta); box-shadow: 4px 4px 0 var(--tinta); }
+  .botao:hover { transform: translate(-1px, -1px); }
+  .nota { font-size: 14px; color: var(--tinta-3); }
+
+  /* ---- a corda: a coleção pendurada como na feira */
+  .colecao { padding: 44px 0 12px; }
+  .corda { position: relative; overflow-x: auto; scroll-snap-type: x proximity;
+           padding: 34px max(20px, calc((100vw - 1120px) / 2 + 20px)) 36px;
+           scroll-padding-inline: max(20px, calc((100vw - 1120px) / 2 + 20px));
+           display: flex; gap: 40px; align-items: flex-start; scrollbar-color: var(--cordao-escuro) transparent; }
+  .corda::before { content: ""; position: absolute; left: 0; top: 26px; height: 3px; min-width: 100%;
+                   width: var(--largura, 100%); background: repeating-linear-gradient(90deg, var(--cordao) 0 7px, var(--cordao-escuro) 7px 9px);
+                   box-shadow: 0 1px 0 #15121033; }
+  .pendurado { flex: none; width: min(80vw, 380px); scroll-snap-align: center; position: relative; }
+  .pendurado:nth-child(odd) .folheto { transform: rotate(-.8deg); }
+  .pendurado:nth-child(even) .folheto { transform: rotate(.7deg); }
+  .pendurado .folheto { transform-origin: 50% 0; max-width: none; }
+  .prendedor { position: absolute; top: -18px; left: 50%; width: 16px; height: 38px; margin-left: -8px; z-index: 2;
+               background: linear-gradient(90deg, #c8a877, #a7864f); border: 1.5px solid #6d5634; border-radius: 3px; }
+  .prendedor::after { content: ""; position: absolute; left: 6px; top: 14px; width: 2px; height: 10px; background: #6d5634; }
+  .legenda { margin: 14px 4px 0; font-size: 14px; color: var(--tinta-2); }
+  .legenda a, .legenda button { font: inherit; color: var(--tinta); }
+  .legenda button { background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .legenda button:disabled { color: var(--tinta-3); cursor: wait; }
+  .vazio { color: var(--tinta-2); padding: 20px 0; }
+
+  /* ---- o que ficou de fora */
+  .descarte { padding: 44px 0; }
+  .descarte ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; }
+  .descarte li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 8px 28px;
+                 padding-top: 16px; border-top: 1.5px solid #15121033; }
+  @media (max-width: 720px) { .descarte li { grid-template-columns: 1fr; } }
+  .descarte h3 { font: 700 21px/1.2 "Oswald", sans-serif; margin: 0 0 6px; }
+  .descarte .motivo { color: var(--vermelho); font-size: 15px; margin: 0; }
+  .descarte .versos-riscados { font: 14.5px/1.55 "Courier Prime", monospace; color: var(--tinta-2); margin: 0; white-space: pre-line; }
+
+  /* ---- como é feito e a entrega */
+  .duas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; padding: 44px 0 56px;
+          border-top: 3px double var(--tinta); }
+  @media (max-width: 820px) { .duas { grid-template-columns: 1fr; gap: 36px; } }
+  .passos, .entrega { margin: 0; padding-left: 1.6em; }
+  .passos li, .entrega li { margin: 0 0 12px; padding-left: 4px; }
+  .passos li::marker, .entrega li::marker { font: 700 17px "Oswald", sans-serif; }
+  .entrega a { font-weight: bold; }
+  .entrega span { display: block; font-size: 15px; color: var(--tinta-2); }
+
+  footer { border-top: 1.5px solid #15121033; padding: 20px 0 40px; font-size: 14px; color: var(--tinta-2); }
+</style>
+</head>
+<body>
+
+<header class="abertura">
+  <div class="miolo">
+    <h1>Do 7 ao 6</h1>
+    <p class="sub">A semana em sextilha: notícias de IA contadas em cordel</p>
+    <blockquote class="eixo" id="eixo">Gerar folhetos de cordel a partir das notícias de IA da semana do
+      CriaComp News, mantendo constantes a forma (sextilhas de sete sílabas) e a estética de
+      xilogravura, enquanto varia a notícia. Estrofes fora da métrica são descartadas.</blockquote>
+    <p class="medida">Sete sílabas por verso, seis versos por estrofe, rima ABCBDB.</p>
+    <div class="botoes">
+      <a class="botao" href="#colecao">Ver os folhetos</a>
+      <a class="botao leve" href="/gerador">Abrir o gerador</a>
+      <span class="nota">O gerador é de uso do grupo e pede senha.</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="colecao" id="colecao" aria-labelledby="t-colecao">
+    <div class="miolo">
+      <h2 id="t-colecao">A coleção</h2>
+      <p class="lide" id="lide-colecao">Os folhetos ficam pendurados no cordão, como na feira. Arraste para o lado para ver todos.</p>
+    </div>
+    <div class="corda" id="corda" tabindex="0" aria-label="Folhetos da coleção, role para o lado">
+      <p class="vazio miolo">Carregando os folhetos.</p>
+    </div>
+  </section>
+
+  <section class="descarte" id="descarte" aria-labelledby="t-descarte">
+    <div class="miolo">
+      <h2 id="t-descarte">O que ficou de fora</h2>
+      <p class="lide">Folhetos que o verificador reprovou e as correções automáticas não salvaram. O motivo é o que o verificador registrou.</p>
+      <ol id="lista-descarte"></ol>
+    </div>
+  </section>
+
+  <div class="miolo">
+    <div class="duas">
+      <section aria-labelledby="t-feito">
+        <h2 id="t-feito">Como um folheto é feito</h2>
+        <p class="lide">Cada passo fica registrado no caderno de bordo, com os prompts na íntegra.</p>
+        <ol class="passos">
+          <li>O grupo escolhe a notícia da semana e cola o link.</li>
+          <li>Um modelo de linguagem resume o fato em uma frase e sugere imagens concretas.</li>
+          <li>O modelo escreve a sextilha usando termos de um dicionário nordestino.</li>
+          <li>O verificador conta as sílabas poéticas e confere a rima e as regras do grupo.</li>
+          <li>Só os versos reprovados voltam para correção, até passarem ou o limite acabar.</li>
+          <li>Outro modelo entalha a xilogravura a partir do mesmo fato.</li>
+        </ol>
+      </section>
+      <section aria-labelledby="t-entrega">
+        <h2 id="t-entrega">A entrega</h2>
+        <p class="lide">Os cinco itens do PA 1, com o texto completo no repositório do projeto.</p>
+        <ol class="entrega">
+          <li><a href="#colecao">A coleção de artefatos</a><span>Os folhetos acima, com texto e xilogravura.</span></li>
+          <li><a href="#eixo">O eixo declarado</a><span>No topo desta página, e no <a href="https://github.com/PeterBaptista/cordel-generator/blob/main/EIXO.md">repositório</a>.</span></li>
+          <li><a href="#descarte">O descarte comentado</a><span>O que ficou de fora e por qual critério.</span></li>
+          <li><a href="https://github.com/PeterBaptista/cordel-generator/blob/main/CADERNO-DE-BORDO.md">O caderno de bordo</a><span>Com o <a href="https://github.com/PeterBaptista/cordel-generator/blob/main/caderno/REGISTRO.md">registro de cada folheto</a> e o <a href="https://github.com/PeterBaptista/cordel-generator/blob/main/dados/dicionario_nordestino.csv">dicionário nordestino</a>.</span></li>
+          <li><a href="/static/Do7ao6.pdf">O material da apresentação</a><span>Os slides em PDF: o eixo, as ferramentas, os modelos e os resultados.</span></li>
+        </ol>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="miolo">
+    Projeto Autoral de Criatividade Computacional (IF866), CIn/UFPE, 2026.2.
+    <a href="https://github.com/PeterBaptista/cordel-generator">Código do projeto</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<script src="/static/folheto.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = escFolheto;
+const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
+const dia = (iso) => iso ? new Date(iso).toLocaleDateString("pt-BR", { day: "numeric", month: "long" }) : "";
+const TIPOS = { aberta: "sextilha aberta", solta: "sextilha solta", corrida: "sextilha corrida", desencontrada: "sextilha desencontrada" };
+
+function legenda(f) {
+  const partes = [];
+  if (f.url) partes.push(`<a href="${esc(f.url)}" rel="noopener">Notícia original</a> em ${esc(f.fonte || dominio(f.url))}`);
+  const forma = `${TIPOS[f.forma.forma] ?? "sextilha"}, ${f.forma.estrofes} ${f.forma.estrofes === 1 ? "estrofe" : "estrofes"}`;
+  return `<p class="legenda">${partes.join("")}${partes.length ? ". " : ""}${esc(dia(f.inicio))}, ${esc(forma)}.
+    <button type="button" data-id="${esc(f.id)}">Baixar em PNG</button></p>`;
+}
+
+function pendurar(colecao) {
+  if (!colecao.length) {
+    $("corda").innerHTML = '<p class="vazio miolo">A coleção ainda não tem folhetos. Eles aparecem aqui quando passarem no verificador.</p>';
+    return;
+  }
+  $("corda").innerHTML = colecao.map((f) => `<figure class="pendurado" style="margin:0">
+      <span class="prendedor" aria-hidden="true"></span>
+      ${folhetoHTML({ manchete: f.manchete, estrofes: f.estrofes, imagem: f.imagem ? `/${f.imagem}` : null,
+                      fonte: f.url ? (f.fonte || dominio(f.url)) : null })}
+      <figcaption>${legenda(f)}</figcaption>
+    </figure>`).join("");
+  // o cordão acompanha toda a largura rolável
+  $("corda").style.setProperty("--largura", `${$("corda").scrollWidth}px`);
+  $("lide-colecao").textContent = colecao.length > 1
+    ? `${colecao.length} folhetos pendurados no cordão, como na feira. Arraste para o lado para ver todos.`
+    : "Um folheto pendurado no cordão, como na feira.";
+  $("corda").querySelectorAll("button[data-id]").forEach((b) => b.onclick = async () => {
+    b.disabled = true; b.textContent = "Gerando o PNG";
+    try { await baixarFolheto(b.closest(".pendurado").querySelector(".folheto"), b.dataset.id); }
+    finally { b.disabled = false; b.textContent = "Baixar em PNG"; }
+  });
+}
+
+function descartar(lista) {
+  $("lista-descarte").innerHTML = lista.length ? lista.map((f) => `<li>
+      <div><h3>${esc(f.manchete)}</h3><p class="motivo">${esc(f.motivo || "Reprovado no verificador.")}</p></div>
+      <p class="versos-riscados">${esc((f.estrofes[0] || []).join("\n"))}${f.estrofes.length > 1 ? "\n…" : ""}</p>
+    </li>`).join("") : "<li><p>Nenhum folheto foi descartado até agora.</p></li>";
+}
+
+fetch("/api/colecao").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(({ colecao, descarte }) => { pendurar(colecao); descartar(descarte); })
+  .catch(() => {
+    $("corda").innerHTML = '<p class="vazio miolo">Não foi possível carregar os folhetos. Recarregue a página.</p>';
+    $("lista-descarte").innerHTML = "";
+  });
+window.addEventListener("resize", () => $("corda").style.setProperty("--largura", `${$("corda").scrollWidth}px`));
+</script>
+</body>
+</html>
