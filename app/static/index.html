@@ -347,6 +347,7 @@ const esqueletoVersos = (estrofes) => Array.from({ length: estrofes }, () =>
 const statusCartaz = (t) => { $("status-geracao").textContent = t; };
 const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
 
+let andamento = {};
 function tratar(ev) {
   switch (ev.etapa) {
     case "noticia":
@@ -364,20 +365,29 @@ function tratar(ev) {
       if (ev.status === "rodando") statusCartaz("escrevendo os versos…");
       if (ev.status === "rodando")
         return passo("cand", ev.angulos.length > 1 ? `2 · escrevendo ${ev.angulos.length} candidatas em paralelo, uma por ângulo` : "2 · escrevendo o poema", "rodando");
-      window.__cand = ev.candidatas;
+      window.__cand = ev.candidatas; andamento = {};
       return passo("cand", ev.candidatas.length > 1 ? `2 · ${ev.candidatas.length} candidatas` : "2 · primeira versão", "ok", htmlCandidatas(ev.candidatas));
     case "julgamento":
-      if (ev.status === "rodando") { statusCartaz("o júri está escolhendo…"); return passo("juri", "2b · o júri está lendo", "rodando"); }
-      mostrarEstrofes(window.__cand[ev.escolhida].estrofes);
+      if (ev.status === "rodando") { statusCartaz("o júri está lendo as aprovadas…"); return passo("juri", "4b · o júri está lendo as aprovadas", "rodando"); }
+      mostrarEstrofes(ev.estrofes);
       if (window.__cand.length < 2) return;
-      passo("cand", `2 · ${window.__cand.length} candidatas`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
-      return passo("juri", `2b · júri escolheu a candidata ${ev.escolhida + 1}`, "ok", esc(ev.justificativa));
+      passo("cand", `2 · ${window.__cand.length} candidatas (primeira versão)`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
+      return passo("juri", ev.aprovadas.length > 1 ? `4b · júri escolheu a candidata ${ev.escolhida + 1}` : `4b · ficou a candidata ${ev.escolhida + 1}`, "ok", esc(ev.justificativa));
     case "escansao":
+      // com várias candidatas em paralelo, cada uma tem uma linha só, com o estado mais recente
+      if (window.__cand.length > 1) {
+        andamento[ev.candidata] = ev.entra;
+        const prontas = Object.values(andamento).filter(Boolean).length;
+        statusCartaz(`corrigindo ${window.__cand.length} candidatas (${prontas} aprovada(s))…`);
+        return passo(`c${ev.candidata}`, `3 · candidata ${ev.candidata + 1}: ${ev.entra ? "passou" : `${ev.reprovados.length} verso(s) reprovado(s)`}, ${ev.rodada}/${MAX_RODADAS} correções`,
+          ev.entra ? "ok" : "rodando", `<details><summary>escansão</summary>${tabelaEscansao(ev)}</details>`);
+      }
       mostrarEstrofes(ev.estrofes, ev.entra ? [] : ev.reprovados);
       statusCartaz(ev.entra ? "passou no verificador" : `${ev.reprovados.length} verso(s) a corrigir…`);
       return passo(`esc${ev.rodada}`, `3 · escansão ${ev.rodada === 0 ? "inicial" : "após rodada " + ev.rodada}`,
         ev.entra ? "ok" : "erro", tabelaEscansao(ev));
     case "correcao":
+      if (window.__cand.length > 1) return;
       if (ev.status === "rodando") statusCartaz(`corrigindo ${ev.reprovados.length} verso(s) (${ev.rodada}/${MAX_RODADAS})…`);
       if (ev.status === "rodando")
         return passo(`cor${ev.rodada}`, `4 · correção ${ev.rodada}/${MAX_RODADAS} — ${listaReprovados(ev.reprovados, 2)}`, "rodando");

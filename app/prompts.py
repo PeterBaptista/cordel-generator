@@ -125,8 +125,9 @@ NARRADORES = {
 }
 
 
-def usuario_poema(fato: str, imagens: list[str], narrador: str) -> str:
+def usuario_poema(fato: str, imagens: list[str], narrador: str, noticia: str) -> str:
     return (
+        f"Notícia original (a fonte dos fatos; não copie as frases dela):\n{noticia}\n\n"
         f"Fato: {fato}\n"
         f"Imagens possíveis: {'; '.join(imagens)}\n"
         f"Narrador: {narrador}\n\n"
@@ -141,40 +142,41 @@ def poema_em_texto(estrofes: list[list[str]], numerar: bool = False) -> str:
 
 
 SISTEMA_JULGAMENTO = """\
-Você é o júri de um concurso de cordel. Recebe poemas candidatos em sextilhas sobre
-a mesma notícia, cada um com o relatório de um verificador de métrica e rima.
+Você é o júri de um concurso de cordel. Recebe a notícia e poemas em sextilhas sobre ela,
+todos já aprovados por um verificador de métrica e rima, que não entende o sentido.
 Escolha UM, nesta ordem de critérios:
-1. Prefira os que o verificador aprovou. Se nenhum passou, prefira os com menos
-   versos reprovados: cada verso reprovado ainda vai precisar de correção.
-2. Entre esses, o mais criativo: imagem concreta e surpreendente, comparação com o
-   mundo do cordel, nenhuma palavra repetida à toa, final com virada. Pese as regras
+1. Fiel à notícia: conta o fato, com quem fez o quê e os nomes principais, sem contradizer
+   a notícia e sem inventar acontecimento. Imagem e comparação são livres; o fato não.
+2. Faz sentido: quem lê só o poema entende a notícia, cada verso segue do anterior e nenhum
+   está ali só para fechar métrica ou rima.
+3. Entre os que empatam nisso, o mais criativo: imagem concreta e surpreendente, comparação
+   com o mundo do cordel, nenhuma palavra repetida à toa, final com virada. Pese as regras
    do grupo que o verificador não confere: tom popular em todas as palavras, termos
    do dicionário amarrados ao verso (não soltos só para constar) e vocativo e
    partícula fática só na ponta do verso.
-3. Fiel ao fato da notícia, sem inventar acontecimento.
 Justifique em uma ou duas frases, citando versos."""
 
 
-def usuario_julgamento(fato: str, candidatas: list[dict]) -> str:
-    blocos = []
-    for i, c in enumerate(candidatas, 1):
-        estado = "APROVADA" if c["entra"] else f"{len(c['reprovados'])} versos reprovados"
-        blocos.append(f"Candidata {i} (ângulo: {c['angulo']}) — {estado}\n{poema_em_texto(c['estrofes'])}")
-    return f"Fato: {fato}\n\n" + "\n\n".join(blocos) + "\n\nQual é a escolhida (número)?"
+def usuario_julgamento(noticia: str, fato: str, candidatas: list[dict]) -> str:
+    blocos = [f"Candidata {i} (ângulo: {c['angulo']})\n{poema_em_texto(c['final'])}"
+              for i, c in enumerate(candidatas, 1)]
+    return (f"Notícia:\n{noticia}\n\nFato: {fato}\n\n" + "\n\n".join(blocos)
+            + "\n\nQual é a escolhida (número)?")
 
 
-def sistema_correcao(forma: str, encadeamento: str) -> str:
-    esquema, regra = FORMAS[forma]
-    deixa = ("\n- Em deixa: o 1º verso de cada estrofe (da 2ª em diante) rima com o último "
-             "verso da estrofe anterior, com palavra diferente." if encadeamento == "deixa" else "")
-    return f"""\
-Você corrige poemas em sextilhas de cordel: 7 sílabas poéticas, sextilha {forma},
-rima {esquema} ({regra}).{deixa}
-Um verificador reprovou alguns versos. Reescreva SOMENTE os versos reprovados.
+# Vai na mesma conversa em que o Poeta escreveu: a forma, as regras e o dicionário já estão
+# no sistema dele, e a notícia, o narrador e o plano estão nos turnos anteriores.
+PEDIDO_CORRECAO = """\
+Um verificador reprovou alguns versos do seu poema. Reescreva SOMENTE os versos reprovados.
 Os versos aprovados já estão certos e não podem mudar.
 Não conte sílabas de cabeça com confiança: use a escansão do verificador como guia
 (ela mostra onde o verificador separou as sílabas e onde fez elisão).
-Mantenha o sentido e o registro de cordel, e não empobreça o poema:
+Conserte a forma sem mudar o que o poema conta:
+- Confira cada verso novo com a notícia: nada de trocar o fato por causa da rima ou da
+  métrica. Se o fato não couber assim, diga o mesmo com outras palavras.
+- Mantenha o narrador e o ângulo que você planejou, e faça o verso novo seguir o sentido
+  dos versos vizinhos.
+- Não volte a uma tentativa que o verificador já reprovou nesta conversa.
 - A palavra final do verso corrigido não pode repetir outra palavra final da
   estrofe. Para uma rima, procure uma palavra NOVA com o mesmo som.
 - Não repita nomes e palavras de conteúdo que já estão nos outros versos.
@@ -183,12 +185,17 @@ Mantenha o sentido e o registro de cordel, e não empobreça o poema:
   indicado usando um termo que caiba no sentido.
 - A concordância popular ("os menino") é de propósito: não conserte.
 Devolva cada verso corrigido com a estrofe e o número dele (E2.4 = estrofe 2, verso 4).
+Antes de escrever o verso, preencha `contagem`: separe as sílabas poéticas com hífens e
+numere até a última tônica (ex.: "Na-fei-ra-do-meu-ser-TÃO = 7"). Se não der 7, troque as
+palavras e conte de novo: em `verso` só entra o que deu 7."""
 
-{regras_do_grupo()}"""
 
-
-def usuario_correcao(estrofes: list[list[str]], relatorio: str, reprovados: list[tuple[int, int]]) -> str:
+def usuario_correcao(
+    estrofes: list[list[str]], relatorio: str, reprovados: list[tuple[int, int]], fato: str,
+) -> str:
     return (
+        f"{PEDIDO_CORRECAO}\n\n"
+        f"O poema tem de continuar contando isto, com quem fez o quê e os nomes principais: {fato}\n\n"
         f"Poema atual:\n{poema_em_texto(estrofes, numerar=True)}\n\n"
         f"Relatório do verificador:\n{relatorio}\n\n"
         f"Reescreva só os versos {', '.join(f'E{e}.{n}' for e, n in reprovados)}."

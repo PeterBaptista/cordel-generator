@@ -380,6 +380,8 @@ async function fechar() {
                          { duration: 320, easing: "cubic-bezier(.5, 0, .7, .4)", fill: "forwards" }).finished.catch(() => {});
   }
   aberto.close(); aberto.classList.remove("saindo");
+  // a saída da ficha usa fill: "forwards"; sem cancelar, ela continua valendo na próxima abertura
+  $("ab-ficha").getAnimations().forEach((a) => a.cancel());
   document.documentElement.classList.remove("travado");
   fig.classList.remove("solto");
   $("ab-folheto").innerHTML = ""; $("ab-ficha").innerHTML = "";

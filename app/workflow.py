@@ -1,7 +1,8 @@
 """O laço do SKILL.md, automatizado com o AI SDK para Python.
 
-notícia -> fato -> sextilha -> escandir.py -> correção (só versos reprovados,
-no máximo MAX_RODADAS rodadas) -> xilogravura -> folhetos/ ou descarte/ + caderno/.
+notícia -> fato -> candidatas -> escandir.py -> correção pelo próprio Poeta, na mesma
+conversa (só versos reprovados, no máximo MAX_RODADAS rodadas) -> júri entre as aprovadas
+-> xilogravura -> folhetos/ ou descarte/ + caderno/.
 
 `run_cordel` é um gerador assíncrono: cada etapa sai como um dict, que o
 servidor repassa ao navegador via SSE.
@@ -81,7 +82,9 @@ class Config:
     duas pessoas gerando ao mesmo tempo não troquem o modelo uma da outra."""
     texto: str = os.getenv("CORDEL_TEXT_MODEL", ECONOMICO["texto"])
     raciocinio: str = os.getenv("CORDEL_REASONING", ECONOMICO["raciocinio"])
-    candidatas: int = int(os.getenv("CORDEL_CANDIDATAS", "1"))
+    # várias candidatas compensam o descarte: um poema fiel que trava na métrica não impede
+    # a entrega, porque outra candidata pode passar
+    candidatas: int = int(os.getenv("CORDEL_CANDIDATAS", "3"))
     # em xilogravura preto e branco, "low" ficou tão bom quanto "medium" e sai mais barato
     imagem_qualidade: str = os.getenv("CORDEL_IMAGE_QUALITY", ECONOMICO["imagem_qualidade"])
     forma: str = "aberta"         # tipo de sextilha pelo esquema de rima
@@ -140,6 +143,7 @@ class Escolha(pydantic.BaseModel):
 class VersoCorrigido(pydantic.BaseModel):
     estrofe: int
     n: int
+    contagem: str  # vem antes do verso de propósito: obriga o modelo a contar as sílabas primeiro
     verso: str
 
 
@@ -150,15 +154,19 @@ class Correcao(pydantic.BaseModel):
 # ---------------------------------------------------------------- modelo
 async def gerar(
     sistema: str, usuario: str, output_type: type[pydantic.BaseModel], log: list,
-    cfg: Config, etapa: str = "",
+    cfg: Config, etapa: str = "", conversa: list | None = None,
 ) -> Any:
-    """Uma chamada estruturada ao modelo de texto, registrada na íntegra no log."""
+    """Uma chamada estruturada ao modelo de texto, registrada na íntegra no log.
+
+    `conversa` guarda os turnos anteriores de uma mesma conversa e recebe os novos. Só vai o
+    texto da resposta, sem o raciocínio, para o histórico não encarecer a cada rodada."""
     model = ai.get_model(cfg.texto)
     params = ai.InferenceRequestParams(reasoning=ai.ReasoningParams(effort=cfg.raciocinio))
+    anteriores = conversa or []
     t0 = time.monotonic()
     async with ai.stream(
         model,
-        [ai.system_message(sistema), ai.user_message(usuario)],
+        [ai.system_message(sistema), *anteriores, ai.user_message(usuario)],
         output_type=output_type,
         params=params,
     ) as stream:
@@ -170,10 +178,13 @@ async def gerar(
         "reasoning_effort": cfg.raciocinio,
         "sistema": sistema,
         "usuario": usuario,
+        "turnos_anteriores": len(anteriores) // 2,
         "saida_bruta": stream.text,
         "tokens": _uso(stream.usage),
         "segundos": round(time.monotonic() - t0, 1),
     })
+    if conversa is not None:
+        conversa += [ai.user_message(usuario), ai.assistant_message(stream.text)]
     return stream.output
 
 
@@ -472,16 +483,20 @@ async def run_cordel(
     angulos = (random.sample(list(prompts.NARRADORES.values()), min(cfg.candidatas, len(prompts.NARRADORES)))
                if cfg.narrador == "sortear" else [prompts.NARRADORES[cfg.narrador]] * cfg.candidatas)
     yield {"etapa": "candidatas", "status": "rodando", "angulos": angulos}
+    sistema_poeta = prompts.sistema_poema(cfg.forma, cfg.estrofes, cfg.encadeamento)
+    # uma conversa por candidata: quem corrige depois é o mesmo Poeta que escreveu
+    conversas = [[] for _ in angulos]
     geradas = await asyncio.gather(*(
-        gerar(prompts.sistema_poema(cfg.forma, cfg.estrofes, cfg.encadeamento),
-              prompts.usuario_poema(fato.fato, fato.imagens_concretas, a),
-              Poema, chamadas, cfg, "candidata")
-        for a in angulos), return_exceptions=True)
-    candidatas = []
-    for a, g in zip(angulos, geradas):
+        gerar(sistema_poeta,
+              prompts.usuario_poema(fato.fato, fato.imagens_concretas, a, noticia),
+              Poema, chamadas, cfg, "candidata", conversa=c)
+        for a, c in zip(angulos, conversas)), return_exceptions=True)
+    candidatas, conversas_ok = [], []
+    for a, g, c in zip(angulos, geradas, conversas):
         if isinstance(g, BaseException):
             log.setdefault("erros_candidatas", []).append(f"{a}: {g}")
             continue
+        conversas_ok.append(c)
         ests = [[v.strip() for v in e.versos if v.strip()] for e in g.estrofes]
         mp = medir_poema(ests, cfg)
         candidatas.append({"angulo": a, "plano": g.angulo, "finais": [e.finais for e in g.estrofes],
@@ -496,66 +511,111 @@ async def run_cordel(
     def estourou() -> bool:
         return custos.resumo(log)["total"] >= teto_texto
 
-    # 2b. júri: escolhe a mais criativa entre as que o verificador prefere
-    validas = [i for i, c in enumerate(candidatas) if c["forma_ok"]] or [0]
-    # sem júri, fica a que o verificador reprovou menos
-    escolhida = min(validas, key=lambda i: len(candidatas[i]["reprovados"]))
-    justificativa = ("única candidata com a forma pedida" if len(validas) == 1
-                     else "sem júri (teto de custo): fica a com menos versos reprovados")
-    if len(validas) > 1 and estourou():
+    # 3-4. escandir e corrigir cada candidata, em paralelo, antes do júri: ele só deve ler o
+    # texto que pode ser publicado. Cada correção continua a conversa do Poeta daquela
+    # candidata, com a notícia, o narrador, o plano e as tentativas anteriores à vista.
+    fila: asyncio.Queue = asyncio.Queue()
+    resultados: list[dict] = [{} for _ in candidatas]
+
+    async def corrigir(i: int) -> None:
+        estrofes = [list(vs) for vs in candidatas[i]["estrofes"]]
+        res = resultados[i]
+        res.update(estrofes=estrofes, rodada=0, rodadas=[])
+        while True:
+            rodada = res["rodada"]
+            mp = res["mp"] = medir_poema(estrofes, cfg)
+            reprovados = mp["reprovados"]
+            res["rodadas"].append({"rodada": rodada, "estrofes": [list(vs) for vs in estrofes],
+                                   "relatorio": mp["relatorio"]})
+            fila.put_nowait({
+                "etapa": "escansao", "candidata": i, "rodada": rodada, "estrofes": [list(vs) for vs in estrofes],
+                "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
+                "deixa": mp["deixa"], "regras": mp["regras"], "entra": mp["entra"], "reprovados": reprovados,
+                "relatorio": mp["relatorio"]})
+            if mp["entra"] or rodada >= MAX_RODADAS or not mp["forma_ok"] or not reprovados:
+                return
+            if estourou():
+                log["parou_no_teto"] = f"correção {rodada + 1}"
+                fila.put_nowait({"etapa": "teto", "onde": f"correção {rodada + 1}",
+                                 "gasto": custos.resumo(log)["total"], "teto": TETO_USD})
+                return
+            rodada = res["rodada"] = rodada + 1
+            fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "rodando", "rodada": rodada,
+                             "reprovados": reprovados})
+            corr: Correcao = await gerar(
+                sistema_poeta,
+                prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados, fato.fato),
+                Correcao, chamadas, cfg, "correção", conversa=conversas_ok[i],
+            )
+            mudancas = []
+            alvo = set(reprovados)
+            for c in corr.versos:
+                # só aceita troca nos versos reprovados: o que passou fica
+                if (c.estrofe, c.n) in alvo and c.verso.strip():
+                    antes = estrofes[c.estrofe - 1][c.n - 1]
+                    estrofes[c.estrofe - 1][c.n - 1] = c.verso.strip()
+                    mudancas.append({"estrofe": c.estrofe, "n": c.n, "antes": antes, "depois": c.verso.strip()})
+            fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "ok", "rodada": rodada,
+                             "mudancas": mudancas})
+
+    async def rodar(i: int) -> None:
+        try:
+            await corrigir(i)
+        except Exception as e:  # uma candidata falhar não derruba as outras
+            resultados[i]["erro"] = str(e)
+            log.setdefault("erros_correcao", []).append(f"candidata {i + 1}: {e}")
+        finally:
+            fila.put_nowait(None)
+
+    tarefas = [asyncio.create_task(rodar(i)) for i in range(len(candidatas))]
+    try:
+        abertas = len(tarefas)
+        while abertas:
+            ev = await fila.get()
+            if ev is None:
+                abertas -= 1
+            else:
+                yield ev
+    finally:  # quem gerava fechou a página: não continua gastando
+        for t in tarefas:
+            t.cancel()
+
+    if all("erro" in r for r in resultados):
+        raise RuntimeError("a correção falhou em todas as candidatas: " + "; ".join(log["erros_correcao"]))
+    for c, r in zip(candidatas, resultados):
+        c.update(final=r["estrofes"], entra_final=r["mp"]["entra"], rodadas_de_correcao=r["rodada"],
+                 rodadas=r["rodadas"], reprovados_final=r["mp"]["reprovados"])
+
+    # 4b. júri: lê só as candidatas aprovadas, já corrigidas
+    aprovadas = [i for i, r in enumerate(resultados) if r["mp"]["entra"]]
+    # sem aprovada, o registro do descarte fica com a que chegou mais perto
+    escolhida = aprovadas[0] if aprovadas else min(
+        range(len(resultados)),
+        key=lambda i: (not resultados[i]["mp"]["forma_ok"], len(resultados[i]["mp"]["reprovados"])))
+    justificativa = ("única candidata" if len(candidatas) == 1
+                     else "nenhuma candidata passou; fica a que chegou mais perto" if not aprovadas
+                     else "única candidata aprovada" if len(aprovadas) == 1
+                     else "sem júri (teto de custo): fica a primeira aprovada")
+    if len(aprovadas) > 1 and estourou():
         log["parou_no_teto"] = "júri"
         yield {"etapa": "teto", "onde": "júri", "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
-    elif len(validas) > 1:
+    elif len(aprovadas) > 1:
         yield {"etapa": "julgamento", "status": "rodando"}
         juri: Escolha = await gerar(
             prompts.SISTEMA_JULGAMENTO,
-            prompts.usuario_julgamento(fato.fato, [candidatas[i] for i in validas]),
+            prompts.usuario_julgamento(noticia, fato.fato, [candidatas[i] for i in aprovadas]),
             Escolha, chamadas, cfg, "júri",
         )
-        if 1 <= juri.escolhida <= len(validas):
-            escolhida, justificativa = validas[juri.escolhida - 1], juri.justificativa
+        if 1 <= juri.escolhida <= len(aprovadas):
+            escolhida, justificativa = aprovadas[juri.escolhida - 1], juri.justificativa
         else:
-            justificativa = f"júri respondeu {juri.escolhida}, fora da lista; fica a primeira"
+            justificativa = f"júri respondeu {juri.escolhida}, fora da lista; fica a primeira aprovada"
     log["escolhida"] = {"indice": escolhida, "justificativa": justificativa}
-    yield {"etapa": "julgamento", "status": "ok", "escolhida": escolhida,
-           "justificativa": justificativa}
-    estrofes = [list(vs) for vs in candidatas[escolhida]["estrofes"]]
-
-    # 3-4. escandir e corrigir só o que foi reprovado, no máximo MAX_RODADAS rodadas
-    rodada = 0
-    while True:
-        mp = medir_poema(estrofes, cfg)
-        reprovados = mp["reprovados"]
-        log["rodadas"].append({"rodada": rodada, "estrofes": [list(vs) for vs in estrofes],
-                               "relatorio": mp["relatorio"]})
-        yield {"etapa": "escansao", "rodada": rodada, "estrofes": estrofes,
-               "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
-               "deixa": mp["deixa"], "regras": mp["regras"], "entra": mp["entra"], "reprovados": reprovados,
-               "relatorio": mp["relatorio"]}
-        if mp["entra"] or rodada >= MAX_RODADAS or not mp["forma_ok"] or not reprovados:
-            break
-        if estourou():
-            log["parou_no_teto"] = f"correção {rodada + 1}"
-            yield {"etapa": "teto", "onde": f"correção {rodada + 1}",
-                   "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
-            break
-        rodada += 1
-        yield {"etapa": "correcao", "status": "rodando", "rodada": rodada,
-               "reprovados": reprovados}
-        corr: Correcao = await gerar(
-            prompts.sistema_correcao(cfg.forma, cfg.encadeamento),
-            prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados),
-            Correcao, chamadas, cfg, "correção",
-        )
-        mudancas = []
-        alvo = set(reprovados)
-        for c in corr.versos:
-            # só aceita troca nos versos reprovados: o que passou fica
-            if (c.estrofe, c.n) in alvo and c.verso.strip():
-                antes = estrofes[c.estrofe - 1][c.n - 1]
-                estrofes[c.estrofe - 1][c.n - 1] = c.verso.strip()
-                mudancas.append({"estrofe": c.estrofe, "n": c.n, "antes": antes, "depois": c.verso.strip()})
-        yield {"etapa": "correcao", "status": "ok", "rodada": rodada, "mudancas": mudancas}
+    final = resultados[escolhida]
+    estrofes, mp, rodada = final["estrofes"], final["mp"], final["rodada"]
+    log["rodadas"] = final["rodadas"]
+    yield {"etapa": "julgamento", "status": "ok", "escolhida": escolhida, "justificativa": justificativa,
+           "estrofes": estrofes, "aprovadas": aprovadas}
 
     # 6. registro
     entra = mp["entra"]
@@ -567,6 +627,8 @@ async def run_cordel(
     motivo = None
     if not entra:
         motivo = motivo_descarte(mp, estrofes, cfg)
+        if len(candidatas) > 1:
+            motivo = f"nenhuma das {len(candidatas)} candidatas passou; a mais próxima: {motivo}"
         texto = f"# DESCARTADA: {motivo}\n" + texto
     for p in PASTAS.values():
         p.mkdir(parents=True, exist_ok=True)
