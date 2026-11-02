@@ -328,6 +328,9 @@ function tabelaEscansao(ev) {
     <details><summary>relatório do escandir.py</summary><pre>${esc(ev.relatorio)}</pre></details>`;
 }
 
+const htmlAvaliacao = (a, prefixo = "") => `<div class="sil">${esc(prefixo)}fidelidade ${esc(a.fidelidade)}/5, coerência ${esc(a.coerencia)}/5, termos ${esc(a.termos)}/5, criatividade ${esc(a.criatividade)}/5</div>`
+  + a.apontados.map((v) => `<div class="mau">${ev2(v.estrofe, v.n)} (${esc(v.tipo)}): ${esc(v.motivo)}</div>`).join("");
+
 function htmlCandidatas(cs, escolhida = -1) {
   return cs.map((c, i) => `<div class="cand ${i === escolhida ? "escolhida" : ""}">
     <div class="sil">${i + 1}. ${esc(c.angulo)} ·
@@ -370,9 +373,18 @@ function tratar(ev) {
     case "julgamento":
       if (ev.status === "rodando") { statusCartaz("o júri está lendo as aprovadas…"); return passo("juri", "4b · o júri está lendo as aprovadas", "rodando"); }
       mostrarEstrofes(ev.estrofes);
-      if (window.__cand.length < 2) return;
-      passo("cand", `2 · ${window.__cand.length} candidatas (primeira versão)`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
-      return passo("juri", ev.aprovadas.length > 1 ? `4b · júri escolheu a candidata ${ev.escolhida + 1}` : `4b · ficou a candidata ${ev.escolhida + 1}`, "ok", esc(ev.justificativa));
+      if (window.__cand.length > 1) passo("cand", `2 · ${window.__cand.length} candidatas (primeira versão)`, "ok", htmlCandidatas(window.__cand, ev.escolhida));
+      if (window.__cand.length < 2 && !ev.avaliacoes.length) return;
+      return passo("juri", ev.aprovadas.length > 1 ? `4b · júri escolheu a candidata ${ev.escolhida + 1}` : "4b · o júri leu o poema", "ok",
+        esc(ev.justificativa) + ev.avaliacoes.map((a) => htmlAvaliacao(a, ev.avaliacoes.length > 1 ? `Candidata ${a.candidata + 1}: ` : "")).join(""));
+    case "sentido":
+      if (ev.status === "rodando") {
+        statusCartaz(`reescrevendo ${ev.apontados.length} verso(s) pelo sentido…`);
+        return passo(`sen${ev.volta}`, `4c · reescrita pelo sentido ${ev.volta}: ${ev.apontados.length} verso(s) apontado(s)`, "rodando");
+      }
+      mostrarEstrofes(ev.estrofes);
+      return passo(`sen${ev.volta}`, `4c · reescrita ${ev.volta}: ${ev.aceita ? "melhorou e ficou" : "não melhorou, voltou a versão anterior"}`, ev.aceita ? "ok" : "erro",
+        ev.mudancas.map((m) => `${ev2(m.estrofe, m.n)}: <del>${esc(m.antes)}</del><br>&nbsp;&nbsp;&nbsp;&nbsp;<ins>${esc(m.depois)}</ins>`).join("<br>"));
     case "escansao":
       // com várias candidatas em paralelo, cada uma tem uma linha só, com o estado mais recente
       if (window.__cand.length > 1) {

@@ -141,27 +141,60 @@ def poema_em_texto(estrofes: list[list[str]], numerar: bool = False) -> str:
         for e, vs in enumerate(estrofes, 1))
 
 
-SISTEMA_JULGAMENTO = """\
+SISTEMA_JUIZ = f"""\
 Você é o júri de um concurso de cordel. Recebe a notícia e poemas em sextilhas sobre ela,
 todos já aprovados por um verificador de métrica e rima, que não entende o sentido.
-Escolha UM, nesta ordem de critérios:
-1. Fiel à notícia: conta o fato, com quem fez o quê e os nomes principais, sem contradizer
-   a notícia e sem inventar acontecimento. Imagem e comparação são livres; o fato não.
-2. Faz sentido: quem lê só o poema entende a notícia, cada verso segue do anterior e nenhum
-   está ali só para fechar métrica ou rima.
-3. Entre os que empatam nisso, o mais criativo: imagem concreta e surpreendente, comparação
-   com o mundo do cordel, nenhuma palavra repetida à toa, final com virada. Pese as regras
-   do grupo que o verificador não confere: tom popular em todas as palavras, termos
-   do dicionário amarrados ao verso (não soltos só para constar) e vocativo e
-   partícula fática só na ponta do verso.
-Justifique em uma ou duas frases, citando versos."""
+Avalie CADA poema, usando o número dele em `candidata`.
+
+Aponte em `apontados` só os versos com problema concreto, com o motivo em uma frase:
+- contradiz: afirma o contrário do que a notícia diz.
+- inventa: afirma um acontecimento, número ou nome da notícia que ela não traz.
+- sem_sentido: não dá para entender o verso, ou quem faz o quê nele, mesmo lendo os vizinhos.
+- termo_solto: termo do dicionário abaixo fora do sentido dado, ou solto só para constar.
+- enchimento: o verso não acrescenta nada, só fecha métrica ou rima.
+
+Não são problema, e não devem ser apontados:
+- A voz do gênero: o narrador "eu" que presenciou tudo, o que ele ouviu o povo dizer, a feira,
+  o sertão, a comparação e a metáfora. É ficção do cordel, não invenção de fato.
+- O que a notícia traz, mesmo fora do resumo: confira na notícia antes de marcar `inventa`.
+- A concordância popular ("os menino") e a fala do dicionário.
+- Gosto pessoal: se o verso funciona, deixe.
+
+Depois dê as notas de 1 a 5:
+- fidelidade: 5 = conta o fato, com quem fez o quê e os nomes principais; 3 = só o assunto;
+  1 = não dá para saber qual é a notícia, ou há erro de fato.
+- coerencia: 5 = quem lê só o poema entende a notícia e cada verso segue do anterior;
+  3 = há versos soltos; 1 = é uma lista de frases sem ligação.
+- termos: 5 = os termos do dicionário estão no sentido certo e amarrados ao verso; 1 = soltos.
+- criatividade: 5 = imagem concreta e surpreendente, final com virada; 1 = lugar-comum.
+Em `comentario`, justifique em uma ou duas frases, citando versos.
+
+Dicionário nordestino (termo — sentido):
+
+{dicionario.texto_para_prompt()}"""
 
 
-def usuario_julgamento(noticia: str, fato: str, candidatas: list[dict]) -> str:
-    blocos = [f"Candidata {i} (ângulo: {c['angulo']})\n{poema_em_texto(c['final'])}"
-              for i, c in enumerate(candidatas, 1)]
-    return (f"Notícia:\n{noticia}\n\nFato: {fato}\n\n" + "\n\n".join(blocos)
-            + "\n\nQual é a escolhida (número)?")
+def usuario_juizo(noticia: str, fato: str, poemas: list[tuple[str, list[list[str]]]]) -> str:
+    blocos = [f"Candidata {i} (ângulo: {angulo})\n{poema_em_texto(estrofes, numerar=True)}"
+              for i, (angulo, estrofes) in enumerate(poemas, 1)]
+    return f"Notícia:\n{noticia}\n\nFato: {fato}\n\n" + "\n\n".join(blocos) + "\n\nAvalie cada candidata."
+
+
+PEDIDO_SENTIDO = """\
+O poema passou na métrica e na rima, mas um leitor apontou problemas de sentido nestes
+versos. Reescreva SOMENTE eles, resolvendo o problema de cada um:"""
+
+
+def usuario_sentido(estrofes: list[list[str]], apontados: list[dict], fato: str) -> str:
+    lista = "\n".join(f"- E{a['estrofe']}.{a['n']} ({a['tipo']}): {a['motivo']}" for a in apontados)
+    return (
+        f"{PEDIDO_SENTIDO}\n{lista}\n\n"
+        "Confira cada verso novo com a notícia e com os versos vizinhos. Continue com 7 sílabas e na "
+        "mesma rima: preencha `contagem` antes do verso, e mantenha a palavra final sempre que ela não "
+        "for o problema. Os termos do dicionário continuam obrigatórios, no sentido dado.\n\n"
+        f"O poema tem de continuar contando isto, com quem fez o quê e os nomes principais: {fato}\n\n"
+        f"Poema atual:\n{poema_em_texto(estrofes, numerar=True)}"
+    )
 
 
 # Vai na mesma conversa em que o Poeta escreveu: a forma, as regras e o dicionário já estão

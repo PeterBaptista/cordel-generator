@@ -1,8 +1,8 @@
 """O laço do SKILL.md, automatizado com o AI SDK para Python.
 
 notícia -> fato -> candidatas -> escandir.py -> correção pelo próprio Poeta, na mesma
-conversa (só versos reprovados, no máximo MAX_RODADAS rodadas) -> júri entre as aprovadas
--> xilogravura -> folhetos/ ou descarte/ + caderno/.
+conversa (só versos reprovados, no máximo MAX_RODADAS rodadas) -> júri semântico entre as
+aprovadas -> reescrita pelo sentido, se melhorar -> xilogravura -> folhetos/ ou descarte/ + caderno/.
 
 `run_cordel` é um gerador assíncrono: cada etapa sai como um dict, que o
 servidor repassa ao navegador via SSE.
@@ -25,7 +25,7 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Literal
 from urllib.parse import urlsplit
 
 import ai
@@ -110,6 +110,18 @@ MAX_RODADAS = int(os.getenv("CORDEL_MAX_RODADAS", "10"))
 # chamada já iniciada termina — e reserva uns centavos para a xilogravura.
 TETO_USD = float(os.getenv("CORDEL_TETO_USD", "0.10"))
 RESERVA_IMAGEM_USD = 0.01
+# reescritas pelo sentido depois do júri, e rodadas de métrica permitidas em cada uma
+MAX_REESCRITAS = 2
+RODADAS_POR_REESCRITA = 4
+GRAVES = {"contradiz", "inventa"}
+
+
+def chave_juizo(av: dict | None) -> tuple:
+    """Menor é melhor: erro de fato pesa mais que verso confuso, e os dois mais que as notas."""
+    if av is None:
+        return (float("inf"),)
+    graves = sum(a["tipo"] in GRAVES for a in av["apontados"])
+    return (graves, len(av["apontados"]), -(av["fidelidade"] + av["coerencia"]), -(av["termos"] + av["criatividade"]))
 
 # No Railway, CORDEL_DADOS aponta para o volume montado (/data), que sobrevive
 # aos deploys. Local, as pastas ficam na raiz do projeto.
@@ -135,9 +147,25 @@ class Poema(pydantic.BaseModel):
     estrofes: list[Estrofe]
 
 
-class Escolha(pydantic.BaseModel):
-    escolhida: int
-    justificativa: str
+class VersoApontado(pydantic.BaseModel):
+    estrofe: int
+    n: int
+    tipo: Literal["contradiz", "inventa", "sem_sentido", "termo_solto", "enchimento"]
+    motivo: str
+
+
+class Avaliacao(pydantic.BaseModel):
+    candidata: int
+    comentario: str
+    apontados: list[VersoApontado]
+    fidelidade: int  # as notas vêm depois dos apontados: o modelo olha os versos antes de dar nota
+    coerencia: int
+    termos: int
+    criatividade: int
+
+
+class Juizo(pydantic.BaseModel):
+    avaliacoes: list[Avaliacao]
 
 
 class VersoCorrigido(pydantic.BaseModel):
@@ -515,12 +543,12 @@ async def run_cordel(
     # texto que pode ser publicado. Cada correção continua a conversa do Poeta daquela
     # candidata, com a notícia, o narrador, o plano e as tentativas anteriores à vista.
     fila: asyncio.Queue = asyncio.Queue()
-    resultados: list[dict] = [{} for _ in candidatas]
+    resultados: list[dict] = [{"estrofes": [list(vs) for vs in c["estrofes"]], "rodada": 0, "rodadas": []}
+                              for c in candidatas]
 
-    async def corrigir(i: int) -> None:
-        estrofes = [list(vs) for vs in candidatas[i]["estrofes"]]
+    async def corrigir(i: int, limite: int) -> None:
         res = resultados[i]
-        res.update(estrofes=estrofes, rodada=0, rodadas=[])
+        estrofes = res["estrofes"]
         while True:
             rodada = res["rodada"]
             mp = res["mp"] = medir_poema(estrofes, cfg)
@@ -532,7 +560,7 @@ async def run_cordel(
                 "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
                 "deixa": mp["deixa"], "regras": mp["regras"], "entra": mp["entra"], "reprovados": reprovados,
                 "relatorio": mp["relatorio"]})
-            if mp["entra"] or rodada >= MAX_RODADAS or not mp["forma_ok"] or not reprovados:
+            if mp["entra"] or rodada >= limite or not mp["forma_ok"] or not reprovados:
                 return
             if estourou():
                 log["parou_no_teto"] = f"correção {rodada + 1}"
@@ -558,27 +586,32 @@ async def run_cordel(
             fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "ok", "rodada": rodada,
                              "mudancas": mudancas})
 
-    async def rodar(i: int) -> None:
+    async def rodar(i: int, limite: int) -> None:
         try:
-            await corrigir(i)
+            await corrigir(i, limite)
         except Exception as e:  # uma candidata falhar não derruba as outras
             resultados[i]["erro"] = str(e)
             log.setdefault("erros_correcao", []).append(f"candidata {i + 1}: {e}")
         finally:
             fila.put_nowait(None)
 
-    tarefas = [asyncio.create_task(rodar(i)) for i in range(len(candidatas))]
-    try:
-        abertas = len(tarefas)
-        while abertas:
-            ev = await fila.get()
-            if ev is None:
-                abertas -= 1
-            else:
-                yield ev
-    finally:  # quem gerava fechou a página: não continua gastando
-        for t in tarefas:
-            t.cancel()
+    async def corrigindo(limites: dict[int, int]) -> AsyncIterator[dict]:
+        tarefas = [asyncio.create_task(rodar(i, limite)) for i, limite in limites.items()]
+        try:
+            abertas = len(tarefas)
+            while abertas:
+                ev = await fila.get()
+                if ev is None:
+                    abertas -= 1
+                else:
+                    yield ev
+        finally:  # quem gerava fechou a página: não continua gastando
+            for t in tarefas:
+                t.cancel()
+
+    async with contextlib.aclosing(corrigindo({i: MAX_RODADAS for i in range(len(candidatas))})) as eventos:
+        async for ev in eventos:
+            yield ev
 
     if all("erro" in r for r in resultados):
         raise RuntimeError("a correção falhou em todas as candidatas: " + "; ".join(log["erros_correcao"]))
@@ -586,36 +619,108 @@ async def run_cordel(
         c.update(final=r["estrofes"], entra_final=r["mp"]["entra"], rodadas_de_correcao=r["rodada"],
                  rodadas=r["rodadas"], reprovados_final=r["mp"]["reprovados"])
 
-    # 4b. júri: lê só as candidatas aprovadas, já corrigidas
+    # 4b. júri: lê só as aprovadas, já corrigidas, numa chamada à parte da conversa do Poeta.
+    # Ele não descarta nada: dá as notas, aponta versos, e o código escolhe pela chave_juizo.
+    async def avaliar(indices: list[int]) -> dict[int, dict]:
+        juizo: Juizo = await gerar(
+            prompts.SISTEMA_JUIZ,
+            prompts.usuario_juizo(noticia, fato.fato, [(candidatas[i]["angulo"], resultados[i]["estrofes"]) for i in indices]),
+            Juizo, chamadas, cfg, "júri",
+        )
+        notas = {}
+        for av in juizo.avaliacoes:
+            if 1 <= av.candidata <= len(indices):
+                i = indices[av.candidata - 1]
+                ests = resultados[i]["estrofes"]
+                d = av.model_dump(exclude={"candidata"})
+                d["apontados"] = [a for a in d["apontados"]
+                                  if 1 <= a["estrofe"] <= len(ests) and 1 <= a["n"] <= len(ests[a["estrofe"] - 1])]
+                notas[i] = d
+        return notas
+
     aprovadas = [i for i, r in enumerate(resultados) if r["mp"]["entra"]]
     # sem aprovada, o registro do descarte fica com a que chegou mais perto
     escolhida = aprovadas[0] if aprovadas else min(
         range(len(resultados)),
         key=lambda i: (not resultados[i]["mp"]["forma_ok"], len(resultados[i]["mp"]["reprovados"])))
-    justificativa = ("única candidata" if len(candidatas) == 1
-                     else "nenhuma candidata passou; fica a que chegou mais perto" if not aprovadas
-                     else "única candidata aprovada" if len(aprovadas) == 1
-                     else "sem júri (teto de custo): fica a primeira aprovada")
-    if len(aprovadas) > 1 and estourou():
+    justificativa = ("nenhuma candidata passou; fica a que chegou mais perto" if not aprovadas
+                     else "sem júri: fica a primeira aprovada")
+    avaliacoes: dict[int, dict] = {}
+    if aprovadas and estourou():
         log["parou_no_teto"] = "júri"
         yield {"etapa": "teto", "onde": "júri", "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
-    elif len(aprovadas) > 1:
+    elif aprovadas:
         yield {"etapa": "julgamento", "status": "rodando"}
-        juri: Escolha = await gerar(
-            prompts.SISTEMA_JULGAMENTO,
-            prompts.usuario_julgamento(noticia, fato.fato, [candidatas[i] for i in aprovadas]),
-            Escolha, chamadas, cfg, "júri",
-        )
-        if 1 <= juri.escolhida <= len(aprovadas):
-            escolhida, justificativa = aprovadas[juri.escolhida - 1], juri.justificativa
-        else:
-            justificativa = f"júri respondeu {juri.escolhida}, fora da lista; fica a primeira aprovada"
+        try:
+            avaliacoes = await avaliar(aprovadas)
+        except Exception as e:  # o júri falhar não derruba um folheto já aprovado
+            log["erro_juri"] = str(e)
+        if avaliacoes:
+            escolhida = min(aprovadas, key=lambda i: chave_juizo(avaliacoes.get(i)))
+            if escolhida in avaliacoes:
+                justificativa = avaliacoes[escolhida]["comentario"]
     log["escolhida"] = {"indice": escolhida, "justificativa": justificativa}
-    final = resultados[escolhida]
-    estrofes, mp, rodada = final["estrofes"], final["mp"], final["rodada"]
-    log["rodadas"] = final["rodadas"]
+    log["juizo"] = {str(i): av for i, av in avaliacoes.items()}
+    res = resultados[escolhida]
     yield {"etapa": "julgamento", "status": "ok", "escolhida": escolhida, "justificativa": justificativa,
-           "estrofes": estrofes, "aprovadas": aprovadas}
+           "estrofes": res["estrofes"], "aprovadas": aprovadas,
+           "avaliacoes": [{"candidata": i, **av} for i, av in avaliacoes.items()]}
+
+    # 4c. reescrita pelo sentido: o Poeta refaz os versos apontados, na conversa dele. A nova
+    # versão só fica se passar no escandir e melhorar a avaliação; se não, volta a anterior.
+    avaliacao = avaliacoes.get(escolhida)
+    log["reescritas"] = []
+    for volta in range(1, MAX_REESCRITAS + 1):
+        if not avaliacao or not avaliacao["apontados"]:
+            break
+        if estourou():
+            log["parou_no_teto"] = f"reescrita {volta}"
+            yield {"etapa": "teto", "onde": f"reescrita {volta}", "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
+            break
+        apontados = avaliacao["apontados"]
+        antes = {"estrofes": [list(vs) for vs in res["estrofes"]], "mp": res["mp"], "rodada": res["rodada"],
+                 "rodadas": list(res["rodadas"])}
+        yield {"etapa": "sentido", "status": "rodando", "volta": volta, "apontados": apontados}
+        registro = {"volta": volta, "apontados": apontados, "mudancas": [], "aceita": False}
+        nova = None
+        try:
+            corr: Correcao = await gerar(
+                sistema_poeta, prompts.usuario_sentido(res["estrofes"], apontados, fato.fato),
+                Correcao, chamadas, cfg, "sentido", conversa=conversas_ok[escolhida],
+            )
+            alvo = {(a["estrofe"], a["n"]) for a in apontados}
+            for c in corr.versos:
+                if (c.estrofe, c.n) in alvo and c.verso.strip():
+                    registro["mudancas"].append({"estrofe": c.estrofe, "n": c.n, "antes": res["estrofes"][c.estrofe - 1][c.n - 1],
+                                                 "depois": c.verso.strip()})
+                    res["estrofes"][c.estrofe - 1][c.n - 1] = c.verso.strip()
+            if registro["mudancas"]:
+                limite = res["rodada"] + RODADAS_POR_REESCRITA
+                async with contextlib.aclosing(corrigindo({escolhida: limite})) as eventos:
+                    async for ev in eventos:
+                        yield ev
+                if res["mp"]["entra"] and "erro" not in res and not estourou():
+                    nova = (await avaliar([escolhida])).get(escolhida)
+        except Exception as e:  # a reescrita falhar não derruba um folheto já aprovado
+            registro["erro"] = str(e)
+        registro["aceita"] = nova is not None and chave_juizo(nova) < chave_juizo(avaliacao)
+        registro["avaliacao"], registro["estrofes"] = nova, [list(vs) for vs in res["estrofes"]]
+        log["reescritas"].append(registro)
+        if registro["aceita"]:
+            avaliacao = nova
+        else:
+            res.pop("erro", None)
+            res.update(antes)
+        yield {"etapa": "sentido", "status": "ok", "volta": volta, "aceita": registro["aceita"],
+               "mudancas": registro["mudancas"], "estrofes": res["estrofes"], "avaliacao": avaliacao}
+        if not registro["aceita"]:
+            break
+
+    candidatas[escolhida].update(final=res["estrofes"], entra_final=res["mp"]["entra"], rodadas_de_correcao=res["rodada"],
+                                 rodadas=res["rodadas"], reprovados_final=res["mp"]["reprovados"])
+    estrofes, mp, rodada = res["estrofes"], res["mp"], res["rodada"]
+    log["rodadas"] = res["rodadas"]
+    log["avaliacao_final"] = avaliacao
 
     # 6. registro
     entra = mp["entra"]
@@ -659,7 +764,7 @@ async def run_cordel(
     arquivos["caderno"] = f"caderno/{slug}.json"
 
     yield {"etapa": "fim", "entra": entra, "motivo": motivo, "titulo": fato.titulo, "autor": autor or None,
-           "url": url or None, "fonte": origem["fonte"],
+           "url": url or None, "fonte": origem["fonte"], "avaliacao": avaliacao,
            "estrofes": estrofes, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos,
            "custo": log["custo_estimado_usd"]}
 

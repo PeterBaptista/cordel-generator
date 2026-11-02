@@ -35,7 +35,7 @@ python3 scripts/escandir.py folhetos/*.txt --csv caderno/metrica.csv
 ## Gerador (AI SDK para Python + OpenAI)
 
 O laço do [`SKILL.md`](SKILL.md) automatizado com o [AI SDK para Python](https://ai-python.dev/docs):
-notícia → fato → 3 candidatas → `escandir.py` → correção só dos versos reprovados, pelo próprio Poeta e na mesma conversa (máx. 10 rodadas) → júri entre as aprovadas
+notícia → fato → 3 candidatas → `escandir.py` → correção só dos versos reprovados, pelo próprio Poeta e na mesma conversa (máx. 10 rodadas) → júri semântico entre as aprovadas → reescrita pelo sentido, se melhorar
 → xilogravura → `folhetos/` ou `descarte/`, com o registro completo em `caderno/<slug>.json`
 (prompts na íntegra, modelo, parâmetros, saída bruta e relatório de cada rodada).
 
