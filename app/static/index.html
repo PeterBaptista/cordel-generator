@@ -118,6 +118,21 @@
   .motivo { font-size: 13px; color: var(--vermelho); margin-top: 8px; }
   .arqs { font-family: "Special Elite", monospace; font-size: 13px; margin-top: 10px; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
   .arqs a { color: var(--tinta); }
+  .bloco-nome { border: 3px solid var(--vermelho); background: #fbf6ea; padding: 12px 14px 10px; margin-bottom: 4px;
+                box-shadow: 4px 4px 0 var(--vermelho); transition: border-color .15s, box-shadow .15s; }
+  .bloco-nome label { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+                      font: 700 20px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .bloco-nome input { font-size: 18px; padding: 10px; border: 2px solid var(--tinta); }
+  .bloco-nome input:focus-visible { outline: 3px solid var(--tinta); outline-offset: 1px; }
+  .bloco-nome p { margin: 6px 0 0; font-size: 13px; color: var(--tinta-2); }
+  .exigido { font-size: 12px; letter-spacing: .6px; color: #fff; background: var(--vermelho); padding: 1px 8px; white-space: nowrap; }
+  .bloco-nome.preenchido { border-color: var(--verde); box-shadow: 4px 4px 0 var(--verde); }
+  .bloco-nome.preenchido .exigido { background: var(--verde); }
+  .bloco-nome.erro { background: #f7dcd3; animation: tremer .4s; }
+  .bloco-nome.erro p { color: var(--vermelho); font-weight: bold; font-size: 15px; }
+  @keyframes tremer { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+  #aviso-gerar { color: var(--vermelho); font-weight: bold; font-size: 14px; margin: 10px 0 0; }
+  @media (prefers-reduced-motion: reduce) { .bloco-nome.erro { animation: none; } }
 </style>
 </head>
 <body>
@@ -130,8 +145,11 @@
 
 <main>
   <section>
-    <label class="campo" for="autor">Seu nome (obrigatório: ele aparece no folheto e na página de sextilhas)</label>
-    <input type="text" id="autor" maxlength="60" required autocomplete="name" placeholder="Como você quer aparecer">
+    <div class="bloco-nome" id="bloco-nome">
+      <label for="autor">Seu nome <span class="exigido" id="nome-estado">obrigatório</span></label>
+      <input type="text" id="autor" maxlength="60" required autocomplete="name" placeholder="Escreva aqui como quer aparecer" aria-describedby="nome-ajuda">
+      <p id="nome-ajuda" role="status">Sem o nome, o folheto não é gerado. Ele sai impresso no folheto e na página de sextilhas.</p>
+    </div>
     <h2 style="margin-top:18px">A notícia</h2>
     <label class="campo" for="url">Link da notícia</label>
     <input type="url" id="url" placeholder="https://…" autocomplete="off">
@@ -158,6 +176,7 @@
       <button id="gerar">Gerar folheto</button>
       <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
     </div>
+    <p id="aviso-gerar" role="alert"></p>
     <ol id="linha"></ol>
   </section>
 
@@ -441,12 +460,34 @@ async function baixar(nome) {
   try { await baixarFolheto($("folheto"), nome); } finally { $("baixar").disabled = false; }
 }
 
+const AJUDA_NOME = $("nome-ajuda").textContent;
+function estadoNome() {
+  const ok = !!$("autor").value.trim(), bloco = $("bloco-nome");
+  bloco.classList.toggle("preenchido", ok);
+  $("nome-estado").textContent = ok ? "preenchido" : "obrigatório";
+  if (ok && bloco.classList.contains("erro")) { bloco.classList.remove("erro"); $("nome-ajuda").textContent = AJUDA_NOME; $("autor").removeAttribute("aria-invalid"); $("aviso-gerar").textContent = ""; }
+}
+function faltaNome(mensagem = "Escreva seu nome aqui para gerar o folheto.") {
+  const bloco = $("bloco-nome");
+  bloco.classList.remove("erro"); void bloco.offsetWidth; // refaz o tremor a cada clique
+  bloco.classList.add("erro");
+  $("autor").setAttribute("aria-invalid", "true");
+  $("nome-ajuda").textContent = mensagem;
+  $("aviso-gerar").textContent = "Falta o seu nome, lá no topo do formulário.";
+  const calmo = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  bloco.scrollIntoView({ block: "center", behavior: calmo ? "auto" : "smooth" });
+  $("autor").focus({ preventScroll: true });
+}
+$("autor").addEventListener("input", estadoNome);
+estadoNome();
+
 $("gerar").onclick = async () => {
   $("autor").value = $("autor").value.trim();
-  if (!$("autor").reportValidity()) return;
+  $("aviso-gerar").textContent = "";
+  if (!$("autor").value) return faltaNome();
   try { localStorage.setItem("cordel-autor", $("autor").value); } catch {}
   const noticia = $("noticia").value.trim(), url = $("url").value.trim();
-  if (!noticia && !url) return $("url").focus();
+  if (!noticia && !url) { $("aviso-gerar").textContent = "Falta a notícia: cole um link ou o texto."; return $("url").focus(); }
   const c = lerCfg(), caros = CAROS.filter((k) => c[k] !== ECONOMICO[k]);
   if (caros.length) {
     const escolha = await perguntar("Esta geração vai custar mais",
@@ -476,7 +517,12 @@ async function gerar(noticia, url) {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ autor: $("autor").value, noticia, url, com_imagem: $("imagem").checked, config: lerCfg() }),
     });
-    if (!resp.ok) throw (await resp.json()).detail;
+    if (!resp.ok) {
+      const { detail } = await resp.json();
+      // 422: o servidor recusou o nome (vazio ou comprido demais)
+      if (resp.status === 422 && typeof detail === "string") { faltaNome(detail); return; }
+      throw detail;
+    }
     const reader = resp.body.getReader(), dec = new TextDecoder();
     let buf = "";
     for (;;) {
