@@ -70,13 +70,13 @@
   .refazer:hover { transform: translate(-1px, -1px); }
   .vazio { text-align: center; color: var(--tinta-2); padding: 40px 0; grid-column: 1 / -1; }
 </style>
-<link rel="stylesheet" href="/static/folheto.css">
+<link rel="stylesheet" href="/static/folheto.css?v=2">
 </head>
 <body>
 <header>
   <h1>Histórico</h1>
   <p>As sextilhas geradas e os parâmetros que as produziram</p>
-  <nav><a href="/">Início</a> · <a href="/gerador">Gerador</a> · <a href="/historico" aria-current="page">Histórico</a> · <a href="/logs">Logs</a></nav>
+  <nav><a href="/">Início</a> · <a href="/gerador">Gerador</a> · <a href="/sextilhas">Sextilhas</a> · <a href="/historico" aria-current="page">Histórico</a> · <a href="/logs">Logs</a></nav>
 </header>
 
 <main>
@@ -92,7 +92,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
-<script src="/static/folheto.js"></script>
+<script src="/static/folheto.js?v=2"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -108,6 +108,7 @@ let ITENS = [], FORMAS = {};
 function ficha(i) {
   const c = i.config, f = FORMAS[c.forma];
   const linhas = [
+    ["Autor", i.autor ?? "Grupo 6"],
     ["Modelo", modelo(c.texto)],
     ["Raciocínio", NOMES[c.raciocinio] ?? c.raciocinio ?? "—"],
     ["Candidatas", c.candidatas],
@@ -161,6 +162,7 @@ function render() {
   $("contagem").textContent = `${vis.length} de ${ITENS.length} ${ITENS.length === 1 ? "geração" : "gerações"}`;
   $("grade").innerHTML = vis.length ? vis.map(([i, idx]) => cartao(i, idx)).join("")
     : '<div class="vazio">Nenhuma geração com esses filtros.</div>';
+  marcarTermos($("grade"));
   document.querySelectorAll(".mais").forEach((b) => b.onclick = () => {
     const v = $(b.dataset.v); const rec = v.classList.toggle("recolhido");
     b.textContent = rec ? `mostrar as ${v.children.length} estrofes` : "recolher";
@@ -172,7 +174,7 @@ function render() {
       await baixarFolhetoDe({
         manchete: i.manchete, estrofes: i.estrofes,
         imagem: i.arquivos.imagem ? `/${i.arquivos.imagem}` : null,
-        fonte: i.url ? (i.fonte || dominio(i.url)) : null,
+        fonte: i.url ? (i.fonte || dominio(i.url)) : null, autor: i.autor,
       }, i.id);
     } finally { b.disabled = false; b.textContent = "baixar PNG"; }
   });

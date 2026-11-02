@@ -21,3 +21,16 @@
 .folheto .rodape::before, .folheto .rodape::after { content: ""; flex: 1; border-top: 2px solid var(--tinta); }
 .fonte { text-align: center; font: 11px "Courier Prime", monospace; color: var(--tinta-2); margin-top: 8px; overflow-wrap: anywhere; }
 .folheto .estrofe-c + .estrofe-c { margin-top: 1em; }
+.autor { text-align: center; font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin-top: 8px; overflow-wrap: anywhere; }
+
+/* as palavras do dicionário nordestino: marcadas nos versos, com o sentido ao passar o mouse */
+.termo { text-decoration: underline dotted var(--vermelho, #a3301f) 2px; text-underline-offset: 3px; cursor: help;
+         border-radius: 1px; transition: background-color .12s, color .12s; }
+.termo:hover, .termo:focus-visible, .termo.ativo { background: var(--tinta, #151210); color: var(--folha, #f4efe3); text-decoration-color: transparent; outline: none; }
+.exportando .termo { text-decoration: none; background: none; color: inherit; }
+#dica-termo { position: fixed; z-index: 50; max-width: min(300px, calc(100vw - 24px)); padding: 9px 12px 10px; pointer-events: none;
+              background: #151210; color: #f4efe3; border: 2px solid #151210; box-shadow: 4px 4px 0 #a3301f;
+              font: 14px/1.4 "Libre Baskerville", Georgia, serif; animation: dica-surge .14s ease-out; }
+#dica-termo b { display: block; font: 700 16px/1.2 "Oswald", sans-serif; letter-spacing: .3px; margin-bottom: 2px; color: #e9c46a; }
+@keyframes dica-surge { from { opacity: 0; transform: translateY(5px) rotate(-1.2deg); } }
+@media (prefers-reduced-motion: reduce) { #dica-termo { animation: none; } .termo { transition: none; } }

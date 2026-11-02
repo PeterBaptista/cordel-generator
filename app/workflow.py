@@ -11,10 +11,12 @@ import asyncio
 import base64
 import contextlib
 import io
+import ipaddress
 import json
 import os
 import random
 import re
+import socket
 import sys
 import time
 import unicodedata
@@ -23,6 +25,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, AsyncIterator
+from urllib.parse import urlsplit
 
 import ai
 import dotenv
@@ -38,6 +41,9 @@ sys.path.insert(0, str(RAIZ / "scripts"))
 import escandir  # noqa: E402  (o verificador fica intocado em scripts/)
 
 dotenv.load_dotenv(RAIZ / ".env")
+# O site está aberto para a turma: tudo (texto, imagem e consulta de custo) usa a chave do
+# professor. O SDK e o cliente da OpenAI leem OPENAI_API_KEY. Sem ela, o servidor nem sobe.
+os.environ["OPENAI_API_KEY"] = os.environ["OPENAI_API_KEY_PROFESSOR"]
 
 # O hospedeiro só repassa o prompt à ferramenta de imagem e não muda o desenho: vai o
 # modelo de texto mais barato (medido: US$ 0,0004 contra US$ 0,003 do gpt-5.4-mini).
@@ -50,13 +56,13 @@ IMAGENS = {
     "medium": ("gpt-image-2", "medium"),
 }
 
-# O que a página deixa escolher. O servidor só aceita estes valores: a API não
-# pode ser usada para chamar um modelo qualquer com a chave do grupo.
+# O que a página deixa escolher. O servidor só aceita estes valores: com o site
+# aberto, a API não pode chamar outro modelo com a chave do professor.
 OPCOES = {
-    "texto": [f"openai:{m}" for m in custos.PRECOS],
+    "texto": ["openai:gpt-6-luna"],
     "raciocinio": ["low", "medium", "high"],
     "candidatas": [1, 2, 3],
-    "imagem_qualidade": list(IMAGENS),
+    "imagem_qualidade": ["minima"],
     "forma": list(prompts.FORMAS),
     "estrofes": [1, 2, 3, 4, 6],
     "encadeamento": ["livre", "deixa"],
@@ -235,10 +241,21 @@ class NoticiaIndisponivel(Exception):
     pass
 
 
+def _endereco_publico(url: str) -> bool:
+    """Com o site aberto, ninguém pode mandar o servidor ler a rede interna do Railway."""
+    try:
+        infos = socket.getaddrinfo(urlsplit(url).hostname, None)
+    except (OSError, UnicodeError, ValueError):
+        return False
+    return bool(infos) and all(ipaddress.ip_address(i[4][0].split("%")[0]).is_global for i in infos)
+
+
 async def obter_noticia(url: str) -> dict:
     """Baixa a página e extrai o texto da matéria. Falha -> o usuário cola o texto."""
     if not re.match(r"^https?://", url):
         raise NoticiaIndisponivel("o link precisa começar com http:// ou https://")
+    if not await asyncio.to_thread(_endereco_publico, url):
+        raise NoticiaIndisponivel("esse endereço não é de um site público")
     html = await asyncio.to_thread(trafilatura.fetch_url, url)
     if not html:
         raise NoticiaIndisponivel("não consegui baixar a página (bloqueio, paywall ou link fora do ar)")
@@ -408,11 +425,12 @@ def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:
 
 # ---------------------------------------------------------------- o laço
 async def run_cordel(
-    noticia: str = "", url: str = "", com_imagem: bool = True, cfg: Config | None = None
+    noticia: str = "", url: str = "", com_imagem: bool = True, cfg: Config | None = None,
+    autor: str = "",
 ) -> AsyncIterator[dict]:
     cfg = (cfg or Config()).validar()
     noticia, url = noticia.strip(), url.strip()
-    log: dict = {"inicio": _agora(),
+    log: dict = {"inicio": _agora(), "autor": autor or None,
                  "url": url or None, "config": {**asdict(cfg), "com_imagem": com_imagem},
                  "chamadas": [], "rodadas": []}
     chamadas = log["chamadas"]
@@ -578,7 +596,7 @@ async def run_cordel(
         json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
     arquivos["caderno"] = f"caderno/{slug}.json"
 
-    yield {"etapa": "fim", "entra": entra, "motivo": motivo, "titulo": fato.titulo,
+    yield {"etapa": "fim", "entra": entra, "motivo": motivo, "titulo": fato.titulo, "autor": autor or None,
            "url": url or None, "fonte": origem["fonte"],
            "estrofes": estrofes, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos,
            "custo": log["custo_estimado_usd"]}

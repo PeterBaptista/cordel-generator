@@ -7,14 +7,15 @@
 <meta name="description" content="Notícias de inteligência artificial da semana recontadas em folhetos de cordel: sextilhas de sete sílabas com xilogravura.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/folheto.css">
+<link rel="stylesheet" href="/static/folheto.css?v=2">
 <style>
   :root {
     --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35; --tinta-3: #6f6253;
     --vermelho: #a3301f; --verde: #2f5d3a; --cordao: #b59a6a; --cordao-escuro: #8a7148;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scrollbar-gutter: stable; }
+  html.travado { overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0; background: var(--papel); color: var(--tinta);
@@ -44,17 +45,35 @@
 
   /* ---- a corda: a coleção pendurada como na feira */
   .colecao { padding: 44px 0 12px; }
-  .corda { position: relative; overflow-x: auto; scroll-snap-type: x proximity;
+  .corda.arrastando { scroll-snap-type: none; cursor: grabbing; user-select: none; }
+  .corda { position: relative; overflow-x: auto; scroll-snap-type: x proximity; cursor: grab; --vento: 0deg;
            padding: 34px max(20px, calc((100vw - 1120px) / 2 + 20px)) 36px;
            scroll-padding-inline: max(20px, calc((100vw - 1120px) / 2 + 20px));
            display: flex; gap: 40px; align-items: flex-start; scrollbar-color: var(--cordao-escuro) transparent; }
   .corda::before { content: ""; position: absolute; left: 0; top: 26px; height: 3px; min-width: 100%;
                    width: var(--largura, 100%); background: repeating-linear-gradient(90deg, var(--cordao) 0 7px, var(--cordao-escuro) 7px 9px);
                    box-shadow: 0 1px 0 #15121033; }
-  .pendurado { flex: none; width: min(80vw, 380px); scroll-snap-align: center; position: relative; }
-  .pendurado:nth-child(odd) .folheto { transform: rotate(-.8deg); }
-  .pendurado:nth-child(even) .folheto { transform: rotate(.7deg); }
-  .pendurado .folheto { transform-origin: 50% 0; max-width: none; }
+  /* cada folheto chega no cordão balançando, um depois do outro; passar o mouse ou
+     arrastar o cordão (--vento) mexe neles, sempre em torno do prendedor */
+  .pendurado { flex: none; width: min(80vw, 380px); scroll-snap-align: center; position: relative;
+               animation: pendura .8s cubic-bezier(.3, 1.4, .5, 1) both; animation-delay: calc(var(--i) * 90ms); }
+  .pendurado:nth-child(odd) { --giro: -.8deg; }
+  .pendurado:nth-child(even) { --giro: .7deg; }
+  .pendurado .folheto { transform-origin: 50% 0; max-width: none; cursor: zoom-in;
+                        transform: rotate(calc(var(--giro) + var(--vento)));
+                        transition: transform .55s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s; }
+  .corda.arrastando .pendurado .folheto { cursor: grabbing; }
+  .pendurado:hover .folheto { animation: balanca 1s ease-in-out; box-shadow: 10px 10px 0 #15121066; }
+  .pendurado:hover .prendedor { transform: translateY(-2px); }
+  .pendurado.solto .folheto { visibility: hidden; }
+  .pendurado.solto .prendedor { animation: prendedor-solta .5s ease-out; }
+  .prendedor { transition: transform .2s; }
+  @keyframes pendura { from { opacity: 0; transform: translateY(-46px) rotate(5deg); } to { opacity: 1; transform: none; } }
+  @keyframes balanca {
+    0%, 100% { transform: rotate(var(--giro)); } 25% { transform: rotate(calc(var(--giro) + 1.5deg)); }
+    60% { transform: rotate(calc(var(--giro) - 1deg)); } 80% { transform: rotate(calc(var(--giro) + .4deg)); }
+  }
+  @keyframes prendedor-solta { 30% { transform: translateY(-7px) rotate(-9deg); } 65% { transform: translateY(1px) rotate(5deg); } }
   .prendedor { position: absolute; top: -18px; left: 50%; width: 16px; height: 38px; margin-left: -8px; z-index: 2;
                background: linear-gradient(90deg, #c8a877, #a7864f); border: 1.5px solid #6d5634; border-radius: 3px; }
   .prendedor::after { content: ""; position: absolute; left: 6px; top: 14px; width: 2px; height: 10px; background: #6d5634; }
@@ -63,6 +82,41 @@
   .legenda button { background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .legenda button:disabled { color: var(--tinta-3); cursor: wait; }
   .vazio { color: var(--tinta-2); padding: 20px 0; }
+  .legenda b { font: 700 16px "Oswald", sans-serif; letter-spacing: .2px; overflow-wrap: anywhere; }
+  .dica-uso { font: 14px "Courier Prime", monospace; color: var(--tinta-2); margin: -14px 0 0; }
+  .dica-uso .termo { cursor: default; }
+
+  /* ---- o folheto aberto: sai do prendedor e vem para a frente */
+  #aberto { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+            background: transparent; color: var(--tinta); overflow-y: auto; overscroll-behavior: contain; }
+  #aberto::backdrop { background: #151210d9; animation: veu .3s ease-out; }
+  #aberto.saindo::backdrop { animation: veu .28s ease-in reverse both; }
+  @keyframes veu { from { opacity: 0; } }
+  .palco { min-height: 100%; display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 360px); justify-content: center;
+           align-items: start; gap: 36px; padding: 40px 20px; }
+  .palco .folheto { max-width: none; cursor: auto; box-shadow: 12px 12px 0 #000a; transform-origin: 0 0; }
+  .palco .ficha { background: var(--papel); border: 3px solid var(--tinta); padding: 22px 22px 20px; position: relative; font-size: 15px; line-height: 1.55; }
+  .ficha .rotulo { font: 13px "Courier Prime", monospace; color: var(--tinta-2); margin: 0; }
+  .ficha h2 { font-size: clamp(28px, 3vw, 36px); margin: 0 0 8px; overflow-wrap: anywhere; }
+  .ficha p { margin: 0 0 10px; }
+  .ficha .carimbo { display: inline-block; font: 700 15px "Oswald", sans-serif; color: var(--verde); border: 3px solid currentColor;
+                    padding: 3px 10px; margin: 0 0 14px; transform: rotate(-4deg); animation: carimba .35s .4s cubic-bezier(.2, 1.5, .4, 1) both; }
+  @keyframes carimba { from { opacity: 0; transform: scale(2.2) rotate(-12deg); } }
+  .ficha h3 { font: 700 17px "Oswald", sans-serif; margin: 18px 0 8px; padding-top: 14px; border-top: 1.5px solid #15121033; }
+  .ficha dl { margin: 0; display: grid; gap: 8px; }
+  .ficha dt { font-weight: bold; }
+  .ficha dd { margin: 0; color: var(--tinta-2); font-size: 14px; }
+  .ficha .acao { font: 700 15px "Oswald", sans-serif; padding: 9px 16px; cursor: pointer; background: var(--tinta); color: var(--papel);
+                 border: 2px solid var(--tinta); box-shadow: 3px 3px 0 var(--vermelho); margin-top: 6px; }
+  .ficha .acao:disabled { opacity: .6; cursor: wait; }
+  .fechar { position: fixed; top: 16px; right: 22px; z-index: 3; width: 46px; height: 46px; font: 700 26px/1 "Oswald", sans-serif; cursor: pointer;
+            background: var(--papel); color: var(--tinta); border: 3px solid var(--tinta); box-shadow: 3px 3px 0 var(--vermelho); }
+  .fechar:focus-visible, .termo:focus-visible { outline: 3px solid var(--vermelho); outline-offset: 2px; }
+  @media (max-width: 860px) { .palco { grid-template-columns: minmax(0, 460px); padding-top: 72px; gap: 24px; } }
+  @media (prefers-reduced-motion: reduce) {
+    .pendurado, .pendurado:hover .folheto, .pendurado.solto .prendedor, .ficha .carimbo, #aberto::backdrop, #aberto.saindo::backdrop { animation: none; }
+    .pendurado .folheto { transition: none; transform: rotate(var(--giro)); }
+  }
 
   /* ---- o que ficou de fora */
   .descarte { padding: 44px 0; }
@@ -100,7 +154,7 @@
     <div class="botoes">
       <a class="botao" href="#colecao">Ver os folhetos</a>
       <a class="botao leve" href="/gerador">Abrir o gerador</a>
-      <span class="nota">O gerador é de uso do grupo e pede senha.</span>
+      <a class="botao leve" href="/sextilhas">Ver todas as geradas</a>
     </div>
   </div>
 </header>
@@ -108,12 +162,14 @@
 <main>
   <section class="colecao" id="colecao" aria-labelledby="t-colecao">
     <div class="miolo">
-      <h2 id="t-colecao">A coleção</h2>
-      <p class="lide" id="lide-colecao">Os folhetos ficam pendurados no cordão, como na feira. Arraste para o lado para ver todos.</p>
+      <h2 id="t-colecao">As últimas geradas</h2>
+      <p class="lide" id="lide-colecao">As 10 mais recentes que passaram no verificador, penduradas no cordão como na feira. Arraste para o lado para ver todas.</p>
+      <p class="dica-uso">Clique num folheto para abri-lo. As palavras <span class="termo" data-termo="palavras assim" data-sentido="Sublinhadas com pontinhos: são do dicionário nordestino. Passe o mouse para ver o significado.">sublinhadas assim</span> têm significado no balão.</p>
     </div>
     <div class="corda" id="corda" tabindex="0" aria-label="Folhetos da coleção, role para o lado">
       <p class="vazio miolo">Carregando os folhetos.</p>
     </div>
+    <div class="miolo"><a class="botao" href="/sextilhas">Ver todas as geradas</a></div>
   </section>
 
   <section class="descarte" id="descarte" aria-labelledby="t-descarte">
@@ -142,7 +198,7 @@
         <h2 id="t-entrega">A entrega</h2>
         <p class="lide">Os cinco itens do PA 1, com o texto completo no repositório do projeto.</p>
         <ol class="entrega">
-          <li><a href="#colecao">A coleção de artefatos</a><span>Os folhetos acima, com texto e xilogravura.</span></li>
+          <li><a href="/sextilhas">A coleção de artefatos</a><span>Todos os folhetos, com texto e xilogravura; os mais recentes estão no cordão acima.</span></li>
           <li><a href="#eixo">O eixo declarado</a><span>No topo desta página, e no <a href="https://github.com/PeterBaptista/cordel-generator/blob/main/EIXO.md">repositório</a>.</span></li>
           <li><a href="#descarte">O descarte comentado</a><span>O que ficou de fora e por qual critério.</span></li>
           <li><a href="https://github.com/PeterBaptista/cordel-generator/blob/main/CADERNO-DE-BORDO.md">O caderno de bordo</a><span>Com o <a href="https://github.com/PeterBaptista/cordel-generator/blob/main/caderno/REGISTRO.md">registro de cada folheto</a>, o <a href="https://github.com/PeterBaptista/cordel-generator/blob/main/dados/dicionario_nordestino.csv">dicionário nordestino</a> e um <a href="/static/Relatorio_Do7ao6.pdf">relatório curto</a>.</span></li>
@@ -153,6 +209,14 @@
   </div>
 </main>
 
+<dialog id="aberto" aria-labelledby="ab-nome">
+  <button type="button" class="fechar" id="fechar" aria-label="Fechar o folheto">×</button>
+  <div class="palco" id="palco">
+    <div id="ab-folheto"></div>
+    <aside class="ficha" id="ab-ficha"></aside>
+  </div>
+</dialog>
+
 <footer>
   <div class="miolo">
     Projeto Autoral de Criatividade Computacional (IF866), CIn/UFPE, 2026.2.
@@ -161,7 +225,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
-<script src="/static/folheto.js"></script>
+<script src="/static/folheto.js?v=2"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = escFolheto;
@@ -169,30 +233,39 @@ const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, "");
 const dia = (iso) => iso ? new Date(iso).toLocaleDateString("pt-BR", { day: "numeric", month: "long" }) : "";
 const TIPOS = { aberta: "sextilha aberta", solta: "sextilha solta", corrida: "sextilha corrida", desencontrada: "sextilha desencontrada" };
 
+// as gerações de antes do campo de nome foram todas do grupo
+const autorDe = (f) => f.autor ?? "Grupo 6";
+const cartaz = (f) => folhetoHTML({ manchete: f.manchete, estrofes: f.estrofes, imagem: f.imagem ? `/${f.imagem}` : null,
+                                    fonte: f.url ? (f.fonte || dominio(f.url)) : null, autor: autorDe(f) });
+const FOLHETOS = new Map();
+
 function legenda(f) {
   const partes = [];
   if (f.url) partes.push(`<a href="${esc(f.url)}" rel="noopener">Notícia original</a> em ${esc(f.fonte || dominio(f.url))}`);
   const forma = `${TIPOS[f.forma.forma] ?? "sextilha"}, ${f.forma.estrofes} ${f.forma.estrofes === 1 ? "estrofe" : "estrofes"}`;
-  return `<p class="legenda">${partes.join("")}${partes.length ? ". " : ""}${esc(dia(f.inicio))}, ${esc(forma)}.
+  return `<p class="legenda">Gerado por <b>${esc(autorDe(f))}</b>. ${partes.join("")}${partes.length ? ". " : ""}${esc(dia(f.inicio))}, ${esc(forma)}.
+    <button type="button" data-abrir="${esc(f.id)}">Abrir folheto</button> ·
     <button type="button" data-id="${esc(f.id)}">Baixar em PNG</button></p>`;
 }
 
 function pendurar(colecao) {
   if (!colecao.length) {
-    $("corda").innerHTML = '<p class="vazio miolo">A coleção ainda não tem folhetos. Eles aparecem aqui quando passarem no verificador.</p>';
+    $("corda").innerHTML = '<p class="vazio miolo">Ainda não há folhetos aqui. Eles aparecem quando passam no verificador.</p>';
     return;
   }
-  $("corda").innerHTML = colecao.map((f) => `<figure class="pendurado" style="margin:0">
+  colecao.forEach((f) => FOLHETOS.set(f.id, f));
+  $("corda").innerHTML = colecao.map((f, i) => `<figure class="pendurado" data-folheto="${esc(f.id)}" style="margin:0; --i:${i}">
       <span class="prendedor" aria-hidden="true"></span>
-      ${folhetoHTML({ manchete: f.manchete, estrofes: f.estrofes, imagem: f.imagem ? `/${f.imagem}` : null,
-                      fonte: f.url ? (f.fonte || dominio(f.url)) : null })}
+      ${cartaz(f)}
       <figcaption>${legenda(f)}</figcaption>
     </figure>`).join("");
+  marcarTermos($("corda"), { foco: false });
   // o cordão acompanha toda a largura rolável
   $("corda").style.setProperty("--largura", `${$("corda").scrollWidth}px`);
   $("lide-colecao").textContent = colecao.length > 1
-    ? `${colecao.length} folhetos pendurados no cordão, como na feira. Arraste para o lado para ver todos.`
-    : "Um folheto pendurado no cordão, como na feira.";
+    ? `As ${colecao.length} mais recentes que passaram no verificador, penduradas no cordão como na feira. Arraste para o lado para ver todas.`
+    : "A mais recente que passou no verificador, pendurada no cordão como na feira.";
+  $("corda").querySelectorAll("button[data-abrir]").forEach((b) => b.onclick = () => abrir(b.closest(".pendurado"), b));
   $("corda").querySelectorAll("button[data-id]").forEach((b) => b.onclick = async () => {
     b.disabled = true; b.textContent = "Gerando o PNG";
     try { await baixarFolheto(b.closest(".pendurado").querySelector(".folheto"), b.dataset.id); }
@@ -213,6 +286,112 @@ fetch("/api/colecao").then((r) => { if (!r.ok) throw new Error(r.status); return
     $("corda").innerHTML = '<p class="vazio miolo">Não foi possível carregar os folhetos. Recarregue a página.</p>';
     $("lista-descarte").innerHTML = "";
   });
+
+// ---- o cordão: arrastar com o mouse, e os folhetos balançam com o movimento
+const corda = $("corda"), parado = matchMedia("(prefers-reduced-motion: reduce)");
+let arraste = null, acabouDeArrastar = false, ultimo = 0, calma;
+corda.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button === 0 && !e.target.closest("a, button"))
+    arraste = { x: e.clientX, inicio: corda.scrollLeft, moveu: false };
+});
+addEventListener("pointermove", (e) => {
+  if (!arraste) return;
+  const dx = e.clientX - arraste.x;
+  if (!arraste.moveu && Math.abs(dx) < 6) return;
+  arraste.moveu = true; corda.classList.add("arrastando");
+  corda.scrollLeft = arraste.inicio - dx;
+});
+addEventListener("pointerup", () => {
+  if (arraste?.moveu) { acabouDeArrastar = true; setTimeout(() => { acabouDeArrastar = false; }); }
+  arraste = null; corda.classList.remove("arrastando");
+});
+corda.addEventListener("dragstart", (e) => e.preventDefault());
+corda.addEventListener("scroll", () => {
+  const d = corda.scrollLeft - ultimo; ultimo = corda.scrollLeft;
+  if (parado.matches) return;
+  corda.style.setProperty("--vento", `${Math.max(-4, Math.min(4, -d * .12))}deg`);
+  clearTimeout(calma); calma = setTimeout(() => corda.style.setProperty("--vento", "0deg"), 90);
+}, { passive: true });
+corda.addEventListener("click", (e) => {
+  if (acabouDeArrastar || e.target.closest(".termo, a, button")) return;
+  const fig = e.target.closest(".pendurado");
+  if (fig && e.target.closest(".folheto")) abrir(fig, null);
+});
+
+// ---- o folheto aberto: voa do cordão para o centro, e volta para o mesmo lugar
+const aberto = $("aberto");
+let atual = null;
+
+const deslocamento = (de, para) => `translate(${de.left - para.left}px, ${de.top - para.top}px) scale(${de.width / para.width})`;
+
+function fichaHTML(f) {
+  const rodadas = f.rodadas ? `Passou depois de ${f.rodadas} ${f.rodadas === 1 ? "rodada" : "rodadas"} de correção.` : "Passou de primeira, sem correção.";
+  const forma = `${TIPOS[f.forma.forma] ?? "sextilha"}, ${f.forma.estrofes} ${f.forma.estrofes === 1 ? "estrofe" : "estrofes"}`;
+  return `<span class="carimbo">Passou no verificador</span>
+    <p class="rotulo">Gerado por</p>
+    <h2 id="ab-nome">${esc(autorDe(f))}</h2>
+    <p>${esc(dia(f.inicio))}, ${esc(forma)}. ${esc(rodadas)}</p>
+    ${f.url ? `<p><a href="${esc(f.url)}" rel="noopener" target="_blank">Ler a notícia original</a> em ${esc(f.fonte || dominio(f.url))}.</p>` : ""}
+    <button type="button" class="acao" id="ab-baixar">Baixar em PNG</button>
+    <div id="ab-termos"></div>`;
+}
+
+async function abrir(fig, gatilho) {
+  if (atual) return;
+  const f = FOLHETOS.get(fig.dataset.folheto), origem = fig.querySelector(".folheto").getBoundingClientRect();
+  atual = { fig, gatilho, f };
+  $("ab-folheto").innerHTML = cartaz(f);
+  $("ab-ficha").innerHTML = fichaHTML(f);
+  const poster = $("ab-folheto").firstElementChild;
+  marcarTermos(poster);
+  $("ab-baixar").onclick = async (e) => {
+    e.target.disabled = true; e.target.textContent = "Gerando o PNG";
+    try { await baixarFolheto(poster, f.id); } finally { e.target.disabled = false; e.target.textContent = "Baixar em PNG"; }
+  };
+  fig.classList.add("solto");
+  document.documentElement.classList.add("travado");
+  aberto.showModal(); aberto.scrollTop = 0;
+  dicaTermo.esconder();
+  if (!parado.matches) {
+    atual.voo = poster.animate([
+      { transform: deslocamento(origem, poster.getBoundingClientRect()) + " rotate(-1deg)" },
+      { transform: "translate(0, -10px) rotate(1.2deg)", offset: .7 },
+      { transform: "none" },
+    ], { duration: 520, easing: "cubic-bezier(.2, .8, .2, 1)" });
+    $("ab-ficha").animate([{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }],
+                          { duration: 320, delay: 240, easing: "ease-out", fill: "backwards" });
+  }
+  const termos = await termosDoFolheto(f.estrofes);
+  if (atual?.f !== f || !termos.length) return;
+  $("ab-termos").innerHTML = `<h3>Palavras do Nordeste neste folheto</h3>
+    <dl>${termos.map((t) => `<div><dt>${esc(t.termo)}</dt><dd>${esc(t.sentido)}</dd></div>`).join("")}</dl>`;
+}
+
+async function fechar() {
+  if (!atual || atual.fechando) return;
+  atual.fechando = true;
+  const { fig, gatilho } = atual, poster = $("ab-folheto").firstElementChild;
+  dicaTermo.esconder();
+  if (!parado.matches) {
+    aberto.classList.add("saindo");
+    $("ab-ficha").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" });
+    const destino = fig.querySelector(".folheto").getBoundingClientRect();
+    await poster.animate([{ transform: "none" }, { transform: deslocamento(destino, poster.getBoundingClientRect()) }],
+                         { duration: 320, easing: "cubic-bezier(.5, 0, .7, .4)", fill: "forwards" }).finished.catch(() => {});
+  }
+  aberto.close(); aberto.classList.remove("saindo");
+  document.documentElement.classList.remove("travado");
+  fig.classList.remove("solto");
+  $("ab-folheto").innerHTML = ""; $("ab-ficha").innerHTML = "";
+  atual = null;
+  gatilho?.focus();
+}
+
+$("fechar").onclick = fechar;
+aberto.addEventListener("cancel", (e) => { e.preventDefault(); fechar(); }); // Esc
+// clicar fora do folheto e da ficha fecha
+aberto.addEventListener("click", (e) => { if (e.target === aberto || e.target.id === "palco" || e.target.id === "ab-folheto") fechar(); });
+
 window.addEventListener("resize", () => $("corda").style.setProperty("--largura", `${$("corda").scrollWidth}px`));
 </script>
 </body>

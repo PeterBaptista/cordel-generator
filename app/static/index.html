@@ -6,7 +6,7 @@
 <title>Notícias em Cordel — gerador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/folheto.css">
+<link rel="stylesheet" href="/static/folheto.css?v=2">
 <style>
   :root {
     --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35;
@@ -33,7 +33,7 @@
   main > section { min-width: 0; }
   h2 { font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 10px; }
   .campo { display: block; font-size: 13px; color: var(--tinta-2); margin: 10px 0 4px; }
-  input[type=url], textarea {
+  input[type=url], input[type=text], textarea {
     width: 100%; padding: 10px 12px; border: 2px solid var(--tinta);
     background: #fbf6ea; color: var(--tinta); font: 15px/1.5 "Libre Baskerville", serif;
   }
@@ -125,12 +125,14 @@
   <h1>Notícias em Cordel</h1>
   <p>Do 7 ao 6 — a semana de IA contada em sextilha e em xilogravura</p>
   <div class="cfg" id="cfg"></div>
-  <nav class="nav"><a href="/">Início</a> · <a href="/gerador" aria-current="page">Gerador</a> · <a href="/historico">Histórico</a> · <a href="/logs">Logs</a></nav>
+  <nav class="nav"><a href="/">Início</a> · <a href="/gerador" aria-current="page">Gerador</a> · <a href="/sextilhas">Sextilhas</a> · <a href="/historico">Histórico</a> · <a href="/logs">Logs</a></nav>
 </header>
 
 <main>
   <section>
-    <h2>A notícia</h2>
+    <label class="campo" for="autor">Seu nome (obrigatório: ele aparece no folheto e na página de sextilhas)</label>
+    <input type="text" id="autor" maxlength="60" required autocomplete="name" placeholder="Como você quer aparecer">
+    <h2 style="margin-top:18px">A notícia</h2>
     <label class="campo" for="url">Link da notícia</label>
     <input type="url" id="url" placeholder="https://…" autocomplete="off">
     <div class="ou">— OU —</div>
@@ -139,10 +141,9 @@
     <div class="exemplos">Exemplos de texto: <a data-ex="0">robô na feira</a><a data-ex="1">modelo que joga xadrez</a></div>
     <fieldset class="config">
       <legend>Modelos</legend>
-      <label>Texto <select id="c-texto"></select></label>
       <label>Raciocínio <select id="c-raciocinio"></select></label>
       <label>Candidatas <select id="c-candidatas"></select></label>
-      <label>Xilogravura <select id="c-imagem_qualidade"></select></label>
+      <div class="estimativa">Texto: gpt-6-luna. Xilogravura: gpt-image-1-mini. São os modelos fixos deste site.</div>
       <div class="estimativa" id="estimativa"></div>
     </fieldset>
     <fieldset class="config">
@@ -172,6 +173,7 @@
         <div class="versos" id="versos"></div>
         <div class="status-geracao" id="status-geracao" aria-live="polite"></div>
         <div class="rodape"><svg class="seta" viewBox="0 0 22 10" style="transform:scaleX(-1)"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg><span class="estrela">✸</span><svg class="seta" viewBox="0 0 22 10"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg></div>
+        <div class="autor" id="autor-folheto"></div>
         <div class="fonte" id="fonte"></div>
       </div>
     </div>
@@ -191,7 +193,7 @@
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
-<script src="/static/folheto.js"></script>
+<script src="/static/folheto.js?v=2"></script>
 <script>
 const EXEMPLOS = [
   "Startup de Recife coloca robô com IA para vender frutas numa feira livre. O robô conversa com os clientes, sugere receitas e faz troco, mas se confundiu com o preço da macaxeira e acabou dando desconto de 90% por uma tarde inteira.",
@@ -202,47 +204,21 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 document.querySelectorAll("[data-ex]").forEach((a) => a.onclick = () => { $("noticia").value = EXEMPLOS[a.dataset.ex]; $("url").value = ""; });
 // ---- seletores de modelo
 const NOMES = { low: "baixo", medium: "médio", high: "alto" };
-const ROTULOS_IMAGEM = { minima: "mínima (gpt-image-1-mini)", low: "rápida (gpt-image-2 low)", medium: "detalhada (gpt-image-2 medium)" };
-// custo medido por xilogravura (28/09, 1536×1024, hospedeiro gpt-6-luna); a detalhada não foi medida
-const CUSTO_IMAGEM = { minima: "~US$ 0,004", low: "~US$ 0,006", medium: "mais que a rápida (não medido)" };
-// custo real de texto medido em 4 notícias de teste com 3 candidatas (28/09/2026);
-// com menos candidatas sai mais barato, e o valor exato de cada geração fica em Logs
-const MEDIDO = {
-  "openai:gpt-5.4-mini|medium": 0.12, "openai:gpt-5.4-mini|high": 0.29,
-  "openai:gpt-5.5|low": 0.13, "openai:gpt-5.5|medium": 0.36,
-};
-const CAMPOS = ["texto", "raciocinio", "candidatas", "imagem_qualidade", "forma", "estrofes", "encadeamento", "narrador"];
+const CAMPOS = ["raciocinio", "candidatas", "forma", "estrofes", "encadeamento", "narrador"];
 const ROTULOS_NARRADOR = { observador: "observador em 1ª pessoa (roteiro fixo)", feira: "causo de feira",
   sertanejo: "sertanejo desconfiado", cantador: "cantador", conselho: "conselho de gente velha", sortear: "sortear (um por candidata)" };
 const NUMERICOS = ["candidatas", "estrofes"];
 const ROTULOS_ENCADEAMENTO = { livre: "livre", deixa: "em deixa (cantoria)" };
-let PRECOS = {}, FORMAS = {}, MAX_RODADAS = 10;
+let FORMAS = {}, MAX_RODADAS = 10;
 const usd = (v, c = 2) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: c, maximumFractionDigits: c }).format(v);
-const nomeModelo = (id) => id.replace("openai:", "").replace(/^gpt-/, "GPT-").replace(/-(luna|sol|terra|astra|mini|nano)$/, " $1");
 const lerCfg = () => Object.fromEntries(CAMPOS.map((k) => {
   const v = $(`c-${k}`).value;
   return [k, NUMERICOS.includes(k) ? Number(v) : v];
 }));
 
-function opcoesTexto(ids) {
-  // agrupa por família (gpt-6, gpt-5.6, …) e ordena do mais barato ao mais caro
-  const familias = {};
-  for (const id of ids) (familias[id.replace("openai:", "").match(/^gpt-[\d.]+/)[0]] ??= []).push(id);
-  const saida = (id) => PRECOS[id.replace("openai:", "")]?.saida ?? 0;
-  return Object.entries(familias).map(([fam, ms]) => `<optgroup label="${esc(fam.toUpperCase())}">${
-    ms.sort((a, b) => saida(a) - saida(b)).map((id) =>
-      `<option value="${esc(id)}">${esc(nomeModelo(id))} — ${esc(usd(saida(id)))}/M saída${id === ECONOMICO.texto ? " (mais barato)" : ""}</option>`).join("")
-  }</optgroup>`).join("");
-}
-
 function estimativa() {
-  const c = lerCfg(), m = MEDIDO[`${c.texto}|${c.raciocinio}`];
-  const p = PRECOS[c.texto.replace("openai:", "")];
-  const preco = p ? `${usd(p.entrada)} entrada · ${usd(p.saida)} saída por 1M tokens` : "";
-  const medido = m != null
-    ? ` · medido: ~${usd(m)} com 3 candidatas${c.candidatas < 3 ? " (com menos, sai mais barato)" : ""}`
-    : " · ainda não medido: o custo real aparece em Logs";
-  $("estimativa").textContent = preco + medido + (c.candidatas > 1 ? " · com mais de 1 candidata, um júri escolhe a melhor" : "");
+  const c = lerCfg();
+  $("estimativa").textContent = "O custo real aparece em Logs" + (c.candidatas > 1 ? " · com mais de 1 candidata, um júri escolhe a melhor" : "");
   // sextilha: a regra do tipo escolhido; deixa só faz sentido com 2+ estrofes
   const f = FORMAS[c.forma];
   $("c-encadeamento").disabled = c.estrofes === 1;
@@ -252,26 +228,15 @@ function estimativa() {
   try { localStorage.setItem("cordel-config", JSON.stringify(c)); } catch {}
 }
 
-// ---- aviso de custo: modelo, raciocínio e qualidade da imagem pedem confirmação
-// quando saem da configuração mais barata; forma, estrofes e candidatas ficam livres
-const CAROS = ["texto", "raciocinio", "imagem_qualidade"];
+// ---- aviso de custo: o raciocínio pede confirmação quando sai da configuração mais
+// barata; forma, estrofes e candidatas ficam livres
+const CAROS = ["raciocinio"];
 let ECONOMICO = {};
-const semPrefixo = (id) => id.replace("openai:", "");
-const rotuloDe = (k, v) => k === "texto" ? nomeModelo(v) : k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : NOMES[v] ?? v;
+const rotuloDe = (k, v) => NOMES[v] ?? v;
 
 function porqueCusta(k, v) {
-  if (k === "texto") {
-    const p = PRECOS[semPrefixo(v)], b = PRECOS[semPrefixo(ECONOMICO.texto)];
-    const x = p.saida / b.saida;
-    return `Modelo <b>${esc(nomeModelo(v))}</b>: ${esc(usd(p.saida))} por 1M tokens de saída, `
-      + `${x >= 2 ? Math.round(x) : x.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}× o preço do `
-      + `${esc(nomeModelo(ECONOMICO.texto))} (${esc(usd(b.saida))}).`;
-  }
-  if (k === "raciocinio")
-    return `Raciocínio <b>${esc(NOMES[v] ?? v)}</b>: o modelo gasta mais tokens pensando antes de escrever, e eles são cobrados. `
+  return `Raciocínio <b>${esc(NOMES[v] ?? v)}</b>: o modelo gasta mais tokens pensando antes de escrever, e eles são cobrados. `
       + `Num teste com o GPT-5.5, 91% do custo do texto foi raciocínio.`;
-  return `Xilogravura <b>${esc(ROTULOS_IMAGEM[v] ?? v)}</b>: ${esc(CUSTO_IMAGEM[v] ?? "mais cara")} por imagem, `
-    + `contra ${esc(CUSTO_IMAGEM[ECONOMICO.imagem_qualidade])} da ${esc(ROTULOS_IMAGEM[ECONOMICO.imagem_qualidade])}.`;
 }
 
 // Abre o diálogo e devolve o valor do botão escolhido (Esc devolve "aoFechar").
@@ -299,9 +264,10 @@ async function confirmarOpcaoCara(k, sel) {
   if (!manter) sel.value = ECONOMICO[k];
 }
 
-fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, precos, formas, economico, max_rodadas }) => {
+try { $("autor").value = localStorage.getItem("cordel-autor") || ""; } catch {}
+fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, formas, economico, max_rodadas }) => {
   MAX_RODADAS = max_rodadas;
-  PRECOS = precos; FORMAS = formas; ECONOMICO = economico;
+  FORMAS = formas; ECONOMICO = economico;
   // opções livres voltam como estavam; as de custo sempre abrem no mais barato
   let salvo = {}, refazer = null;
   try { salvo = JSON.parse(localStorage.getItem("cordel-config") || "{}"); } catch {}
@@ -310,9 +276,8 @@ fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, precos,
   salvo = { ...salvo, ...(refazer || {}) };
   for (const k of CAMPOS) {
     const sel = $(`c-${k}`);
-    sel.innerHTML = k === "texto" ? opcoesTexto(opcoes.texto)
-      : opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
-          k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] : NUMERICOS.includes(k) ? v
+    sel.innerHTML = opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
+          NUMERICOS.includes(k) ? v
           : k === "forma" ? `${v} (${formas[v].esquema})` : k === "encadeamento" ? ROTULOS_ENCADEAMENTO[v]
           : k === "narrador" ? ROTULOS_NARRADOR[v] ?? v
           : NOMES[v] ?? v)}${CAROS.includes(k) && v === economico[k] ? " (mais barato)" : ""}</option>`).join("");
@@ -375,6 +340,7 @@ function mostrarEstrofes(estrofes, pendentes = []) {
   const p = new Set(pendentes.map(([e, n]) => `${e}.${n}`));
   $("versos").innerHTML = estrofes.map((vs, e) => `<div class="estrofe-c">${vs.map((v, n) =>
     `<div class="v${p.has(`${e + 1}.${n + 1}`) ? " pendente" : ""}">${esc(v)}</div>`).join("")}</div>`).join("");
+  marcarTermos($("versos"));
 }
 const esqueletoVersos = (estrofes) => Array.from({ length: estrofes }, () =>
   `<div class="estrofe-c">${[1, 0, 1, 0, 1, 0].map((curto) => `<div class="esqueleto${curto ? " curto" : ""}"></div>`).join("")}</div>`).join("");
@@ -426,12 +392,13 @@ function tratar(ev) {
     case "fim": {
       $("folheto").classList.remove("gerando");
       $("manchete").textContent = ev.titulo; mostrarEstrofes(ev.estrofes);
+      $("autor-folheto").textContent = ev.autor ? `gerado por ${ev.autor}` : "";
       if (!$("imagem").checked) $("xilo").innerHTML = "<span>sem xilogravura nesta rodada</span>";
       $("veredito").style.display = "block";
       $("selo").className = "selo " + (ev.entra ? "entra" : "descarte");
       $("selo").textContent = ev.entra ? "Entra na coleção" : "Descarte";
       if (ev.custo) {
-        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/historico">histórico</a> · <a href="/logs">logs</a>`;
+        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/sextilhas">todas as sextilhas</a> · <a href="/logs">logs</a>`;
       }
       $("motivo").textContent = ev.motivo || (ev.duvidas.length ? `${ev.duvidas.length} ponto(s) marcados com "?" — o grupo decide.` : "");
       $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${p}" target="_blank">${k}</a>`).join("·")
@@ -453,6 +420,9 @@ async function baixar(nome) {
 }
 
 $("gerar").onclick = async () => {
+  $("autor").value = $("autor").value.trim();
+  if (!$("autor").reportValidity()) return;
+  try { localStorage.setItem("cordel-autor", $("autor").value); } catch {}
   const noticia = $("noticia").value.trim(), url = $("url").value.trim();
   if (!noticia && !url) return $("url").focus();
   const c = lerCfg(), caros = CAROS.filter((k) => c[k] !== ECONOMICO[k]);
@@ -474,7 +444,7 @@ async function gerar(noticia, url) {
   $("linha").innerHTML = ""; for (const k in itens) delete itens[k];
   $("veredito").style.display = "none"; $("custo").textContent = "";
   $("folheto").classList.add("gerando");
-  $("manchete").innerHTML = '<div class="esqueleto"></div>';
+  $("manchete").innerHTML = '<div class="esqueleto"></div>'; $("autor-folheto").textContent = "";
   $("versos").innerHTML = esqueletoVersos(lerCfg().estrofes); $("fonte").textContent = "";
   statusCartaz("começando…");
   $("xilo").classList.toggle("carregando", $("imagem").checked);
@@ -482,8 +452,9 @@ async function gerar(noticia, url) {
   try {
     const resp = await fetch("/api/cordel", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ noticia, url, com_imagem: $("imagem").checked, config: lerCfg() }),
+      body: JSON.stringify({ autor: $("autor").value, noticia, url, com_imagem: $("imagem").checked, config: lerCfg() }),
     });
+    if (!resp.ok) throw (await resp.json()).detail;
     const reader = resp.body.getReader(), dec = new TextDecoder();
     let buf = "";
     for (;;) {

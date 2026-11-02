@@ -94,11 +94,11 @@ em que ordem.
 O `escandir.py` verifica arquivos com várias estrofes (separadas por linha em branco)
 e lê o esquema de uma linha `# esquema: AABCCB` no arquivo, ou de `--esquema`.
 
-**Páginas.** A home (`/`) é pública: é o link da entrega, com a coleção pendurada no cordão,
-o descarte com o motivo e os cinco itens do PA 1. O gerador (`/gerador`), o histórico, os logs
-e os cadernos pedem a senha do grupo (variável `CORDEL_SENHA`). Para escolher quais folhetos
-aparecem na home, e em que ordem, defina `CORDEL_COLECAO` com os ids separados por vírgula
-(o id é o nome do arquivo sem extensão); sem ela, aparecem todos os que passaram no verificador.
+**Páginas.** Todas são públicas, para a turma testar. A home (`/`) é o link da entrega, com as
+10 gerações mais recentes que passaram no verificador penduradas no cordão, o descarte do grupo
+com o motivo e os cinco itens do PA 1. O gerador (`/gerador`) exige o nome de quem gera, só usa `gpt-6-luna` e
+`gpt-image-1-mini` e gasta a chave `OPENAI_API_KEY_PROFESSOR`. Em `/sextilhas` ficam todas as
+sextilhas geradas, com o nome de quem gerou.
 
 Em `/historico` ficam todas as sextilhas geradas (as que entraram e as de descarte),
 cada uma no cartaz com a ficha dos parâmetros que a produziram: modelo, raciocínio,

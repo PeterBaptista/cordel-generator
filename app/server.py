@@ -1,58 +1,45 @@
 """Mini servidor para testar o gerador: uv run uvicorn app.server:app --reload"""
 
-import base64
 import json
 import os
-import secrets
 import traceback
 
-from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, Response, StreamingResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import cadernos, criacomp, custos, prompts
+from . import cadernos, criacomp, custos, dicionario, prompts
 from .workflow import ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, PASTAS, RAIZ, Config, run_cordel
 
 app = FastAPI(title="Do 7 ao 6")
 
-# No ar, cada folheto gasta a chave da OpenAI: com CORDEL_SENHA definida, o gerador,
-# o histórico, os logs e os cadernos pedem senha (HTTP Basic, qualquer usuário). A home
-# com a coleção fica aberta: é o link da entrega. Sem CORDEL_SENHA, tudo aberto (uso local).
-SENHA = os.getenv("CORDEL_SENHA", "")
-PUBLICO = {"/", "/saude", "/api/colecao", "/static/home.html", "/static/folheto.css", "/static/folheto.js",
-           "/static/Do7ao6.pdf", "/static/Relatorio_Do7ao6.pdf"}
-PUBLICO_PREFIXOS = ("/folhetos/", "/descarte/")  # os textos e imagens da coleção e do descarte
-
-# Quais folhetos aparecem na coleção da home, na ordem: ids dos cadernos separados por
-# vírgula (ex.: 20260928-154345-amador-resolve-desafio-matematico-com-ia). Vazio: todos
-# os que passaram no verificador, dos mais recentes para os mais antigos.
-COLECAO = [i.strip() for i in os.getenv("CORDEL_COLECAO", "").split(",") if i.strip()]
+# Quantas gerações aparecem no cordão da home; as outras ficam em /sextilhas.
+ULTIMAS = 10
 
 
-def publico(caminho: str) -> bool:
-    return caminho in PUBLICO or caminho.startswith(PUBLICO_PREFIXOS)
 
 
-@app.middleware("http")
-async def exigir_senha(request: Request, call_next):
-    if SENHA and not publico(request.url.path):
-        auth = request.headers.get("authorization", "")
-        try:
-            _, _, dada = base64.b64decode(auth.removeprefix("Basic ")).decode().partition(":")
-        except ValueError:
-            dada = ""
-        if not (auth.startswith("Basic ") and secrets.compare_digest(dada, SENHA)):
-            return Response(status_code=401,
-                            headers={"WWW-Authenticate": 'Basic realm="Noticias em Cordel"'})
-    return await call_next(request)
-app.mount("/static", StaticFiles(directory=RAIZ / "app" / "static"), name="static")
+class SemCacheVelho(StaticFiles):
+    """O navegador confere com o servidor antes de reusar: assim ninguém fica com o script antigo."""
+    async def get_response(self, path, scope):
+        resposta = await super().get_response(path, scope)
+        resposta.headers["Cache-Control"] = "no-cache"
+        return resposta
+
+
+def pagina(nome: str) -> FileResponse:
+    return FileResponse(RAIZ / "app" / "static" / nome, headers={"Cache-Control": "no-cache"})
+
+
+app.mount("/static", SemCacheVelho(directory=RAIZ / "app" / "static"), name="static")
 for nome, pasta in PASTAS.items():
     pasta.mkdir(parents=True, exist_ok=True)
     app.mount(f"/{nome}", StaticFiles(directory=pasta), name=nome)
 
 
 class Pedido(BaseModel):
+    autor: str = ""
     noticia: str = ""
     url: str = ""
     com_imagem: bool = True
@@ -61,12 +48,26 @@ class Pedido(BaseModel):
 
 @app.get("/")
 def home():
-    return FileResponse(RAIZ / "app" / "static" / "home.html")
+    return pagina("home.html")
 
 
 @app.get("/gerador")
 def gerador():
-    return FileResponse(RAIZ / "app" / "static" / "index.html")
+    return pagina("index.html")
+
+
+@app.get("/sextilhas")
+def sextilhas():
+    return pagina("sextilhas.html")
+
+
+@app.get("/api/dicionario")
+def dicionario_publico():
+    """Os termos que a página marca nos versos, com o sentido de cada um. "viu", "tá" e
+    "sabe" ficam de fora: quase sempre são só os verbos comuns."""
+    return [{"termo": t["termo"], "sentido": t["sentido"], "formas": sorted(t["formas"])}
+            for t in dicionario.carregar()
+            if t["tipo"] != "fatica" or dicionario.normalizar(t["termo"]) in dicionario.FATICAS_VERIFICADAS]
 
 
 @app.get("/saude")
@@ -86,6 +87,7 @@ def colecao():
         fato = log.get("fato") or {}
         itens.append({
             "id": f.stem, "inicio": cadernos.hora(log.get("inicio")), "entra": bool(log.get("entra")),
+            "autor": log.get("autor"),
             "manchete": fato.get("titulo") or f.stem,
             "estrofes": cadernos.estrofes(log, "estrofes_finais"),
             "imagem": arq.get("imagem"), "texto": arq.get("texto"),
@@ -93,26 +95,21 @@ def colecao():
             "motivo": log.get("motivo"), "rodadas": log.get("rodadas_de_correcao"),
             "forma": {k: cfg.get(k) for k in ("forma", "estrofes", "encadeamento", "narrador")},
         })
-    # o eixo: só notícias da lista do CriaComp News; o resto continua no histórico
-    itens = [i for i in itens if criacomp.tem(i["url"])]
-    entraram = [i for i in itens if i["entra"]]
-    # a mesma notícia gerada mais de uma vez: na coleção fica a versão mais recente
+    # o que o grupo gerou segue o eixo: só notícias do CriaComp News, e da mesma notícia
+    # fica a versão mais recente. O que a turma gera entra sempre, com o nome de quem gerou.
+    grupo = [i for i in itens if not i["autor"] and criacomp.tem(i["url"])]
     recentes = {}
-    for i in sorted(entraram, key=lambda i: i["inicio"] or ""):
+    for i in sorted((i for i in grupo if i["entra"]), key=lambda i: i["inicio"] or ""):
         recentes[criacomp.normalizar(i["url"])] = i
-    entraram = list(recentes.values())
-    if COLECAO:
-        por_id = {i["id"]: i for i in entraram}
-        entraram = [por_id[i] for i in COLECAO if i in por_id]
-    else:
-        entraram.sort(key=lambda i: i["inicio"] or "", reverse=True)  # os mais recentes primeiro
-    descarte = sorted((i for i in itens if not i["entra"]), key=lambda i: i["inicio"] or "", reverse=True)
-    return {"colecao": entraram, "descarte": descarte, "curada": bool(COLECAO)}
+    turma = [i for i in itens if i["autor"] and i["entra"]]
+    ultimas = sorted([*recentes.values(), *turma], key=lambda i: i["inicio"] or "", reverse=True)[:ULTIMAS]
+    descarte = sorted((i for i in grupo if not i["entra"]), key=lambda i: i["inicio"] or "", reverse=True)
+    return {"colecao": ultimas, "descarte": descarte}
 
 
 @app.get("/logs")
 def logs_pagina():
-    return FileResponse(RAIZ / "app" / "static" / "logs.html")
+    return pagina("logs.html")
 
 
 def _cadernos():
@@ -157,7 +154,7 @@ def logs():
 
 @app.get("/historico")
 def historico_pagina():
-    return FileResponse(RAIZ / "app" / "static" / "historico.html")
+    return pagina("historico.html")
 
 
 @app.get("/api/historico")
@@ -172,7 +169,7 @@ def historico():
         escolhida = (log.get("escolhida") or {}).get("indice")
         candidatas = log.get("candidatas") or []
         itens.append({
-            "id": f.stem, "inicio": cadernos.hora(log.get("inicio")),
+            "id": f.stem, "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor"),
             "manchete": fato.get("titulo") or f.stem, "fato": fato.get("fato"),
             "url": log.get("url"), "fonte": log.get("fonte"), "origem": log.get("origem"),
             "config": config, "config_deduzida": deduzida,
@@ -198,10 +195,14 @@ def config():
 
 @app.post("/api/cordel")
 async def cordel(pedido: Pedido):
+    autor = " ".join(pedido.autor.split())
+    if not autor or len(autor) > 60:
+        raise HTTPException(422, "Coloque seu nome (até 60 caracteres) para gerar.")
+
     async def eventos():
         try:
             cfg = Config(**{k: v for k, v in pedido.config.items() if k in OPCOES})
-            async for ev in run_cordel(pedido.noticia, pedido.url, pedido.com_imagem, cfg):
+            async for ev in run_cordel(pedido.noticia, pedido.url, pedido.com_imagem, cfg, autor):
                 yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
         except Exception as e:
             traceback.print_exc()
