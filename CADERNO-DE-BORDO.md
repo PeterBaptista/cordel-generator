@@ -212,6 +212,28 @@ Observado nos registros e nos experimentos de 28/09 (números em
 - **Sempre os mesmos termos** (16/11). "Terreiro" e "magote" voltavam em quase todo poema.
   Cada candidata passa a ver só um sorteio do dicionário, puxado para os termos menos usados
   nas últimas gerações (o sorteio fica no caderno, em `dicionario`).
+- **Pontos demais, dicionário de menos** (17/11). Em produção, com a prioridade "a notícia",
+  as gerações iam para o descarte e não usavam nenhum termo do dicionário. Os pontos essenciais
+  eram 5 frases longas, com faixas e siglas ("R$ 43 bilhões a R$ 54 bilhões", "PLP 299/2026",
+  seis políticos), e o Poeta tentava enfiar tudo em versos de 7 sílabas: a métrica não fechava
+  em 10 rodadas (os reprovados oscilavam entre 2 e 10). E o dicionário, só como sugestão, era
+  largado de vez. Resposta: 2, 3 ou 4 pontos conforme as estrofes, até 6 palavras cada, número
+  arredondado, sem sigla nem faixa; o júri só marca `faltando` se o ponto sumiu de todo. Na
+  notícia, cada estrofe precisa de 2 termos diferentes (o verificador reprova); a expressão por
+  estrofe segue sugestão. Prompt e júri recusam termo jogado ("Como o cuscuz quer crescer").
+  Na correção, o Poeta manda duas alternativas por verso e o verificador fica com a que passa;
+  da 4ª rodada em diante, raciocínio médio; estrutura errada ganha até 2 "refaça"; contagem
+  colada no verso (" = 7") é apagada. Rodadas: 8 + 2 por estrofe, até 20 (eram 10 fixas),
+  sugestão do grupo. Testes reais (gpt-6-luna, raciocínio baixo):
+  - Bateria 1 (só pontos curtos + 1 termo por estrofe): 2/4 passaram.
+  - Bateria 2 (+ alternativas e raciocínio médio): 4/4, inclusive os dois descartes de produção
+    (pacote fiscal, 2 estrofes; pernambucanos, 4 estrofes, 2 candidatas).
+  - Bateria 3 (2 termos por estrofe): 7/8. A falha foi erro de estrutura com 1 estrofe; houve
+    também termo jogado e " = 7" vazando. Corrigidos.
+  - Bateria 4: 8/8, com 2 a 3 termos por estrofe.
+  - Bateria final (casos difíceis: 6 estrofes, deixa, prioridade forma, 2 candidatas): 5/6. A falha
+    foi 4 estrofes com 1 candidata, rima da 3ª estrofe que não fechou em 16 rodadas. A de 6
+    estrofes passou, mas levou 10 minutos. Gasto total dos testes: US$ 0,41.
 
 ✍️ Grupo: acrescentem o que vocês viram nas gerações da coleção.
 

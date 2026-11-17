@@ -22,7 +22,7 @@ import sys
 import time
 import unicodedata
 from collections import Counter
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from pathlib import Path
 from typing import Any, AsyncIterator, Literal
@@ -142,7 +142,13 @@ class Config:
 
 
 # rodadas de correção antes do descarte (eram 3 até 28/09; o teto de custo continua valendo)
-MAX_RODADAS = int(os.getenv("CORDEL_MAX_RODADAS", "10"))
+# Desde 17/11 depende do tamanho: 8 + 2 por estrofe (1 estrofe = 10, 6 estrofes = 20), até o teto.
+MAX_RODADAS = int(os.getenv("CORDEL_MAX_RODADAS", "20"))
+
+
+def rodadas_para(cfg: "Config") -> int:
+    """Poema maior tem mais versos para acertar: ganha mais rodadas de correção."""
+    return min(MAX_RODADAS, 8 + 2 * cfg.estrofes)
 # Teto de gasto por geração. Passou dele, a geração não chama o júri nem faz novas
 # rodadas de correção: entrega o que tem. É um freio, não uma garantia exata — uma
 # chamada já iniciada termina — e reserva uns centavos para a xilogravura.
@@ -154,6 +160,9 @@ RESERVA_IMAGEM_USD = 0.01
 MAX_REESCRITAS = 2
 RODADAS_POR_REESCRITA = 4
 GRAVES = {"contradiz", "inventa"}
+# a partir desta rodada de correção, o Poeta pensa mais (raciocínio médio): no baixo, a métrica
+# ficava oscilando entre as rodadas sem fechar
+RODADA_PENSAR_MAIS = 4
 
 
 def chave_juizo(av: dict | None, prioridade: str = "noticia") -> tuple:
@@ -226,6 +235,8 @@ class VersoCorrigido(pydantic.BaseModel):
     n: int
     contagem: str  # vem antes do verso de propósito: obriga o modelo a contar as sílabas primeiro
     verso: str
+    # outras versões do mesmo verso: o verificador testa todas e fica com a que passa
+    alternativas: list[str] = []
 
 
 class Correcao(pydantic.BaseModel):
@@ -462,18 +473,74 @@ def regras_do_grupo(estrofes: list[list[str]], cfg: "Config") -> list[dict]:
             if fat := dicionario.faticas_fora_da_ponta(v):
                 achados.append({"estrofe": e, "n": n, "regra": 9,
                                 "motivo": f"partícula fática no meio do verso: {', '.join(fat)}"})
-        for a in range(0, len(vs) - 1, 2):
-            par = [a + 1, a + 2]
-            if not any(dicionario.termos_no_verso(vs[n - 1]) for n in par):
-                achados.append({"estrofe": e, "n": escolher(e, par), "regra": 3,
-                                "motivo": f"nenhum termo do dicionário nos versos {par[0]} e {par[1]}"})
+        if cfg.prioridade == "noticia":
+            # com a notícia em primeiro, a estrofe precisa de TERMOS_POR_ESTROFE termos, em qualquer
+            # verso: um a cada 2 versos tirava o sentido; só sugerir, e o modelo largava o dicionário
+            termos = {t for v in vs for t in dicionario.termos_no_verso(v)}
+            if vs and len(termos) < TERMOS_POR_ESTROFE:
+                sem_termo = [n for n, v in enumerate(vs, 1) if not dicionario.termos_no_verso(v)]
+                # prefere um verso livre e sem termo; se não houver, qualquer verso livre (trocar um
+                # verso que rima arrisca quebrar a rima)
+                todos = list(range(1, len(vs) + 1))
+                alvo3 = [n for n in sem_termo if n in livres] or [n for n in todos if n in livres] or sem_termo or todos
+                achados.append({"estrofe": e, "n": escolher(e, alvo3), "regra": 3,
+                                "motivo": f"a estrofe tem {len(termos)} termo(s) do dicionário; pede {TERMOS_POR_ESTROFE}"})
+        else:
+            for a in range(0, len(vs) - 1, 2):
+                par = [a + 1, a + 2]
+                if not any(dicionario.termos_no_verso(vs[n - 1]) for n in par):
+                    achados.append({"estrofe": e, "n": escolher(e, par), "regra": 3,
+                                    "motivo": f"nenhum termo do dicionário nos versos {par[0]} e {par[1]}"})
         if vs and not any(dicionario.termos_no_verso(v, ("expressao",)) for v in vs):
             achados.append({"estrofe": e, "n": escolher(e, list(range(1, len(vs) + 1))), "regra": 7,
                             "motivo": "a estrofe não tem nenhuma expressão de mais de uma palavra do dicionário"})
     return achados
 
 
-REGRAS_DO_DICIONARIO = {3, 7}
+# na prioridade notícia, só a expressão por estrofe (regra 7) vira sugestão; o termo por
+# estrofe (regra 3, mais branda) continua reprovando: sem ele, o modelo largava o dicionário
+REGRAS_SUGERIDAS = {7}
+TERMOS_POR_ESTROFE = 2
+
+
+# o modelo às vezes cola a contagem no fim do verso ("Trump anunciou força = 7"), e o
+# verificador contava isso como verso de 7 sílabas
+_CONTAGEM_COLADA = re.compile(r"\s*(?:=\s*\d{1,2}|\(\s*\d{1,2}\s*\))\s*$")
+
+
+def limpar_verso(v: str) -> str:
+    return _CONTAGEM_COLADA.sub("", (v or "").strip()).strip()
+
+
+def aplicar_correcao(estrofes: list[list[str]], corr: "Correcao", alvo: set, cfg: "Config") -> list[dict]:
+    """Troca os versos do alvo pela melhor das versões que o Poeta mandou: para cada verso,
+    testa a principal e as alternativas no verificador e fica com a que deixa menos versos
+    reprovados (no empate, a principal). Muda `estrofes` no lugar e devolve as mudanças."""
+    validos = [c for c in corr.versos
+               if (c.estrofe, c.n) in alvo and 1 <= c.estrofe <= len(estrofes) and 1 <= c.n <= len(estrofes[c.estrofe - 1])]
+    antes_de = {(c.estrofe, c.n): estrofes[c.estrofe - 1][c.n - 1] for c in validos}
+    # primeiro todas as versões principais: um par de rimas reescrito junto é testado já junto
+    for c in validos:
+        if limpar_verso(c.verso):
+            estrofes[c.estrofe - 1][c.n - 1] = limpar_verso(c.verso)
+    mudancas = []
+    for c in validos:
+        opcoes = list(dict.fromkeys(limpar_verso(v) for v in [c.verso, *c.alternativas] if limpar_verso(v)))
+        if not opcoes:
+            continue
+        antes = antes_de[(c.estrofe, c.n)]
+
+        def nota(opcao: str) -> tuple:
+            estrofes[c.estrofe - 1][c.n - 1] = opcao
+            mp = medir_poema(estrofes, cfg)
+            return ((c.estrofe, c.n) in mp["reprovados"], len(mp["reprovados"]))
+
+        notas = [nota(o) for o in opcoes]
+        melhor = opcoes[min(range(len(opcoes)), key=lambda i: (notas[i], i))]
+        estrofes[c.estrofe - 1][c.n - 1] = melhor
+        mudancas.append({"estrofe": c.estrofe, "n": c.n, "antes": antes, "depois": melhor,
+                         "testadas": len(opcoes), "escolhida": opcoes.index(melhor)})
+    return mudancas
 
 
 def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
@@ -483,9 +550,7 @@ def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
                for e, vs in enumerate(estrofes, 1)]
     deixa = ligacoes_em_deixa(estrofes) if cfg.encadeamento == "deixa" else []
     regras = regras_do_grupo(estrofes, cfg)
-    # com a notícia em primeiro lugar, o dicionário (regras 3 e 7) só avisa: trocar um verso
-    # que conta bem a notícia por outro que encaixa um termo era o que mais tirava o sentido
-    sugestoes = [r for r in regras if r["regra"] in REGRAS_DO_DICIONARIO] if cfg.prioridade == "noticia" else []
+    sugestoes = [r for r in regras if r["regra"] in REGRAS_SUGERIDAS] if cfg.prioridade == "noticia" else []
     regras = [r for r in regras if r not in sugestoes]
     reprovados = sorted({(e, n) for e, m in enumerate(medidas, 1) for n in versos_reprovados(m)}
                         | {(d["estrofe"], 1) for d in deixa if not d["ok"]}
@@ -507,7 +572,7 @@ def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
             "relatorio": relatorio}
 
 
-def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:
+def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:  # noqa: C901
     partes = []
     if len(estrofes) != cfg.estrofes:
         partes.append(f"{len(estrofes)} estrofes (pedidas {cfg.estrofes})")
@@ -522,7 +587,9 @@ def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:
         partes += [f"{pref}verso {x['n']} {x['motivo']}" for x in m["extras"]]
     partes += [f"deixa da estrofe {d['estrofe']}: {d['estado']}" for d in mp["deixa"] if not d["ok"]]
     partes += [f"estrofe {r['estrofe']}, verso {r['n']}: regra {r['regra']} ({r['motivo']})" for r in mp["regras"]]
-    return "; ".join(partes) + f" — resistiu a {MAX_RODADAS} rodadas de correção."
+    if not mp["forma_ok"]:
+        return "; ".join(partes) + " — a estrutura veio errada mesmo depois de pedir para refazer."
+    return "; ".join(partes) + f" — resistiu a {rodadas_para(cfg)} rodadas de correção."
 
 
 # ---------------------------------------------------------------- o laço
@@ -580,7 +647,7 @@ async def _run_cordel(
 
     # 1. fato
     yield {"etapa": "fato", "status": "rodando"}
-    fato: Fato = await gerar(prompts.SISTEMA_FATO, noticia, Fato, chamadas, cfg, "fato", ia=ia)
+    fato: Fato = await gerar(prompts.SISTEMA_FATO, prompts.usuario_fato(noticia, cfg.estrofes), Fato, chamadas, cfg, "fato", ia=ia)
     log["fato"] = fato.model_dump()
     yield {"etapa": "fato", "status": "ok", **fato.model_dump()}
 
@@ -610,13 +677,29 @@ async def _run_cordel(
               Poema, chamadas, cfg, "candidata", conversa=c, ia=ia)
         for a, c, sp in zip(angulos, conversas, sistemas)), return_exceptions=True)
     candidatas, conversas_ok, sistemas_ok = [], [], []
+    # o Poeta às vezes erra a estrutura (1 estrofe em vez de 2, 5 versos em vez de 6), e forma
+    # errada não tem correção verso a verso: pede para refazer, na mesma conversa
+    async def estrutura(g, c, sp):
+        for _ in range(2):
+            if isinstance(g, BaseException) or _forma_certa(_versos_de(g), cfg):
+                return g
+            if custos.resumo(log)["total"] >= teto - (RESERVA_IMAGEM_USD if com_imagem else 0):
+                return g
+            try:
+                g = await gerar(sp, prompts.pedido_estrutura(cfg.estrofes, [len(e) for e in _versos_de(g)]),
+                                Poema, chamadas, cfg, "estrutura", conversa=c, ia=ia)
+            except Exception as e:  # noqa: BLE001 — fica a tentativa anterior
+                log.setdefault("erros_candidatas", []).append(f"estrutura: {e}")
+                return g
+        return g
+    geradas = await asyncio.gather(*(estrutura(g, c, sp) for g, c, sp in zip(geradas, conversas, sistemas)))
     for a, g, c, sp in zip(angulos, geradas, conversas, sistemas):
         if isinstance(g, BaseException):
             log.setdefault("erros_candidatas", []).append(f"{a}: {g}")
             continue
         conversas_ok.append(c)
         sistemas_ok.append(sp)
-        ests = [[v.strip() for v in e.versos if v.strip()] for e in g.estrofes]
+        ests = _versos_de(g)
         mp = medir_poema(ests, cfg)
         candidatas.append({"angulo": a, "plano": g.angulo, "finais": [e.finais for e in g.estrofes],
                            "estrofes": ests, "entra": mp["entra"], "forma_ok": mp["forma_ok"],
@@ -624,7 +707,7 @@ async def _run_cordel(
     if not candidatas:
         raise RuntimeError("nenhuma candidata foi gerada: " + "; ".join(log["erros_candidatas"]))
     log["candidatas"] = candidatas
-    yield {"etapa": "candidatas", "status": "ok", "candidatas": candidatas}
+    yield {"etapa": "candidatas", "status": "ok", "candidatas": candidatas, "max_rodadas": rodadas_para(cfg)}
 
     teto_texto = teto - (RESERVA_IMAGEM_USD if com_imagem else 0)
     def estourou() -> bool:
@@ -661,19 +744,15 @@ async def _run_cordel(
             rodada = res["rodada"] = rodada + 1
             fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "rodando", "rodada": rodada,
                              "reprovados": reprovados})
+            cfg_rodada = (replace(cfg, raciocinio="medium")
+                          if rodada >= RODADA_PENSAR_MAIS and cfg.raciocinio == "low" else cfg)
             corr: Correcao = await gerar(
                 sistemas_ok[i],
                 prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados, fato.fato, fato.essencial),
-                Correcao, chamadas, cfg, "correção", conversa=conversas_ok[i], ia=ia,
+                Correcao, chamadas, cfg_rodada, "correção", conversa=conversas_ok[i], ia=ia,
             )
-            mudancas = []
-            alvo = set(reprovados)
-            for c in corr.versos:
-                # só aceita troca nos versos reprovados: o que passou fica
-                if (c.estrofe, c.n) in alvo and c.verso.strip():
-                    antes = estrofes[c.estrofe - 1][c.n - 1]
-                    estrofes[c.estrofe - 1][c.n - 1] = c.verso.strip()
-                    mudancas.append({"estrofe": c.estrofe, "n": c.n, "antes": antes, "depois": c.verso.strip()})
+            # só aceita troca nos versos reprovados: o que passou fica
+            mudancas = aplicar_correcao(estrofes, corr, set(reprovados), cfg)
             fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "ok", "rodada": rodada,
                              "mudancas": mudancas})
 
@@ -700,7 +779,7 @@ async def _run_cordel(
             for t in tarefas:
                 t.cancel()
 
-    async with contextlib.aclosing(corrigindo({i: MAX_RODADAS for i in range(len(candidatas))})) as eventos:
+    async with contextlib.aclosing(corrigindo({i: rodadas_para(cfg) for i in range(len(candidatas))})) as eventos:
         async for ev in eventos:
             yield ev
 
@@ -783,11 +862,7 @@ async def _run_cordel(
             # para contar o que falta, o Poeta pode mexer em qualquer verso; se não, só nos apontados
             alvo = ({(e, n) for e, vs in enumerate(res["estrofes"], 1) for n in range(1, len(vs) + 1)}
                     if faltando else {(a["estrofe"], a["n"]) for a in apontados})
-            for c in corr.versos:
-                if (c.estrofe, c.n) in alvo and c.verso.strip():
-                    registro["mudancas"].append({"estrofe": c.estrofe, "n": c.n, "antes": res["estrofes"][c.estrofe - 1][c.n - 1],
-                                                 "depois": c.verso.strip()})
-                    res["estrofes"][c.estrofe - 1][c.n - 1] = c.verso.strip()
+            registro["mudancas"] = aplicar_correcao(res["estrofes"], corr, alvo, cfg)
             if registro["mudancas"]:
                 limite = res["rodada"] + RODADAS_POR_REESCRITA
                 async with contextlib.aclosing(corrigindo({escolhida: limite})) as eventos:
@@ -865,6 +940,14 @@ async def _run_cordel(
 
 
 # ------------------------------------------------------------------- util
+def _versos_de(g: "Poema") -> list[list[str]]:
+    return [[limpar_verso(v) for v in e.versos if limpar_verso(v)] for e in g.estrofes]
+
+
+def _forma_certa(estrofes: list[list[str]], cfg: Config) -> bool:
+    return len(estrofes) == cfg.estrofes and all(len(vs) == 6 for vs in estrofes)
+
+
 RECENTES = 30
 
 

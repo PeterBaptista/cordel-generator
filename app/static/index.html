@@ -313,7 +313,7 @@ const ROTULOS_NARRADOR = { observador: "observador em 1ª pessoa (roteiro fixo)"
   sertanejo: "sertanejo desconfiado", cantador: "cantador", conselho: "conselho de gente velha", sortear: "sortear (um por candidata)" };
 const NUMERICOS = ["candidatas", "estrofes"];
 const ROTULOS_ENCADEAMENTO = { livre: "livre", deixa: "em deixa (cantoria)" };
-let FORMAS = {}, MAX_RODADAS = 10;
+let FORMAS = {}, MAX_RODADAS = 10, MAX_TETO = 20;
 const usd = (v, c = 2) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: c, maximumFractionDigits: c }).format(v);
 const lerCfg = () => Object.fromEntries(campos().map((k) => {
   const v = $(`c-${k}`).value;
@@ -330,7 +330,8 @@ function estimativa() {
   for (const k of CAMPOS_PROPRIA) $(`l-${k}`).hidden = !propria;
   $("modelos-fixos").hidden = propria;
   $("c-encadeamento").disabled = c.estrofes === 1;
-  $("regra").textContent = (f ? `${f.esquema}: ${f.regra}` : "")
+  MAX_RODADAS = Math.min(MAX_TETO, 8 + 2 * c.estrofes);
+  $("regra").textContent = (f ? `${f.esquema}: ${f.regra}` : "") + ` · até ${MAX_RODADAS} rodadas de correção`
     + (c.estrofes > 1 ? ` · ${c.estrofes} estrofes = ${c.estrofes * 6} versos, custa uns ${c.estrofes}× o texto` : "")
     + (c.estrofes > 1 && c.encadeamento === "deixa" ? " · em deixa: o 1º verso de cada estrofe rima com o último da anterior" : "");
   try { localStorage.setItem("cordel-config", JSON.stringify(c)); } catch {}
@@ -380,7 +381,7 @@ async function confirmarOpcaoCara(k, sel) {
 try { $("autor").value = localStorage.getItem("cordel-autor") || ""; } catch {}
 const CONFIG = fetch("/api/config").then((r) => r.json());
 CONFIG.then(async ({ padrao, opcoes, opcoes_chave_propria, formas, economico, max_rodadas, precos, teto_propria }) => {
-  MAX_RODADAS = max_rodadas;
+  MAX_TETO = max_rodadas;
   FORMAS = formas; ECONOMICO = economico; PRECOS = precos;
   $("teto-propria").textContent = usd(teto_propria);
   // opções livres voltam como estavam; as de custo sempre abrem no mais barato
@@ -490,6 +491,7 @@ function tratar(ev) {
       if (ev.status === "rodando")
         return passo("cand", ev.angulos.length > 1 ? `2 · escrevendo ${ev.angulos.length} candidatas em paralelo, uma por ângulo` : "2 · escrevendo o poema", "rodando");
       window.__cand = ev.candidatas; andamento = {};
+      if (ev.max_rodadas) MAX_RODADAS = ev.max_rodadas;  // depende do número de estrofes
       return passo("cand", ev.candidatas.length > 1 ? `2 · ${ev.candidatas.length} candidatas` : "2 · primeira versão", "ok", htmlCandidatas(ev.candidatas));
     case "julgamento":
       if (ev.status === "rodando") { statusCartaz("o júri está lendo as aprovadas…"); return passo("juri", "4b · o júri está lendo as aprovadas", "rodando"); }

@@ -35,9 +35,13 @@ python3 scripts/escandir.py folhetos/*.txt --csv caderno/metrica.csv
 ## Gerador (AI SDK para Python + OpenAI)
 
 O laço do [`SKILL.md`](SKILL.md) automatizado com o [AI SDK para Python](https://ai-python.dev/docs):
-notícia → fato → 3 candidatas → `escandir.py` → correção só dos versos reprovados, pelo próprio Poeta e na mesma conversa (máx. 10 rodadas) → júri semântico entre as aprovadas → reescrita pelo sentido, se melhorar
+notícia → fato → 3 candidatas → `escandir.py` → correção só dos versos reprovados, pelo próprio Poeta e na mesma conversa (8 + 2 por estrofe, até 20 rodadas) → júri semântico entre as aprovadas → reescrita pelo sentido, se melhorar
 → xilogravura → `folhetos/` ou `descarte/`, com o registro completo em `caderno/<slug>.json`
 (prompts na íntegra, modelo, parâmetros, saída bruta e relatório de cada rodada).
+Na correção, o Poeta manda cada verso consertado com mais duas alternativas, e o verificador
+fica com a que passa. A partir da 4ª rodada, a correção usa raciocínio médio. Candidata com
+estrutura errada (número de estrofes ou de versos) recebe até 2 pedidos de "refaça" antes de
+ir para correção, em vez do descarte direto.
 
 A notícia entra por **link** (o servidor extrai o texto da matéria com `trafilatura`) ou
 por **texto colado**. Se o link não abrir (bloqueio, paywall, página sem matéria), a tela
@@ -67,8 +71,8 @@ xilogravura mínima: gpt-image-1-mini). Escolher algo mais caro, ou gerar com al
 com o preço e a opção de voltar ao mais barato. Forma, estrofes e candidatas mudam
 sem aviso.
 
-Toda geração segue as **regras do grupo** (sem ênclise ou mesóclise, termo do dicionário
-nordestino a cada 2 versos, uma expressão por estrofe, partícula fática só na ponta do verso,
+Toda geração segue as **regras do grupo** (sem ênclise ou mesóclise, termos do dicionário
+nordestino (2 por estrofe na prioridade notícia; um a cada 2 versos na forma), uma expressão por estrofe, partícula fática só na ponta do verso,
 concordância popular, narrador em 1ª pessoa…). As que dá para conferir por código reprovam o
 verso e mandam para correção; a lista completa, com o que é conferido e o que é só pedido, está
 no `CADERNO-DE-BORDO.md`. O dicionário fica em `dados/dicionario_nordestino.csv` (158 termos,
@@ -116,11 +120,14 @@ Sem `OPENAI_API_KEY_PROFESSOR`, o site continua no ar e pede a chave própria. O
 Contas, sessões e usos ficam em `contas.sqlite3`, no volume de dados (`CORDEL_DADOS`).
 
 **Prioridade** (padrão: a notícia). Com "a notícia", o poema tem de contar sozinho os pontos
-essenciais que a etapa do fato extrai (quem, o quê, onde/quando, número), sem contar com a
-manchete; métrica e rima seguem reprovando, mas as regras 3 e 7 do dicionário viram sugestão, e
-o júri escolhe pela fidelidade antes da forma. Com "a forma", o dicionário reprova, como antes.
-Nas duas, o júri lista em `faltando` o ponto essencial que quem lê só o poema não fica sabendo,
-e isso dispara a reescrita pelo sentido.
+essenciais que a etapa do fato extrai, sem contar com a manchete. Desde 17/11 são 2 pontos
+(1 estrofe), 3 (2 estrofes) ou 4 (3 ou mais), cada um com até 6 palavras, número arredondado e
+sem sigla ou faixa. Métrica e rima seguem reprovando. O dicionário também: cada estrofe precisa
+de pelo menos 2 termos diferentes, em qualquer verso; só a expressão por estrofe (regra 7) fica
+como sugestão. O júri escolhe pela fidelidade antes da forma. Com "a forma", o dicionário reprova
+como antes (um termo a cada 2 versos). Nas duas, o júri lista em `faltando` o ponto essencial que
+não aparece de jeito nenhum no poema (ponto simplificado conta como presente), e isso dispara a
+reescrita pelo sentido.
 
 **Rodízio do dicionário.** Cada candidata recebe no prompt um sorteio de 25 palavras e 12
 expressões, com peso menor para os termos que mais apareceram nas últimas 30 gerações, e a lista

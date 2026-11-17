@@ -63,7 +63,8 @@ def reconstruir(log: dict, nome: str) -> list[dict]:
         # com uma estrofe só, os cadernos antigos guardavam o número do verso, sem a estrofe
         for k in ("reprovados", "reprovados_final"):
             c[k] = [[1, r] if isinstance(r, int) else r for r in c.get(k) or []]
-    ev.append({"etapa": "candidatas", "status": "ok", "candidatas": candidatas})
+    # antes de 17/11 o limite era fixo em 10 rodadas
+    ev.append({"etapa": "candidatas", "status": "ok", "candidatas": candidatas, "max_rodadas": 10})
 
     for i, c in enumerate(candidatas):
         rodadas = c.get("rodadas") or (log.get("rodadas") if i == escolhida else None) or [{"rodada": 0, "estrofes": c["estrofes"]}]
