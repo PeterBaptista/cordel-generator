@@ -625,8 +625,8 @@ function renderConta() {
         ? `<label>Código de convite da turma <input id="f-convite" autocomplete="off" required></label>
            <label>Seu nome (sai impresso no folheto) <input id="f-nome" maxlength="60" autocomplete="name" required></label>` : "") : ""}
       ${cadastro && !EU.cadastro_aberto ? "<p>O cadastro está fechado. Peça uma conta ao professor.</p>" : `
-      <label>Usuário <input id="f-login" autocomplete="username" autocapitalize="none" spellcheck="false" required
-        ${cadastro ? 'placeholder="3 a 30 letras minúsculas, números, . _ -"' : ""}></label>
+      <label>E-mail ou usuário <input id="f-login" autocomplete="username" autocapitalize="none" spellcheck="false" required
+        ${cadastro ? 'placeholder="seu e-mail, ou um usuário sem espaços"' : ""}></label>
       <label>Senha <input id="f-senha" type="password" autocomplete="${cadastro ? "new-password" : "current-password"}" required
         ${cadastro ? 'placeholder="pelo menos 8 caracteres"' : ""}></label>
       <button type="submit">${cadastro ? "Criar conta e entrar" : "Entrar"}</button>`}

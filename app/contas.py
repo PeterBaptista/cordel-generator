@@ -34,7 +34,8 @@ SESSAO_DIAS = 30
 COOKIE = "cordel_sessao"
 FUSO = ZoneInfo("America/Recife")
 
-LOGIN_OK = re.compile(r"^[a-z0-9._-]{3,30}$")
+# usuário simples ("ana.silva") ou e-mail ("ana@cin.ufpe.br")
+LOGIN_OK = re.compile(r"^(?:[a-z0-9._-]{3,30}|[a-z0-9._%+-]{1,64}@[a-z0-9.-]{1,190}\.[a-z]{2,24})$")
 
 _trava = threading.Lock()
 
@@ -98,7 +99,7 @@ _HASH_FALSO = _hash(secrets.token_hex(8))
 def _validar(login: str, nome: str, senha: str) -> tuple[str, str]:
     login, nome = login.strip().lower(), " ".join(nome.split())
     if not LOGIN_OK.fullmatch(login):
-        raise ErroConta(422, "O usuário precisa ter de 3 a 30 letras minúsculas, números, ponto, hífen ou _.")
+        raise ErroConta(422, "Use um e-mail ou um usuário de 3 a 30 letras minúsculas, números, ponto, hífen ou _.")
     if not 1 <= len(nome) <= 60:
         raise ErroConta(422, "Coloque seu nome (até 60 caracteres): ele sai impresso no folheto.")
     if not 8 <= len(senha) <= 200:
