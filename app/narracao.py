@@ -5,8 +5,9 @@ ouvir põe a própria chave nas Configurações do site, e ela vai num cabeçalh
 sem ser gravada. O áudio fica no volume (narracao/<id>.mp3): gerado uma vez, qualquer um
 ouve de graça depois.
 
-Voz, modelo e marcação de sotaque vêm do ambiente para trocar sem mexer no código. As vozes
-foram escolhidas na biblioteca pública da ElevenLabs pelo sotaque declarado (17/11).
+Quem narra escolhe a voz no site, entre as de VOZES (com a amostra de cada uma); o padrão
+vem de CORDEL_VOZ_PADRAO. As vozes foram escolhidas na biblioteca pública da ElevenLabs pelo
+sotaque nordestino declarado (17/11).
 """
 
 import asyncio
@@ -18,10 +19,40 @@ import urllib.error
 import urllib.request
 
 CHAVE_PROFESSOR = os.getenv("ELEVENLABS_API_KEY", "").strip()
-VOZ = os.getenv("CORDEL_VOZ", "bOfmGBubwU6YlrKXeRkh")  # Cicero: "authentic Northeastern Brazilian accent"
-MODELO = os.getenv("CORDEL_VOZ_MODELO", "eleven_v4")
 # os modelos v3 e v4 aceitam marcação de voz entre colchetes; ela puxa o sotaque e o ritmo
-MARCACAO = os.getenv("CORDEL_VOZ_MARCACAO", "[strong Northeastern Brazilian accent, cordel reciter, rhythmic]")
+MARCACAO = "[strong Northeastern Brazilian accent, cordel reciter, rhythmic]"
+
+# a amostra de cada uma é a mesma estrofe (Rec'n'Play), em app/static/vozes/
+VOZES = {
+    "cicero-sotaque": {"nome": "Cicero, sotaque reforçado", "voz": "bOfmGBubwU6YlrKXeRkh", "modelo": "eleven_v4",
+                       "marcacao": True, "sobre": "jovem, nordestino, com a marcação de sotaque forte e ritmo de cordel"},
+    "anderson-sotaque": {"nome": "Anderson Carlos, sotaque reforçado", "voz": "SAA76GSoxwYgqvFLpT5j", "modelo": "eleven_v4",
+                         "marcacao": True, "sobre": "meia-idade, nordestino, voz de narrador, com a marcação de sotaque"},
+    "cicero": {"nome": "Cicero", "voz": "bOfmGBubwU6YlrKXeRkh", "modelo": "eleven_v4_turbo", "marcacao": False,
+               "sobre": "jovem, nordestino, conversado (metade do custo)"},
+    "andre": {"nome": "Andre Ambrosio", "voz": "npTHTbBmWiNxOlMiBxaa", "modelo": "eleven_v4_turbo", "marcacao": False,
+              "sobre": "meia-idade, nordestino (metade do custo)"},
+    "michael": {"nome": "Michael Almeida", "voz": "UP5aPvvfM4UCXZrr3fdX", "modelo": "eleven_v4_turbo", "marcacao": False,
+                "sobre": "jovem, cearense (metade do custo)"},
+    "anderson": {"nome": "Anderson Carlos", "voz": "SAA76GSoxwYgqvFLpT5j", "modelo": "eleven_v4_turbo", "marcacao": False,
+                 "sobre": "meia-idade, nordestino, voz de narrador (metade do custo)"},
+}
+AMOSTRAS = {"cicero-sotaque": "cicero-v4-sotaque", "anderson-sotaque": "anderson-v4-sotaque", "cicero": "cicero-v4turbo",
+            "andre": "andre-v4turbo", "michael": "michael-v4turbo", "anderson": "anderson-v4turbo"}
+PADRAO = os.getenv("CORDEL_VOZ_PADRAO", "cicero-sotaque")
+if PADRAO not in VOZES:
+    PADRAO = "cicero-sotaque"
+
+
+def voz(chave: str | None) -> tuple[str, dict]:
+    """A voz pedida, ou a padrão."""
+    k = chave if chave in VOZES else PADRAO
+    return k, VOZES[k]
+
+
+def catalogo() -> list[dict]:
+    return [{"id": k, "nome": v["nome"], "sobre": v["sobre"], "amostra": f"static/vozes/{AMOSTRAS[k]}.mp3",
+             "metade": "turbo" in v["modelo"], "padrao": k == PADRAO} for k, v in VOZES.items()]
 MAX_CARACTERES = 2500  # 6 estrofes dão uns 1.300; o resto é folga, não convite
 
 CHAVE_OK = re.compile(r"[A-Za-z0-9_\-]{20,200}")
@@ -33,11 +64,12 @@ class ErroNarracao(Exception):
         self.status, self.mensagem = status, mensagem
 
 
-def montar(estrofes: list[list[str]]) -> tuple[str, list[tuple[int, int, int, int, str]]]:
+def montar(estrofes: list[list[str]], preset: dict | None = None) -> tuple[str, list[tuple[int, int, int, int, str]]]:
     """O texto enviado (cada verso termina em pausa curta, cada estrofe em pausa longa, como se
     recita cordel) e onde cada verso ficou nele: (estrofe, verso, início no texto, recuo do
     verso na tela, verso limpo). É assim que o tempo de cada letra volta para a palavra na tela."""
-    corpo = f"{MARCACAO}\n" if MARCACAO and MODELO.startswith(("eleven_v3", "eleven_v4")) else ""
+    preset = preset or voz(None)[1]
+    corpo = f"{MARCACAO}\n" if preset["marcacao"] and preset["modelo"].startswith(("eleven_v3", "eleven_v4")) else ""
     posicoes, primeira = [], True
     for e, vs in enumerate(estrofes):
         versos = [(n, v, re.sub(r"[\s,;:.]+$", "", v.strip())) for n, v in enumerate(vs) if v.strip()]
@@ -52,8 +84,8 @@ def montar(estrofes: list[list[str]]) -> tuple[str, list[tuple[int, int, int, in
     return corpo, posicoes
 
 
-def texto(estrofes: list[list[str]]) -> str:
-    return montar(estrofes)[0]
+def texto(estrofes: list[list[str]], preset: dict | None = None) -> str:
+    return montar(estrofes, preset)[0]
 
 
 def tempos_das_palavras(alinhamento: dict | None, corpo: str, posicoes: list) -> dict | None:
@@ -73,17 +105,19 @@ def tempos_das_palavras(alinhamento: dict | None, corpo: str, posicoes: list) ->
     return {"versao": 1, "duracao": round(fim[-1], 3) if fim else 0, "palavras": palavras}
 
 
-def custo(estrofes: list[list[str]]) -> int:
-    """Créditos estimados: 1 por caractere (0,5 nos modelos turbo/flash)."""
-    meio = any(k in MODELO for k in ("turbo", "flash", "conversational"))
-    return round(len(texto(estrofes)) * (0.5 if meio else 1))
+def custo(estrofes: list[list[str]], preset: dict | None = None) -> int:
+    """Créditos estimados: 1 por caractere (0,5 nos modelos turbo/flash); a marcação não é cobrada."""
+    preset = preset or voz(None)[1]
+    meio = any(k in preset["modelo"] for k in ("turbo", "flash", "conversational"))
+    falado = len(texto(estrofes, preset)) - (len(MARCACAO) + 1 if preset["marcacao"] else 0)
+    return round(falado * (0.5 if meio else 1))
 
 
-def _sintetizar(corpo: str, chave: str) -> tuple[bytes, dict | None, int | None]:
+def _sintetizar(corpo: str, chave: str, preset: dict) -> tuple[bytes, dict | None, int | None]:
     """O áudio, o tempo de cada letra (variante with-timestamps, mesmo preço) e o custo cobrado."""
     req = urllib.request.Request(
-        f"https://api.elevenlabs.io/v1/text-to-speech/{VOZ}/with-timestamps?output_format=mp3_44100_128",
-        json.dumps({"text": corpo, "model_id": MODELO}).encode(),
+        f"https://api.elevenlabs.io/v1/text-to-speech/{preset['voz']}/with-timestamps?output_format=mp3_44100_128",
+        json.dumps({"text": corpo, "model_id": preset["modelo"]}).encode(),
         {"xi-api-key": chave, "Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=180) as r:
@@ -107,10 +141,11 @@ def _sintetizar(corpo: str, chave: str) -> tuple[bytes, dict | None, int | None]
         raise ErroNarracao(504, f"Não consegui falar com a ElevenLabs: {e}") from None
 
 
-async def sintetizar(estrofes: list[list[str]], chave: str) -> tuple[bytes, int, dict | None]:
+async def sintetizar(estrofes: list[list[str]], chave: str, preset: dict) -> tuple[bytes, int, dict | None]:
     """O áudio, os créditos que custou (os cobrados, ou a estimativa) e o tempo de cada palavra."""
-    corpo, posicoes = montar(estrofes)
+    corpo, posicoes = montar(estrofes, preset)
     if len(corpo) > MAX_CARACTERES:
         raise ErroNarracao(422, f"O poema é longo demais para narrar ({len(corpo)} caracteres).")
-    audio, alinhamento, cobrado = await asyncio.to_thread(_sintetizar, corpo, chave)
-    return audio, cobrado if cobrado is not None else custo(estrofes), tempos_das_palavras(alinhamento, corpo, posicoes)
+    audio, alinhamento, cobrado = await asyncio.to_thread(_sintetizar, corpo, chave, preset)
+    return (audio, cobrado if cobrado is not None else custo(estrofes, preset),
+            tempos_das_palavras(alinhamento, corpo, posicoes))

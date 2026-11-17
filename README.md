@@ -120,9 +120,13 @@ Sem `OPENAI_API_KEY_PROFESSOR`, o site continua no ar e pede a chave própria. O
 Contas, sessões e usos ficam em `contas.sqlite3`, no volume de dados (`CORDEL_DADOS`).
 
 **Narração** (`app/narracao.py`). Cada sextilha pode ser narrada pela ElevenLabs, com voz de
-sotaque nordestino (padrão: Cicero, modelo `eleven_v4`, com a marcação `[strong Northeastern
-Brazilian accent, cordel reciter, rhythmic]`; troca-se por `CORDEL_VOZ`, `CORDEL_VOZ_MODELO` e
-`CORDEL_VOZ_MARCACAO`). A chave do professor (`ELEVENLABS_API_KEY`) só serve às contas de admin,
+sotaque nordestino. Quem narra escolhe a voz no site (em Configurações ou ao lado do botão de
+narrar), ouvindo a amostra de cada uma: a mesma estrofe, em `app/static/vozes/`. São 6 vozes da
+biblioteca da ElevenLabs com sotaque nordestino declarado; as "de sotaque reforçado" usam o modelo
+`eleven_v4` com a marcação `[strong Northeastern Brazilian accent, cordel reciter, rhythmic]`, e
+as outras, o `eleven_v4_turbo` (metade do crédito). O padrão vem de `CORDEL_VOZ_PADRAO`
+(`cicero-sotaque`). Enquanto o áudio toca, o cartaz destaca o verso e a palavra que estão sendo
+ditos, pelo tempo de cada letra que a ElevenLabs devolve. A chave do professor (`ELEVENLABS_API_KEY`) só serve às contas de admin,
 que também podem refazer uma narração; os outros põem a própria chave em Configurações (fica no
 navegador e vai no cabeçalho `X-ElevenLabs-Key`, sem ser gravada). O MP3 fica em `narracao/`, no
 volume: gerado uma vez, qualquer um ouve de graça, e sobrevive aos deploys. Os créditos de cada

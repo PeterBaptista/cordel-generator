@@ -174,6 +174,17 @@
   .narracao { margin-top: 12px; display: grid; gap: 8px; justify-items: center; }
   .narracao audio { width: 100%; }
   .nota-narracao { font-size: 13px; color: var(--tinta-2); }
+  .trocar-voz { width: 100%; text-align: left; }
+  .trocar-voz summary { font-size: 13px; color: var(--tinta-2); text-align: center; }
+  .vozes { display: grid; gap: 8px; margin-top: 8px; }
+  .voz { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 8px 10px;
+         border: 1.5px solid var(--linha); background: #fbf6ea; cursor: pointer; }
+  .voz:has(input:checked) { border: 2px solid var(--tinta); box-shadow: 3px 3px 0 var(--vermelho); }
+  .voz input { grid-row: span 2; accent-color: var(--vermelho); width: 18px; height: 18px; }
+  .voz .nome { font: 700 15px "Oswald", sans-serif; letter-spacing: .3px; }
+  .voz .nome small { font: 12px "Courier Prime", monospace; color: var(--verde); margin-left: 6px; letter-spacing: 0; }
+  .voz .sobre { font-size: 12.5px; color: var(--tinta-2); }
+  .voz audio { grid-column: 1 / -1; width: 100%; height: 32px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -253,6 +264,9 @@
         <button class="sec" type="button" id="eleven-remover">remover</button>
       </form>
       <p class="selo-chave" id="eleven-estado" role="status"></p>
+      <p style="margin-top:14px"><b>Voz da narração.</b> Ouça a amostra (a mesma estrofe em todas) e escolha.
+        Vale para as próximas narrações; a que já foi gravada fica com a voz dela.</p>
+      <div class="vozes" id="vozes-config" role="radiogroup" aria-label="Voz da narração"></div>
     </details>
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
@@ -290,6 +304,10 @@
         <button class="sec" type="button" id="renarrar" hidden>refazer narração</button>
         <audio id="audio-narracao" controls preload="none" hidden></audio>
         <div class="nota-narracao" id="nota-narracao" role="status"></div>
+        <details class="trocar-voz" id="trocar-voz">
+          <summary>voz escolhida: <b id="voz-atual">…</b> · trocar</summary>
+          <div class="vozes" id="vozes-narracao" role="radiogroup" aria-label="Voz da narração"></div>
+        </details>
       </div>
     </div>
   </section>
@@ -572,7 +590,7 @@ function tratar(ev) {
       $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${esc(p)}" target="_blank">${esc(k)}</a>`).join("·")
         + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
       $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
-      prepararNarracao(ev.id || REPLAY, REPLAY_NARRACAO, REPLAY_TEMPOS);
+      prepararNarracao(ev.id || REPLAY, REPLAY_NARRACAO, REPLAY_TEMPOS, REPLAY_VOZ);
       if (!REPLAY && $("narrar-fim").checked && podeNarrar()) narrar(false);
       return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
     }
@@ -680,7 +698,7 @@ async function carregarEu() {
   try { EU = await (await fetch("/api/eu")).json(); } catch {}
   renderConta();
   opcaoNarrarFim();
-  if (NARRACAO.id) prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos);
+  if (NARRACAO.id) prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos, NARRACAO.voz);
 }
 
 $("form-chave").onsubmit = (e) => {
@@ -699,25 +717,45 @@ $("form-eleven").onsubmit = (e) => {
   const v = $("chave-eleven").value.trim();
   if (!/^[A-Za-z0-9_\-]{20,}$/.test(v)) { $("eleven-estado").textContent = "Isso não parece uma chave da ElevenLabs."; return; }
   try { localStorage.setItem(ELEVEN_LS, v); } catch { $("eleven-estado").textContent = "Este navegador não deixou guardar a chave."; return; }
-  $("chave-eleven").value = ""; estadoEleven(); opcaoNarrarFim(); prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos);
+  $("chave-eleven").value = ""; estadoEleven(); opcaoNarrarFim(); prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos, NARRACAO.voz);
 };
 $("eleven-remover").onclick = () => {
   try { localStorage.removeItem(ELEVEN_LS); } catch {}
-  estadoEleven(); opcaoNarrarFim(); prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos);
+  estadoEleven(); opcaoNarrarFim(); prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos, NARRACAO.voz);
 };
 estadoEleven();
 
 // ---- narração: já gerada, qualquer um ouve; gerar pede a chave própria ou a conta do professor
-let NARRACAO = { id: null, url: null, tempos: null };
+let NARRACAO = { id: null, url: null, tempos: null, voz: null };
+// ---- vozes: a escolhida fica neste navegador; cada uma tem a amostra da mesma estrofe
+const VOZ_LS = "cordel-voz";
+let VOZES = [], VOZ_PADRAO = null;
+const vozEscolhida = () => { let v = null; try { v = localStorage.getItem(VOZ_LS); } catch {} return VOZES.some((x) => x.id === v) ? v : VOZ_PADRAO; };
+function renderVozes() {
+  const atual = vozEscolhida();
+  for (const [id, cont] of [["cfg", $("vozes-config")], ["narr", $("vozes-narracao")]]) {
+    cont.innerHTML = VOZES.map((v) => `<label class="voz">
+      <input type="radio" name="voz-${id}" value="${esc(v.id)}"${v.id === atual ? " checked" : ""}>
+      <span class="nome">${esc(v.nome)}${v.padrao ? "<small>padrão</small>" : ""}${v.metade ? "<small>½ crédito</small>" : ""}</span>
+      <span class="sobre">${esc(v.sobre)}</span>
+      <audio controls preload="none" src="/${esc(v.amostra)}" aria-label="amostra: ${esc(v.nome)}"></audio></label>`).join("");
+    cont.querySelectorAll("input").forEach((i) => i.onchange = () => { try { localStorage.setItem(VOZ_LS, i.value); } catch {} renderVozes(); });
+    // uma amostra por vez
+    cont.querySelectorAll("audio").forEach((a) => a.addEventListener("play", () =>
+      document.querySelectorAll(".vozes audio").forEach((o) => o !== a && o.pause())));
+  }
+  $("voz-atual").textContent = VOZES.find((v) => v.id === atual)?.nome || "…";
+}
+fetch("/api/vozes").then((r) => r.json()).then((d) => { VOZES = d.vozes; VOZ_PADRAO = d.padrao; renderVozes(); }).catch(() => {});
 const podeNarrar = () => !!chaveEleven() || (EU.admin && EU.narracao_professor);
 // destaca o verso e a palavra narrados no cartaz enquanto o áudio toca
 const buscarTempos = () => NARRACAO.tempos ? fetch(`/${NARRACAO.tempos}`).then((r) => r.ok ? r.json() : null) : Promise.resolve(null);
 acompanharNarracao($("audio-narracao"), $("versos"), buscarTempos);
 // narrar ao terminar: desligado por padrão; só aparece para quem pode narrar
 function opcaoNarrarFim() { $("l-narrar-fim").hidden = REPLAY || !podeNarrar(); if ($("l-narrar-fim").hidden) $("narrar-fim").checked = false; }
-function prepararNarracao(id, url, tempos = null) {
+function prepararNarracao(id, url, tempos = null, vozGravada = null) {
   if (id !== NARRACAO.id || url !== NARRACAO.url) acompanharNarracao($("audio-narracao"), $("versos"), buscarTempos);
-  NARRACAO = { id, url, tempos };
+  NARRACAO = { id, url, tempos, voz: vozGravada };
   if (!id) { $("narracao").hidden = true; return; }
   $("narracao").hidden = false;
   $("audio-narracao").hidden = !url;
@@ -725,8 +763,11 @@ function prepararNarracao(id, url, tempos = null) {
   $("narrar").hidden = !!url;
   $("narrar").disabled = !url && !podeNarrar();
   $("renarrar").hidden = !(url && EU.admin);
-  $("nota-narracao").textContent = url || podeNarrar() ? ""
-    : "Para narrar, coloque a sua chave da ElevenLabs em Configurações (a do site é só do professor).";
+  $("renarrar").textContent = "refazer com a voz escolhida";
+  // escolher a voz só faz sentido para quem vai gravar (narrar agora, ou o admin refazer)
+  $("trocar-voz").hidden = !podeNarrar() || (!!url && !EU.admin);
+  $("nota-narracao").textContent = url ? (vozGravada ? `narrada com ${vozGravada}` : "")
+    : podeNarrar() ? "" : "Para narrar, coloque a sua chave da ElevenLabs em Configurações (a do site é só do professor).";
 }
 async function narrar(refazer = false) {
   const botao = refazer ? $("renarrar") : $("narrar");
@@ -734,11 +775,12 @@ async function narrar(refazer = false) {
   const headers = { "Content-Type": "application/json" };
   if (chaveEleven()) headers["X-ElevenLabs-Key"] = chaveEleven();
   try {
-    const r = await fetch(`/api/narracao/${encodeURIComponent(NARRACAO.id)}`, { method: "POST", headers, body: JSON.stringify({ refazer }) });
+    const r = await fetch(`/api/narracao/${encodeURIComponent(NARRACAO.id)}`, { method: "POST", headers, body: JSON.stringify({ refazer, voz: vozEscolhida() }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) { $("nota-narracao").textContent = typeof d.detail === "string" ? d.detail : "A narração falhou."; return; }
-    prepararNarracao(NARRACAO.id, `${d.url}?v=${Date.now()}`, d.tempos ? `${d.tempos}?v=${Date.now()}` : null);
-    $("nota-narracao").textContent = d.nova ? `narração gravada (${d.creditos} créditos da ElevenLabs)` : "";
+    prepararNarracao(NARRACAO.id, `${d.url}?v=${Date.now()}`, d.tempos ? `${d.tempos}?v=${Date.now()}` : null, d.voz);
+    $("nota-narracao").textContent = d.nova ? `narração gravada com ${d.voz} (${d.creditos} créditos da ElevenLabs)`
+      : d.voz ? `já estava narrada com ${d.voz}` : "";
     $("audio-narracao").play().catch(() => {});
   } finally { botao.disabled = false; }
 }
@@ -841,7 +883,7 @@ async function gerar(noticia, url) {
 }
 
 // ---- /geracao/<id>: a mesma linha do tempo, tocada a partir do caderno
-let REPLAY_NARRACAO = null, REPLAY_TEMPOS = null;
+let REPLAY_NARRACAO = null, REPLAY_TEMPOS = null, REPLAY_VOZ = null;
 const REPLAY = location.pathname.startsWith("/geracao/") ? decodeURIComponent(location.pathname.split("/")[2] || "") : null;
 const dormir = (ms) => new Promise((ok) => setTimeout(ok, ms));
 const calmo = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -869,7 +911,7 @@ if (REPLAY) {
   fetch(`/api/geracao/${encodeURIComponent(REPLAY)}`).then(async (r) => {
     if (!r.ok) { $("replay-meta").textContent = "Essa geração não está no caderno."; return; }
     const dados = await r.json(), cfg = dados.config || {};
-    REPLAY_NARRACAO = dados.narracao; REPLAY_TEMPOS = dados.narracao_tempos;
+    REPLAY_NARRACAO = dados.narracao; REPLAY_TEMPOS = dados.narracao_tempos; REPLAY_VOZ = dados.narracao_voz;
     await CONFIG.catch(() => {});
     const quando = dados.inicio ? new Date(dados.inicio).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
     $("replay-meta").innerHTML = [dados.autor ? `gerada por <b>${esc(dados.autor)}</b>` : "gerada pelo grupo", esc(quando),

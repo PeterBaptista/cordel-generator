@@ -200,14 +200,28 @@ def geracao(nome: str):
     cfg, _ = cadernos.config(log)
     return {"id": nome, "eventos": evs, "reconstruido": reconstruido, "config": cfg,
             "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor"), "narracao": _narracao(nome),
-            "narracao_tempos": _tempos(nome)}
+            "narracao_tempos": _tempos(nome), "narracao_voz": _voz_da_narracao(log)}
 
 
 _narrando: dict[str, asyncio.Lock] = {}
 
 
 class PedidoNarracao(BaseModel):
-    refazer: bool = False  # só admin: gera de novo por cima (por exemplo, depois de trocar a voz)
+    refazer: bool = False  # só admin: gera de novo por cima (por exemplo, com outra voz)
+    voz: str | None = None  # uma das narracao.VOZES; sem ela, a padrão
+
+
+@app.get("/api/vozes")
+def vozes():
+    """As vozes de narração, com a amostra de cada uma (a mesma estrofe)."""
+    return {"vozes": narracao.catalogo(), "padrao": narracao.PADRAO}
+
+
+def _voz_da_narracao(log: dict) -> str | None:
+    """A voz da narração atual (a última gravada)."""
+    ns = log.get("narracoes") or []
+    k = ns[-1].get("preset") if ns else None
+    return narracao.VOZES[k]["nome"] if k in narracao.VOZES else None
 
 
 @app.post("/api/narracao/{nome}", dependencies=[Depends(_so_json)])
@@ -221,7 +235,8 @@ async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = No
     if refazer and not (usuario and usuario["admin"]):
         raise HTTPException(403, "Só o professor pode refazer uma narração.")
     if (url := _narracao(nome)) and not refazer:
-        return {"url": url, "tempos": _tempos(nome), "nova": False}
+        return {"url": url, "tempos": _tempos(nome), "nova": False,
+                "voz": _voz_da_narracao(json.loads(f.read_text(encoding="utf-8")))}
     chave = (request.headers.get("x-elevenlabs-key") or "").strip()
     if chave and not narracao.CHAVE_OK.fullmatch(chave):
         raise HTTPException(422, "Essa chave não parece uma chave da ElevenLabs.")
@@ -238,8 +253,10 @@ async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = No
     trava = _narrando.setdefault(nome, asyncio.Lock())
     async with trava:  # dois cliques ao mesmo tempo não pagam duas vezes
         if (url := _narracao(nome)) and not refazer:
-            return {"url": url, "tempos": _tempos(nome), "nova": False}
-        audio, creditos, tempos = await narracao.sintetizar(estrofes, chave)
+            return {"url": url, "tempos": _tempos(nome), "nova": False,
+                    "voz": _voz_da_narracao(json.loads(f.read_text(encoding="utf-8")))}
+        k_voz, preset = narracao.voz(pedido.voz if pedido else None)
+        audio, creditos, tempos = await narracao.sintetizar(estrofes, chave, preset)
         PASTAS["narracao"].mkdir(parents=True, exist_ok=True)
         tmp = PASTAS["narracao"] / f"{nome}.mp3.tmp"
         tmp.write_bytes(audio)
@@ -253,13 +270,14 @@ async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = No
         log = json.loads(f.read_text(encoding="utf-8"))
         log.setdefault("narracoes", []).append({
             "quando": datetime.now().astimezone().isoformat(timespec="seconds"), "creditos": creditos,
-            "modelo": narracao.MODELO, "voz": narracao.VOZ,
+            "modelo": preset["modelo"], "voz": preset["voz"], "preset": k_voz,
             "chave": "professor" if chave == narracao.CHAVE_PROFESSOR else "propria",
             "por": usuario["login"] if usuario else None})
         tmp = f.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
         tmp.replace(f)
-    return {"url": _narracao(nome), "tempos": _tempos(nome), "nova": True, "creditos": creditos}
+    return {"url": _narracao(nome), "tempos": _tempos(nome), "nova": True, "creditos": creditos,
+            "voz": preset["nome"]}
 
 
 @app.get("/sextilhas")
