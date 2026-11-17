@@ -316,6 +316,7 @@ def colecao():
             "estrofes": cadernos.estrofes(log, "estrofes_finais"),
             "imagem": arq.get("imagem"), "texto": arq.get("texto"),
             "url": log.get("url"), "fonte": log.get("fonte"), "narracao": _narracao(f.stem),
+            "narracao_tempos": _tempos(f.stem),
             "motivo": log.get("motivo"), "rodadas": log.get("rodadas_de_correcao"),
             "forma": {k: cfg.get(k) for k in ("forma", "estrofes", "encadeamento", "narrador")},
         })

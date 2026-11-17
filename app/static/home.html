@@ -139,6 +139,9 @@
   .entrega span { display: block; font-size: 15px; color: var(--tinta-2); }
 
   footer { border-top: 1.5px solid #15121033; padding: 20px 0 40px; font-size: 14px; color: var(--tinta-2); }
+  .ab-narracao { margin: 14px 0; }
+  .ab-narracao audio { width: 100%; }
+  .ab-narracao .nota { font-size: 13px; margin: 4px 0 0; opacity: .8; }
 </style>
 </head>
 <body>
@@ -246,7 +249,7 @@ function legenda(f) {
   return `<p class="legenda">Gerado por <b>${esc(autorDe(f))}</b>. ${partes.join("")}${partes.length ? ". " : ""}${esc(dia(f.inicio))}, ${esc(forma)}.
     <button type="button" data-abrir="${esc(f.id)}">Abrir folheto</button> ·
     <button type="button" data-id="${esc(f.id)}">Baixar em PNG</button> ·
-    <a href="/geracao/${esc(f.id)}">Como foi gerada</a></p>`;
+    ${f.narracao ? `<button type="button" data-ouvir="${esc(f.id)}">🔊 Ouvir</button> · ` : ""}<a href="/geracao/${esc(f.id)}">Como foi gerada</a></p>`;
 }
 
 function pendurar(colecao) {
@@ -267,6 +270,7 @@ function pendurar(colecao) {
     ? `As ${colecao.length} mais recentes que passaram no verificador, penduradas no cordão como na feira. Arraste para o lado para ver todas.`
     : "A mais recente que passou no verificador, pendurada no cordão como na feira.";
   $("corda").querySelectorAll("button[data-abrir]").forEach((b) => b.onclick = () => abrir(b.closest(".pendurado"), b));
+  $("corda").querySelectorAll("button[data-ouvir]").forEach((b) => b.onclick = () => abrir(b.closest(".pendurado"), b, true));
   $("corda").querySelectorAll("button[data-id]").forEach((b) => b.onclick = async () => {
     b.disabled = true; b.textContent = "Gerando o PNG";
     try { await baixarFolheto(b.closest(".pendurado").querySelector(".folheto"), b.dataset.id); }
@@ -333,12 +337,15 @@ function fichaHTML(f) {
     <h2 id="ab-nome">${esc(autorDe(f))}</h2>
     <p>${esc(dia(f.inicio))}, ${esc(forma)}. ${esc(rodadas)}</p>
     ${f.url ? `<p><a href="${esc(f.url)}" rel="noopener" target="_blank">Ler a notícia original</a> em ${esc(f.fonte || dominio(f.url))}.</p>` : ""}
+    ${f.narracao ? `<div class="ab-narracao"><p class="rotulo">Ouça a sextilha narrada</p>
+      <audio id="ab-audio" controls preload="none" src="/${esc(f.narracao)}"></audio>
+      <p class="nota">Os versos se acendem no folheto enquanto o cantador fala.</p></div>` : ""}
     <button type="button" class="acao" id="ab-baixar">Baixar em PNG</button>
     <p><a href="/geracao/${esc(f.id)}">Ver como foi gerada, passo a passo</a></p>
     <div id="ab-termos"></div>`;
 }
 
-async function abrir(fig, gatilho) {
+async function abrir(fig, gatilho, tocar = false) {
   if (atual) return;
   const f = FOLHETOS.get(fig.dataset.folheto), origem = fig.querySelector(".folheto").getBoundingClientRect();
   atual = { fig, gatilho, f };
@@ -346,6 +353,12 @@ async function abrir(fig, gatilho) {
   $("ab-ficha").innerHTML = fichaHTML(f);
   const poster = $("ab-folheto").firstElementChild;
   marcarTermos(poster);
+  if (f.narracao) {
+    // a narração acende o verso e a palavra ditos no cartaz aberto
+    acompanharNarracao($("ab-audio"), poster.querySelector(".versos"),
+      f.narracao_tempos ? () => fetch(`/${f.narracao_tempos}`).then((r) => r.ok ? r.json() : null) : null);
+    if (tocar) $("ab-audio").play().catch(() => {});
+  }
   $("ab-baixar").onclick = async (e) => {
     e.target.disabled = true; e.target.textContent = "Gerando o PNG";
     try { await baixarFolheto(poster, f.id); } finally { e.target.disabled = false; e.target.textContent = "Baixar em PNG"; }
@@ -374,6 +387,7 @@ async function fechar() {
   atual.fechando = true;
   const { fig, gatilho } = atual, poster = $("ab-folheto").firstElementChild;
   dicaTermo.esconder();
+  if ($("ab-audio")) { $("ab-audio").pause(); if (typeof CSS !== "undefined" && CSS.highlights) CSS.highlights.delete("narrada"); }
   if (!parado.matches) {
     aberto.classList.add("saindo");
     $("ab-ficha").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" });
