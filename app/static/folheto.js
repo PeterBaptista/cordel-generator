@@ -156,3 +156,85 @@ const dicaTermo = (() => {
   addEventListener("scroll", esconder, { capture: true, passive: true });
   return { esconder };
 })();
+
+// ---- narração: enquanto o áudio toca, destaca o verso e a palavra que estão sendo ditos.
+// `versosEl` é o .versos do cartaz (estrofes = filhos, versos = netos). `tempos` é o
+// narracao/<id>.json (o tempo de cada palavra) ou uma função que o busca; sem ele, estima
+// pela duração do áudio. A palavra é marcada pela CSS Custom Highlight API, sem mexer no
+// HTML (convive com a marcação dos termos do dicionário); onde não houver, só o verso.
+const DESTACA_PALAVRA = typeof CSS !== "undefined" && "highlights" in CSS && typeof Highlight !== "undefined";
+
+function faixaNoVerso(el, i0, i1) {
+  const andar = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const r = document.createRange();
+  let pos = 0, comecou = false, no;
+  while ((no = andar.nextNode())) {
+    const fim = pos + no.length;
+    if (!comecou && i0 < fim) { r.setStart(no, i0 - pos); comecou = true; }
+    if (comecou && i1 <= fim) { r.setEnd(no, i1 - pos); return r; }
+    pos = fim;
+  }
+  return null;
+}
+
+// Sem tempos gravados (narração antiga): reparte a duração pelas letras, com pausa no fim
+// de cada verso e de cada estrofe.
+function estimarTempos(linhas, duracao) {
+  const itens = [];
+  let peso = 0.5;
+  linhas.forEach((vs, e) => {
+    vs.forEach((v, n) => {
+      for (const m of v.textContent.matchAll(/\S+/g)) {
+        itens.push([e, n, m.index, m.index + m[0].length, peso, peso + m[0].length]);
+        peso += m[0].length + 1;
+      }
+      peso += 3;
+    });
+    peso += 4;
+  });
+  const k = duracao / peso;
+  return itens.map(([e, n, a, b, p0, p1]) => [e, n, a, b, p0 * k, p1 * k]);
+}
+
+function acompanharNarracao(audio, versosEl, tempos) {
+  audio._narracao?.abort();  // religar no mesmo áudio troca o acompanhamento anterior
+  const fim = new AbortController(), opt = { signal: fim.signal };
+  audio._narracao = fim;
+  let palavras = null, atual = null, linhas = [], quadro = null, buscando = null;
+  const limpar = () => {
+    versosEl.querySelectorAll(".lendo").forEach((v) => v.classList.remove("lendo"));
+    if (DESTACA_PALAVRA) CSS.highlights.delete("narrada");
+    atual = null;
+  };
+  const passo = () => {
+    if (!palavras && audio.duration) palavras = estimarTempos(linhas, audio.duration);
+    if (!palavras?.length) return;
+    const t = audio.currentTime;
+    let p = null;  // a última palavra que já começou
+    for (const w of palavras) { if (w[4] <= t) p = w; else break; }
+    if (!p || p === atual) return;
+    atual = p;
+    const v = linhas[p[0]]?.[p[1]];
+    if (!v) return;
+    if (!v.classList.contains("lendo")) { limpar(); atual = p; v.classList.add("lendo"); }
+    if (DESTACA_PALAVRA) {
+      const r = faixaNoVerso(v, p[2], p[3]);
+      if (r) CSS.highlights.set("narrada", new Highlight(r)); else CSS.highlights.delete("narrada");
+    }
+  };
+  const laco = () => { passo(); quadro = requestAnimationFrame(laco); };
+  audio.addEventListener("play", async () => {
+    // os versos podem ter sido redesenhados desde a última vez
+    linhas = [...versosEl.children].map((est) => [...est.children]);
+    if (!palavras && tempos) {
+      buscando ??= (typeof tempos === "function" ? tempos() : Promise.resolve(tempos))
+        .then((d) => d?.palavras || null).catch(() => null);
+      palavras = await buscando;
+    }
+    cancelAnimationFrame(quadro); laco();
+  }, opt);
+  audio.addEventListener("pause", () => cancelAnimationFrame(quadro), opt);
+  audio.addEventListener("ended", () => { cancelAnimationFrame(quadro); limpar(); }, opt);
+  audio.addEventListener("seeked", () => { atual = null; passo(); }, opt);
+  return limpar;
+}

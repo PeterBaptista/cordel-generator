@@ -30,6 +30,11 @@ def _narracao(nome: str) -> str | None:
     """O link do áudio da narração, se já foi gerado."""
     return f"narracao/{nome}.mp3" if (PASTAS["narracao"] / f"{nome}.mp3").is_file() else None
 
+
+def _tempos(nome: str) -> str | None:
+    """O tempo de cada palavra da narração (para destacar o que está sendo dito)."""
+    return f"narracao/{nome}.json" if (PASTAS["narracao"] / f"{nome}.json").is_file() else None
+
 # Quantas gerações aparecem no cordão da home; as outras ficam em /sextilhas.
 ULTIMAS = 10
 
@@ -194,7 +199,8 @@ def geracao(nome: str):
     evs, reconstruido = linha_do_tempo.eventos(log, nome)
     cfg, _ = cadernos.config(log)
     return {"id": nome, "eventos": evs, "reconstruido": reconstruido, "config": cfg,
-            "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor"), "narracao": _narracao(nome)}
+            "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor"), "narracao": _narracao(nome),
+            "narracao_tempos": _tempos(nome)}
 
 
 _narrando: dict[str, asyncio.Lock] = {}
@@ -215,7 +221,7 @@ async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = No
     if refazer and not (usuario and usuario["admin"]):
         raise HTTPException(403, "Só o professor pode refazer uma narração.")
     if (url := _narracao(nome)) and not refazer:
-        return {"url": url, "nova": False}
+        return {"url": url, "tempos": _tempos(nome), "nova": False}
     chave = (request.headers.get("x-elevenlabs-key") or "").strip()
     if chave and not narracao.CHAVE_OK.fullmatch(chave):
         raise HTTPException(422, "Essa chave não parece uma chave da ElevenLabs.")
@@ -232,12 +238,17 @@ async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = No
     trava = _narrando.setdefault(nome, asyncio.Lock())
     async with trava:  # dois cliques ao mesmo tempo não pagam duas vezes
         if (url := _narracao(nome)) and not refazer:
-            return {"url": url, "nova": False}
-        audio, creditos = await narracao.sintetizar(estrofes, chave)
+            return {"url": url, "tempos": _tempos(nome), "nova": False}
+        audio, creditos, tempos = await narracao.sintetizar(estrofes, chave)
         PASTAS["narracao"].mkdir(parents=True, exist_ok=True)
         tmp = PASTAS["narracao"] / f"{nome}.mp3.tmp"
         tmp.write_bytes(audio)
         tmp.replace(PASTAS["narracao"] / f"{nome}.mp3")
+        arq_tempos = PASTAS["narracao"] / f"{nome}.json"
+        if tempos:
+            arq_tempos.write_text(json.dumps(tempos, ensure_ascii=False), encoding="utf-8")
+        else:  # sem tempos novos, os velhos (de outro áudio) não servem
+            arq_tempos.unlink(missing_ok=True)
         # o caderno registra a narração, para o custo dela aparecer em /logs (nunca a chave)
         log = json.loads(f.read_text(encoding="utf-8"))
         log.setdefault("narracoes", []).append({
@@ -248,7 +259,7 @@ async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = No
         tmp = f.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
         tmp.replace(f)
-    return {"url": _narracao(nome), "nova": True, "creditos": creditos}
+    return {"url": _narracao(nome), "tempos": _tempos(nome), "nova": True, "creditos": creditos}
 
 
 @app.get("/sextilhas")
@@ -375,7 +386,7 @@ def historico():
             "rodadas": log.get("rodadas_de_correcao"), "duvidas": log.get("duvidas_para_o_grupo") or [],
             "angulo": candidatas[escolhida]["angulo"] if escolhida is not None and escolhida < len(candidatas) else None,
             "justificativa": (log.get("escolhida") or {}).get("justificativa"),
-            "custo": custos.resumo(log)["total"], "narracao": _narracao(f.stem),
+            "custo": custos.resumo(log)["total"], "narracao": _narracao(f.stem), "narracao_tempos": _tempos(f.stem),
             "arquivos": _arquivos(f, log),
         })
     return {"itens": itens}

@@ -6,7 +6,7 @@
 <title>Notícias em Cordel — gerador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/folheto.css?v=2">
+<link rel="stylesheet" href="/static/folheto.css?v=3">
 <style>
   :root {
     --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35;
@@ -257,6 +257,7 @@
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
       <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
+      <label id="l-narrar-fim" hidden title="usa créditos da ElevenLabs"><input type="checkbox" id="narrar-fim"> narrar ao terminar</label>
     </div>
     <p id="aviso-gerar" role="alert"></p>
     </div>
@@ -301,7 +302,7 @@
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
-<script src="/static/folheto.js?v=2"></script>
+<script src="/static/folheto.js?v=3"></script>
 <script>
 const EXEMPLOS = [
   "Startup de Recife coloca robô com IA para vender frutas numa feira livre. O robô conversa com os clientes, sugere receitas e faz troco, mas se confundiu com o preço da macaxeira e acabou dando desconto de 90% por uma tarde inteira.",
@@ -571,7 +572,8 @@ function tratar(ev) {
       $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${esc(p)}" target="_blank">${esc(k)}</a>`).join("·")
         + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
       $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
-      prepararNarracao(ev.id || REPLAY, REPLAY_NARRACAO);
+      prepararNarracao(ev.id || REPLAY, REPLAY_NARRACAO, REPLAY_TEMPOS);
+      if (!REPLAY && $("narrar-fim").checked && podeNarrar()) narrar(false);
       return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
     }
     case "teto":
@@ -677,7 +679,8 @@ function renderConta() {
 async function carregarEu() {
   try { EU = await (await fetch("/api/eu")).json(); } catch {}
   renderConta();
-  if (NARRACAO.id) prepararNarracao(NARRACAO.id, NARRACAO.url);
+  opcaoNarrarFim();
+  if (NARRACAO.id) prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos);
 }
 
 $("form-chave").onsubmit = (e) => {
@@ -696,19 +699,25 @@ $("form-eleven").onsubmit = (e) => {
   const v = $("chave-eleven").value.trim();
   if (!/^[A-Za-z0-9_\-]{20,}$/.test(v)) { $("eleven-estado").textContent = "Isso não parece uma chave da ElevenLabs."; return; }
   try { localStorage.setItem(ELEVEN_LS, v); } catch { $("eleven-estado").textContent = "Este navegador não deixou guardar a chave."; return; }
-  $("chave-eleven").value = ""; estadoEleven(); prepararNarracao(NARRACAO.id, NARRACAO.url);
+  $("chave-eleven").value = ""; estadoEleven(); opcaoNarrarFim(); prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos);
 };
 $("eleven-remover").onclick = () => {
   try { localStorage.removeItem(ELEVEN_LS); } catch {}
-  estadoEleven(); prepararNarracao(NARRACAO.id, NARRACAO.url);
+  estadoEleven(); opcaoNarrarFim(); prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos);
 };
 estadoEleven();
 
 // ---- narração: já gerada, qualquer um ouve; gerar pede a chave própria ou a conta do professor
-let NARRACAO = { id: null, url: null };
+let NARRACAO = { id: null, url: null, tempos: null };
 const podeNarrar = () => !!chaveEleven() || (EU.admin && EU.narracao_professor);
-function prepararNarracao(id, url) {
-  NARRACAO = { id, url };
+// destaca o verso e a palavra narrados no cartaz enquanto o áudio toca
+const buscarTempos = () => NARRACAO.tempos ? fetch(`/${NARRACAO.tempos}`).then((r) => r.ok ? r.json() : null) : Promise.resolve(null);
+acompanharNarracao($("audio-narracao"), $("versos"), buscarTempos);
+// narrar ao terminar: desligado por padrão; só aparece para quem pode narrar
+function opcaoNarrarFim() { $("l-narrar-fim").hidden = REPLAY || !podeNarrar(); if ($("l-narrar-fim").hidden) $("narrar-fim").checked = false; }
+function prepararNarracao(id, url, tempos = null) {
+  if (id !== NARRACAO.id || url !== NARRACAO.url) acompanharNarracao($("audio-narracao"), $("versos"), buscarTempos);
+  NARRACAO = { id, url, tempos };
   if (!id) { $("narracao").hidden = true; return; }
   $("narracao").hidden = false;
   $("audio-narracao").hidden = !url;
@@ -728,7 +737,7 @@ async function narrar(refazer = false) {
     const r = await fetch(`/api/narracao/${encodeURIComponent(NARRACAO.id)}`, { method: "POST", headers, body: JSON.stringify({ refazer }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) { $("nota-narracao").textContent = typeof d.detail === "string" ? d.detail : "A narração falhou."; return; }
-    prepararNarracao(NARRACAO.id, `${d.url}?v=${Date.now()}`);
+    prepararNarracao(NARRACAO.id, `${d.url}?v=${Date.now()}`, d.tempos ? `${d.tempos}?v=${Date.now()}` : null);
     $("nota-narracao").textContent = d.nova ? `narração gravada (${d.creditos} créditos da ElevenLabs)` : "";
     $("audio-narracao").play().catch(() => {});
   } finally { botao.disabled = false; }
@@ -832,7 +841,7 @@ async function gerar(noticia, url) {
 }
 
 // ---- /geracao/<id>: a mesma linha do tempo, tocada a partir do caderno
-let REPLAY_NARRACAO = null;
+let REPLAY_NARRACAO = null, REPLAY_TEMPOS = null;
 const REPLAY = location.pathname.startsWith("/geracao/") ? decodeURIComponent(location.pathname.split("/")[2] || "") : null;
 const dormir = (ms) => new Promise((ok) => setTimeout(ok, ms));
 const calmo = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -860,7 +869,7 @@ if (REPLAY) {
   fetch(`/api/geracao/${encodeURIComponent(REPLAY)}`).then(async (r) => {
     if (!r.ok) { $("replay-meta").textContent = "Essa geração não está no caderno."; return; }
     const dados = await r.json(), cfg = dados.config || {};
-    REPLAY_NARRACAO = dados.narracao;
+    REPLAY_NARRACAO = dados.narracao; REPLAY_TEMPOS = dados.narracao_tempos;
     await CONFIG.catch(() => {});
     const quando = dados.inicio ? new Date(dados.inicio).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
     $("replay-meta").innerHTML = [dados.autor ? `gerada por <b>${esc(dados.autor)}</b>` : "gerada pelo grupo", esc(quando),

@@ -34,3 +34,8 @@
 #dica-termo b { display: block; font: 700 16px/1.2 "Oswald", sans-serif; letter-spacing: .3px; margin-bottom: 2px; color: #e9c46a; }
 @keyframes dica-surge { from { opacity: 0; transform: translateY(5px) rotate(-1.2deg); } }
 @media (prefers-reduced-motion: reduce) { #dica-termo { animation: none; } .termo { transition: none; } }
+
+/* narração: o verso sendo dito ganha um fundo de marca-texto, e a palavra, o vermelho do cartaz */
+.versos .lendo { background: #e8c56a66; border-radius: 2px; box-shadow: -4px 0 0 #e8c56a66, 4px 0 0 #e8c56a66; transition: background .2s; }
+::highlight(narrada) { background-color: #a3301f; color: #fbf6ea; }
+@media (prefers-reduced-motion: reduce) { .versos .lendo { transition: none; } }

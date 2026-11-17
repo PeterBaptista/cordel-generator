@@ -6,7 +6,7 @@
 <title>Sextilhas geradas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/folheto.css?v=2">
+<link rel="stylesheet" href="/static/folheto.css?v=3">
 <style>
   :root {
     --papel: #efe4cc; --folha: #f4efe3; --tinta: #151210; --tinta-2: #4a3f35; --tinta-3: #7a6d5f;
@@ -73,7 +73,7 @@
   <section class="grade" id="grade"><div class="vazio">Carregando…</div></section>
 </main>
 
-<script src="/static/folheto.js?v=2"></script>
+<script src="/static/folheto.js?v=3"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -91,7 +91,7 @@ const cartao = (i) => `<article class="mini"><div class="moldura">
     <div class="versos">${i.estrofes.map((vs) => `<div class="estrofe">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("")}</div>
     <span class="selo ${i.entra ? "entra" : "descarte"}">${i.entra ? "Passou" : "Descarte"}</span>
     ${i.motivo ? `<div class="motivo">${esc(i.motivo)}</div>` : ""}
-    ${i.narracao ? `<audio class="ouvir" controls preload="none" src="/${esc(i.narracao)}" aria-label="narração: ${esc(i.manchete)}"></audio>` : ""}
+    ${i.narracao ? `<audio class="ouvir" controls preload="none" data-id="${esc(i.id)}" src="/${esc(i.narracao)}" aria-label="narração: ${esc(i.manchete)}"></audio>` : ""}
     <a class="como" href="/geracao/${esc(i.id)}">${i.narracao ? "como foi gerada" : "como foi gerada · narrar"}</a>
   </div></article>`;
 
@@ -103,6 +103,13 @@ function render() {
     : ITENS.length ? '<div class="vazio">Nenhuma geração com esses filtros.</div>'
     : '<div class="vazio">Ainda não há nada aqui. <a href="/gerador">Gere a primeira sextilha</a>.</div>';
   marcarTermos($("grade"));
+  // narração: destaca o verso e a palavra ditos; um áudio por vez
+  document.querySelectorAll("#grade audio.ouvir").forEach((a) => {
+    const i = ITENS.find((x) => x.id === a.dataset.id);
+    const versos = a.closest(".moldura").querySelector(".versos");
+    acompanharNarracao(a, versos, i?.narracao_tempos ? () => fetch(`/${i.narracao_tempos}`).then((r) => r.ok ? r.json() : null) : null);
+    a.addEventListener("play", () => document.querySelectorAll("#grade audio.ouvir").forEach((o) => o !== a && o.pause()));
+  });
 }
 
 fetch("/api/historico").then((r) => r.json())
