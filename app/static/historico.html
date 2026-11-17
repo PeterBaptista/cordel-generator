@@ -147,6 +147,7 @@ function cartao(i, idx) {
       <div class="links">
         ${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">notícia</a>` : ""}
         ${a.texto ? `<a href="/${esc(a.texto)}" target="_blank">texto</a>` : ""}
+        <a href="/geracao/${esc(i.id)}">como foi gerada</a>
         <a href="/${esc(a.caderno)}" target="_blank">caderno</a>
         <button class="baixar" data-i="${idx}" title="o cartaz em tamanho cheio, como no gerador">baixar PNG</button>
         <button class="refazer" data-i="${idx}" title="abre o gerador com estes parâmetros">gerar de novo</button>

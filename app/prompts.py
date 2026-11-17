@@ -7,6 +7,9 @@ SISTEMA_FATO = """\
 Você lê notícias de IA para um grupo que as reconta em cordel.
 Extraia da notícia:
 - fato: o acontecimento em UMA frase curta, concreta, sem jargão.
+- essencial: de 3 a 5 pontos que quem NUNCA leu a notícia precisa saber para entendê-la:
+  quem fez, o que fez, onde ou quando, e o número ou a consequência principal. Cada ponto
+  curto e concreto, com o nome próprio quando houver ("a Meta", "em Pernambuco", "10%").
 - titulo: a manchete do folheto, no estilo de jornal popular: curta (até 8 palavras),
   informativa, direta (ex.: "Nordeste tem maior chuva dos últimos 30 anos").
 - imagens_concretas: 3 a 5 imagens visuais concretas e narráveis que a notícia sugere
@@ -27,19 +30,27 @@ FORMAS = {
 }
 
 
-def regras_do_grupo() -> str:
-    """As regras do grupo (as de número 1, 3, 7 e 9 o verificador confere) e o dicionário."""
+def regras_do_grupo(prioridade: str = "forma", dicionario_texto: str | None = None) -> str:
+    """As regras do grupo (as de número 1, 3, 7 e 9 o verificador confere) e o dicionário.
+    Com a prioridade na notícia, as do dicionário (3 e 7) viram sugestão."""
+    sugestao = prioridade == "noticia"
+    regra3 = ("""3. Sempre que couber sem tirar informação do verso, um termo do dicionário nordestino
+   abaixo a cada 2 versos. É sugestão: o verificador só avisa, não reprova.""" if sugestao else
+              """3. Pelo menos um termo do dicionário nordestino abaixo a cada 2 versos (versos 1 e 2,
+   3 e 4, 5 e 6). O verificador confere.""")
+    regra7 = ("""7. Se couber sem atrapalhar a notícia, uma EXPRESSÃO do dicionário por estrofe (as de
+   mais de uma palavra, como "caixa dos peito"). É sugestão: o verificador só avisa.""" if sugestao else
+              """7. Cada estrofe tem pelo menos uma EXPRESSÃO do dicionário (as de mais de uma
+   palavra, como "caixa dos peito"). O verificador confere.""")
     return f"""\
-Regras do grupo, obrigatórias:
+Regras do grupo:
 1. Pronome sempre antes do verbo ("me disse", "se foi"). Nunca ênclise ("disse-me")
    nem mesóclise ("dir-lhe-ei"). O verificador reprova.
-3. Pelo menos um termo do dicionário nordestino abaixo a cada 2 versos (versos 1 e 2,
-   3 e 4, 5 e 6). O verificador confere.
+{regra3}
 4. As outras palavras no mesmo tom popular dos termos do dicionário: nada de palavra
    difícil, técnica ou de jornal.
 5. Sem sair da formalidade do cordel: nada de gíria de internet nem palavrão.
-7. Cada estrofe tem pelo menos uma EXPRESSÃO do dicionário (as de mais de uma
-   palavra, como "caixa dos peito"). O verificador confere.
+{regra7}
 8. Vocativo (chamar alguém: "seu moço", "minha gente", "meu fi") só no início ou no
    fim do verso, nunca no meio.
 9. Partícula fática (né, viu, visse, tá, sabe) só no início ou no fim do verso.
@@ -51,10 +62,32 @@ Regras do grupo, obrigatórias:
 
 Dicionário nordestino (termo — sentido):
 
-{dicionario.texto_para_prompt()}"""
+{dicionario_texto or dicionario.texto_para_prompt()}"""
 
 
-def sistema_poema(forma: str, estrofes: int, encadeamento: str) -> str:
+# O leitor do folheto vê a manchete em cima do poema, e o Poeta tendia a contar com ela:
+# o poema ficava com o clima da notícia e sem a notícia. Vale nas duas prioridades.
+SEM_MANCHETE = """\
+O poema conta a notícia sozinho. Quem lê pode não ter visto a manchete, e nunca leu a
+matéria: não conte com o título para dar a informação. Todos os pontos essenciais dados
+(quem fez, o quê, onde ou quando, o número) têm de estar nos versos, com os nomes
+principais. Um verso que só dá o clima ("é novidade de espantar") não informa nada."""
+
+PRIORIDADES = {
+    "noticia": """\
+Prioridade desta geração: a NOTÍCIA. Quando as exigências brigarem, vale esta ordem:
+1. contar os pontos essenciais, com fidelidade e de um jeito que se entenda;
+2. a métrica e a rima, que o verificador confere;
+3. o dicionário nordestino e o tom regional, que são tempero: use quando couberem
+   sem tirar informação do verso.""",
+    "forma": """\
+Prioridade desta geração: a FORMA. A métrica, a rima e as regras do dicionário são
+conferidas e obrigatórias, sem deixar de contar os pontos essenciais.""",
+}
+
+
+def sistema_poema(forma: str, estrofes: int, encadeamento: str, prioridade: str = "forma",
+                  dicionario_texto: str | None = None) -> str:
     esquema, regra = FORMAS[forma]
     quantas = "UMA sextilha" if estrofes == 1 else f"{estrofes} sextilhas"
     narrativa = "" if estrofes == 1 else f"""
@@ -72,6 +105,10 @@ diferente. O verificador confere essa ligação.
 Você é um poeta de cordel nordestino, desses que leem a notícia na feira e a
 transformam em causo. Escreva {quantas} sobre o fato dado, na voz do narrador pedido.
 
+{SEM_MANCHETE}
+
+{PRIORIDADES[prioridade]}
+
 A forma, obrigatória em cada estrofe:
 - Sextilha: exatamente 6 versos.
 - Métrica: 7 sílabas poéticas por verso (redondilha maior). Conta-se até a última
@@ -82,11 +119,13 @@ A forma, obrigatória em cada estrofe:
 {narrativa}{deixa}
 Planeje antes de escrever:
 - angulo: em uma frase, como o narrador vai contar a notícia.
+- para cada estrofe, cobre: os pontos essenciais que ela vai contar. Somadas, as
+  estrofes cobrem todos.
 - para cada estrofe, finais: as 6 palavras finais dos versos, seguindo o esquema
   {esquema}. Palavras que rimam têm que ser DIFERENTES (ex.: sertão / razão /
   clarão). Repetir a mesma palavra final é proibido: o verificador reprova.
-- para cada estrofe, termos: os termos do dicionário que você vai usar nela (pelo
-  menos um a cada 2 versos, e pelo menos uma expressão de mais de uma palavra).
+- para cada estrofe, termos: os termos do dicionário que você vai usar nela
+  (veja as regras 3 e 7: {"quando couberem" if prioridade == "noticia" else "pelo menos um a cada 2 versos, e pelo menos uma expressão de mais de uma palavra"}).
 Depois escreva os versos terminando nessas palavras e usando esses termos.
 
 Criatividade:
@@ -105,7 +144,7 @@ O registro:
 - A imagem e a comparação são livres; o fato não: não invente o que não aconteceu.
 - Sem título, sem numeração.
 
-{regras_do_grupo()}"""
+{regras_do_grupo(prioridade, dicionario_texto)}"""
 
 
 # Quem conta a notícia. "observador" é a regra 10 do grupo (narrador em 1ª pessoa,
@@ -125,10 +164,22 @@ NARRADORES = {
 }
 
 
-def usuario_poema(fato: str, imagens: list[str], narrador: str, noticia: str) -> str:
+def lista_essencial(essencial: list[str]) -> str:
+    return "\n".join(f"- {p}" for p in essencial)
+
+
+def amarra(fato: str, essencial: list[str]) -> str:
+    """O que a correção e a reescrita não podem perder."""
+    pontos = f"\nE, lendo só o poema, sem a manchete, dá para saber:\n{lista_essencial(essencial)}" if essencial else ""
+    return f"O poema tem de continuar contando isto, com quem fez o quê e os nomes principais: {fato}{pontos}"
+
+
+def usuario_poema(fato: str, essencial: list[str], imagens: list[str], narrador: str, noticia: str) -> str:
+    pontos = f"Pontos essenciais (todos têm de estar nos versos):\n{lista_essencial(essencial)}\n" if essencial else ""
     return (
         f"Notícia original (a fonte dos fatos; não copie as frases dela):\n{noticia}\n\n"
         f"Fato: {fato}\n"
+        f"{pontos}"
         f"Imagens possíveis: {'; '.join(imagens)}\n"
         f"Narrador: {narrador}\n\n"
         "Planeje e escreva."
@@ -146,6 +197,9 @@ Você é o júri de um concurso de cordel. Recebe a notícia e poemas em sextilh
 todos já aprovados por um verificador de métrica e rima, que não entende o sentido.
 Avalie CADA poema, usando o número dele em `candidata`.
 
+Leia cada poema como quem NÃO viu a manchete nem a notícia: só os versos. O folheto mostra
+um título em cima, mas o poema tem de contar a notícia sozinho.
+
 Aponte em `apontados` só os versos com problema concreto, com o motivo em uma frase:
 - contradiz: afirma o contrário do que a notícia diz.
 - inventa: afirma um acontecimento, número ou nome da notícia que ela não traz.
@@ -160,9 +214,12 @@ Não são problema, e não devem ser apontados:
 - A concordância popular ("os menino") e a fala do dicionário.
 - Gosto pessoal: se o verso funciona, deixe.
 
+Em `faltando`, copie cada ponto essencial dado que quem lê só o poema não fica sabendo
+(porque não está lá, ou está tão vago que não dá para saber). Lista vazia se estão todos.
+
 Depois dê as notas de 1 a 5:
-- fidelidade: 5 = conta o fato, com quem fez o quê e os nomes principais; 3 = só o assunto;
-  1 = não dá para saber qual é a notícia, ou há erro de fato.
+- fidelidade: lendo só o poema, 5 = conta o fato e os pontos essenciais, com quem fez o quê e
+  os nomes principais; 3 = só o assunto; 1 = não dá para saber qual é a notícia, ou há erro de fato.
 - coerencia: 5 = quem lê só o poema entende a notícia e cada verso segue do anterior;
   3 = há versos soltos; 1 = é uma lista de frases sem ligação.
 - termos: 5 = os termos do dicionário estão no sentido certo e amarrados ao verso; 1 = soltos.
@@ -174,10 +231,11 @@ Dicionário nordestino (termo — sentido):
 {dicionario.texto_para_prompt()}"""
 
 
-def usuario_juizo(noticia: str, fato: str, poemas: list[tuple[str, list[list[str]]]]) -> str:
+def usuario_juizo(noticia: str, fato: str, essencial: list[str], poemas: list[tuple[str, list[list[str]]]]) -> str:
     blocos = [f"Candidata {i} (ângulo: {angulo})\n{poema_em_texto(estrofes, numerar=True)}"
               for i, (angulo, estrofes) in enumerate(poemas, 1)]
-    return f"Notícia:\n{noticia}\n\nFato: {fato}\n\n" + "\n\n".join(blocos) + "\n\nAvalie cada candidata."
+    pontos = f"Pontos essenciais:\n{lista_essencial(essencial)}\n\n" if essencial else ""
+    return f"Notícia:\n{noticia}\n\nFato: {fato}\n\n{pontos}" + "\n\n".join(blocos) + "\n\nAvalie cada candidata."
 
 
 PEDIDO_SENTIDO = """\
@@ -185,14 +243,24 @@ O poema passou na métrica e na rima, mas um leitor apontou problemas de sentido
 versos. Reescreva SOMENTE eles, resolvendo o problema de cada um:"""
 
 
-def usuario_sentido(estrofes: list[list[str]], apontados: list[dict], fato: str) -> str:
+PEDIDO_FALTANDO = """\
+Quem lê só o poema, sem a manchete, não fica sabendo destes pontos essenciais da notícia.
+Conte-os trocando o mínimo de versos: de preferência os apontados acima, os de enchimento ou
+os que só dão o clima. Diga a estrofe e o número de cada verso que trocar:"""
+
+
+def usuario_sentido(estrofes: list[list[str]], apontados: list[dict], faltando: list[str],
+                    fato: str, essencial: list[str]) -> str:
     lista = "\n".join(f"- E{a['estrofe']}.{a['n']} ({a['tipo']}): {a['motivo']}" for a in apontados)
+    pedido = f"{PEDIDO_SENTIDO}\n{lista}\n\n" if apontados else ""
+    if faltando:
+        pedido += f"{PEDIDO_FALTANDO}\n{lista_essencial(faltando)}\n\n"
     return (
-        f"{PEDIDO_SENTIDO}\n{lista}\n\n"
+        f"{pedido}"
         "Confira cada verso novo com a notícia e com os versos vizinhos. Continue com 7 sílabas e na "
         "mesma rima: preencha `contagem` antes do verso, e mantenha a palavra final sempre que ela não "
-        "for o problema. Os termos do dicionário continuam obrigatórios, no sentido dado.\n\n"
-        f"O poema tem de continuar contando isto, com quem fez o quê e os nomes principais: {fato}\n\n"
+        "for o problema. Os termos do dicionário seguem as regras 3 e 7, no sentido dado.\n\n"
+        f"{amarra(fato, essencial)}\n\n"
         f"Poema atual:\n{poema_em_texto(estrofes, numerar=True)}"
     )
 
@@ -225,10 +293,11 @@ palavras e conte de novo: em `verso` só entra o que deu 7."""
 
 def usuario_correcao(
     estrofes: list[list[str]], relatorio: str, reprovados: list[tuple[int, int]], fato: str,
+    essencial: list[str] = (),
 ) -> str:
     return (
         f"{PEDIDO_CORRECAO}\n\n"
-        f"O poema tem de continuar contando isto, com quem fez o quê e os nomes principais: {fato}\n\n"
+        f"{amarra(fato, list(essencial))}\n\n"
         f"Poema atual:\n{poema_em_texto(estrofes, numerar=True)}\n\n"
         f"Relatório do verificador:\n{relatorio}\n\n"
         f"Reescreva só os versos {', '.join(f'E{e}.{n}' for e, n in reprovados)}."

@@ -33,6 +33,8 @@ import dotenv
 import openai
 import pydantic
 import trafilatura
+from ai.models.core.model import Model
+from ai.providers import base as ai_base
 from ai.providers.openai import tools as openai_tools
 
 from . import custos, dicionario, prompts
@@ -42,9 +44,38 @@ sys.path.insert(0, str(RAIZ / "scripts"))
 import escandir  # noqa: E402  (o verificador fica intocado em scripts/)
 
 dotenv.load_dotenv(RAIZ / ".env")
-# O site está aberto para a turma: tudo (texto, imagem e consulta de custo) usa a chave do
-# professor. O SDK e o cliente da OpenAI leem OPENAI_API_KEY. Sem ela, o servidor nem sobe.
-os.environ["OPENAI_API_KEY"] = os.environ["OPENAI_API_KEY_PROFESSOR"]
+# A chave do professor serve quem entra com login (ver contas.py). Quem preferir, ou quando a
+# disciplina acabar, usa a própria chave, que vem do navegador a cada geração e nunca é
+# gravada. Por isso a chave não vai para o ambiente: cada geração leva a sua (classe IA).
+CHAVE_PROFESSOR = os.getenv("OPENAI_API_KEY_PROFESSOR", "").strip()
+
+
+class IA:
+    """Os clientes da OpenAI de uma geração, com a chave dela."""
+
+    def __init__(self, chave: str):
+        self.provider = ai_base.Provider.from_id("openai", api_key=chave)
+        self._chave = chave
+        self._cliente: openai.AsyncOpenAI | None = None
+
+    def modelo(self, model_id: str) -> Model:
+        provedor, _, nome = model_id.partition(":")
+        if provedor != "openai" or not nome:
+            raise ValueError(f"modelo fora da OpenAI: {model_id!r}")
+        return Model(id=nome, provider=self.provider)
+
+    @property
+    def cliente(self) -> openai.AsyncOpenAI:
+        if self._cliente is None:
+            self._cliente = openai.AsyncOpenAI(api_key=self._chave)
+        return self._cliente
+
+    async def fechar(self) -> None:
+        with contextlib.suppress(Exception):
+            await self.provider.aclose()
+        if self._cliente is not None:
+            with contextlib.suppress(Exception):
+                await self._cliente.close()
 
 # O hospedeiro só repassa o prompt à ferramenta de imagem e não muda o desenho: vai o
 # modelo de texto mais barato (medido: US$ 0,0004 contra US$ 0,003 do gpt-5.4-mini).
@@ -68,7 +99,13 @@ OPCOES = {
     "estrofes": [1, 2, 3, 4, 6],
     "encadeamento": ["livre", "deixa"],
     "narrador": [*prompts.NARRADORES, "sortear"],
+    # "noticia": o dicionário vira sugestão e o júri põe a notícia antes da forma.
+    # "forma": o dicionário reprova, como era até 16/11 (a métrica reprova nas duas).
+    "prioridade": ["noticia", "forma"],
 }
+# Com a chave do próprio usuário o gasto é dele: liberam os outros modelos e a imagem melhor.
+OPCOES_CHAVE_PROPRIA = {**OPCOES, "texto": [f"openai:{m}" for m in custos.PRECOS],
+                        "imagem_qualidade": list(IMAGENS)}
 
 
 # A configuração mais barata. A página abre nela e pede confirmação quando alguém
@@ -91,15 +128,16 @@ class Config:
     estrofes: int = 1
     encadeamento: str = "livre"   # "deixa": 1º verso rima com o último da estrofe anterior
     narrador: str = "observador"  # regra 10 do grupo; "sortear" = um por candidata
+    prioridade: str = "noticia"   # o que vence quando a forma e a notícia brigam
 
     @property
     def esquema(self) -> str:
         return prompts.FORMAS[self.forma][0]
 
-    def validar(self) -> "Config":
+    def validar(self, opcoes: dict = OPCOES) -> "Config":
         for campo, valor in asdict(self).items():
-            if valor not in OPCOES[campo]:
-                raise ValueError(f"{campo}={valor!r} não está entre {OPCOES[campo]}")
+            if valor not in opcoes[campo]:
+                raise ValueError(f"{campo}={valor!r} não está entre {opcoes[campo]}")
         return self
 
 
@@ -109,6 +147,8 @@ MAX_RODADAS = int(os.getenv("CORDEL_MAX_RODADAS", "10"))
 # rodadas de correção: entrega o que tem. É um freio, não uma garantia exata — uma
 # chamada já iniciada termina — e reserva uns centavos para a xilogravura.
 TETO_USD = float(os.getenv("CORDEL_TETO_USD", "0.10"))
+# com a chave própria os modelos caros ficam liberados: o freio é mais folgado, mas existe
+TETO_PROPRIA_USD = float(os.getenv("CORDEL_TETO_PROPRIA_USD", "0.50"))
 RESERVA_IMAGEM_USD = 0.01
 # reescritas pelo sentido depois do júri, e rodadas de métrica permitidas em cada uma
 MAX_REESCRITAS = 2
@@ -116,12 +156,19 @@ RODADAS_POR_REESCRITA = 4
 GRAVES = {"contradiz", "inventa"}
 
 
-def chave_juizo(av: dict | None) -> tuple:
-    """Menor é melhor: erro de fato pesa mais que verso confuso, e os dois mais que as notas."""
+def chave_juizo(av: dict | None, prioridade: str = "noticia") -> tuple:
+    """Menor é melhor: erro de fato pesa mais que tudo, depois a notícia que ficou faltando.
+    Com prioridade na notícia, fidelidade e coerência vêm antes dos versos apontados; com
+    prioridade na forma, é como era: os apontados, depois as notas."""
     if av is None:
         return (float("inf"),)
     graves = sum(a["tipo"] in GRAVES for a in av["apontados"])
-    return (graves, len(av["apontados"]), -(av["fidelidade"] + av["coerencia"]), -(av["termos"] + av["criatividade"]))
+    faltando = len(av.get("faltando") or [])
+    if prioridade == "noticia":
+        return (graves, faltando, -av["fidelidade"], -av["coerencia"], len(av["apontados"]),
+                -(av["termos"] + av["criatividade"]))
+    return (graves, faltando, len(av["apontados"]), -(av["fidelidade"] + av["coerencia"]),
+            -(av["termos"] + av["criatividade"]))
 
 # No Railway, CORDEL_DADOS aponta para o volume montado (/data), que sobrevive
 # aos deploys. Local, as pastas ficam na raiz do projeto.
@@ -132,11 +179,15 @@ PASTAS = {nome: DADOS / nome for nome in ("folhetos", "descarte", "caderno")}
 # ------------------------------------------------------------------ esquemas
 class Fato(pydantic.BaseModel):
     fato: str
+    # o que quem nunca leu a notícia precisa saber: o poema tem de contar tudo isto sozinho,
+    # sem contar com a manchete (cadernos de antes de 16/11 não têm)
+    essencial: list[str] = []
     titulo: str
     imagens_concretas: list[str]
 
 
 class Estrofe(pydantic.BaseModel):
+    cobre: list[str] = []  # os pontos essenciais que a estrofe conta (vem no plano, antes dos versos)
     finais: list[str]
     termos: list[str]  # termos do dicionário nordestino planejados para a estrofe
     versos: list[str]
@@ -158,6 +209,8 @@ class Avaliacao(pydantic.BaseModel):
     candidata: int
     comentario: str
     apontados: list[VersoApontado]
+    # pontos essenciais que quem lê só o poema (sem a manchete) não fica sabendo
+    faltando: list[str] = []
     fidelidade: int  # as notas vêm depois dos apontados: o modelo olha os versos antes de dar nota
     coerencia: int
     termos: int
@@ -182,13 +235,13 @@ class Correcao(pydantic.BaseModel):
 # ---------------------------------------------------------------- modelo
 async def gerar(
     sistema: str, usuario: str, output_type: type[pydantic.BaseModel], log: list,
-    cfg: Config, etapa: str = "", conversa: list | None = None,
+    cfg: Config, etapa: str = "", conversa: list | None = None, *, ia: IA,
 ) -> Any:
     """Uma chamada estruturada ao modelo de texto, registrada na íntegra no log.
 
     `conversa` guarda os turnos anteriores de uma mesma conversa e recebe os novos. Só vai o
     texto da resposta, sem o raciocínio, para o histórico não encarecer a cada rodada."""
-    model = ai.get_model(cfg.texto)
+    model = ia.modelo(cfg.texto)
     params = ai.InferenceRequestParams(reasoning=ai.ReasoningParams(effort=cfg.raciocinio))
     anteriores = conversa or []
     t0 = time.monotonic()
@@ -225,13 +278,13 @@ async def _consumir(stream) -> str | None:
     return response_id
 
 
-async def uso_da_imagem(response_id: str | None) -> dict | None:
+async def uso_da_imagem(response_id: str | None, ia: IA) -> dict | None:
     """O SDK só repassa o uso do modelo hospedeiro; a geração da imagem é cobrada à
     parte e aparece em tool_usage.image_gen da resposta, que buscamos pelo id."""
     if not response_id:
         return None
     try:
-        r = await openai.AsyncOpenAI().responses.retrieve(response_id)
+        r = await ia.cliente.responses.retrieve(response_id)
         ig = (r.model_dump().get("tool_usage") or {}).get("image_gen") or {}
     except openai.OpenAIError:
         return None
@@ -242,7 +295,7 @@ async def uso_da_imagem(response_id: str | None) -> dict | None:
             "imagem_saida": sai.get("image_tokens") or ig.get("output_tokens") or 0}
 
 
-async def gerar_xilogravura(fato: Fato, log: list, cfg: Config) -> bytes | None:
+async def gerar_xilogravura(fato: Fato, log: list, cfg: Config, ia: IA) -> bytes | None:
     """Imagem pela ferramenta image_generation da OpenAI (provider tool do SDK)."""
     prompt = prompts.prompt_xilogravura(fato.fato, fato.imagens_concretas)
     modelo_imagem, qualidade = IMAGENS[cfg.imagem_qualidade]
@@ -254,7 +307,7 @@ async def gerar_xilogravura(fato: Fato, log: list, cfg: Config) -> bytes | None:
     )
     t0 = time.monotonic()
     async with ai.stream(
-        ai.get_model(IMAGE_HOST_MODEL), [ai.user_message(prompt)],
+        ia.modelo(IMAGE_HOST_MODEL), [ai.user_message(prompt)],
         tools=[tool], params=params,
     ) as stream:
         response_id = await _consumir(stream)
@@ -265,7 +318,7 @@ async def gerar_xilogravura(fato: Fato, log: list, cfg: Config) -> bytes | None:
         "response_id": response_id,
         "usuario": prompt,
         "tokens": _uso(stream.usage),
-        "tokens_imagem": await uso_da_imagem(response_id),
+        "tokens_imagem": await uso_da_imagem(response_id, ia),
         "segundos": round(time.monotonic() - t0, 1),
     })
     for f in stream.message.files:
@@ -420,6 +473,9 @@ def regras_do_grupo(estrofes: list[list[str]], cfg: "Config") -> list[dict]:
     return achados
 
 
+REGRAS_DO_DICIONARIO = {3, 7}
+
+
 def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
     """Mede cada estrofe no escandir.py com o esquema escolhido, e a deixa entre elas."""
     unica = len(estrofes) == 1
@@ -427,6 +483,10 @@ def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
                for e, vs in enumerate(estrofes, 1)]
     deixa = ligacoes_em_deixa(estrofes) if cfg.encadeamento == "deixa" else []
     regras = regras_do_grupo(estrofes, cfg)
+    # com a notícia em primeiro lugar, o dicionário (regras 3 e 7) só avisa: trocar um verso
+    # que conta bem a notícia por outro que encaixa um termo era o que mais tirava o sentido
+    sugestoes = [r for r in regras if r["regra"] in REGRAS_DO_DICIONARIO] if cfg.prioridade == "noticia" else []
+    regras = [r for r in regras if r not in sugestoes]
     reprovados = sorted({(e, n) for e, m in enumerate(medidas, 1) for n in versos_reprovados(m)}
                         | {(d["estrofe"], 1) for d in deixa if not d["ok"]}
                         | {(r["estrofe"], r["n"]) for r in regras})
@@ -439,7 +499,10 @@ def medir_poema(estrofes: list[list[str]], cfg: "Config") -> dict:
     if regras:
         relatorio += "\n\n  regras do grupo:\n" + "\n".join(
             f"  XX estrofe {r['estrofe']}, verso {r['n']} (regra {r['regra']}): {r['motivo']}" for r in regras)
-    return {"medidas": medidas, "deixa": deixa, "regras": regras, "reprovados": reprovados, "forma_ok": forma_ok,
+    if sugestoes:
+        relatorio += "\n\n  sugestões do dicionário (não reprovam: a prioridade é a notícia):\n" + "\n".join(
+            f"  ~~ estrofe {r['estrofe']}, verso {r['n']} (regra {r['regra']}): {r['motivo']}" for r in sugestoes)
+    return {"medidas": medidas, "deixa": deixa, "regras": regras, "sugestoes": sugestoes, "reprovados": reprovados, "forma_ok": forma_ok,
             "entra": forma_ok and all(m["entra"] for m in medidas) and all(d["ok"] for d in deixa) and not regras,
             "relatorio": relatorio}
 
@@ -465,12 +528,33 @@ def motivo_descarte(mp: dict, estrofes: list[list[str]], cfg: "Config") -> str:
 # ---------------------------------------------------------------- o laço
 async def run_cordel(
     noticia: str = "", url: str = "", com_imagem: bool = True, cfg: Config | None = None,
-    autor: str = "",
+    autor: str = "", *, chave: str, chave_propria: bool = False,
 ) -> AsyncIterator[dict]:
-    cfg = (cfg or Config()).validar()
+    """Roda uma geração com a chave dada. Cada evento que vai à tela também vai para o
+    caderno (`eventos`), com o segundo em que saiu: é dele que a página /geracao/<id>
+    remonta a linha do tempo depois."""
+    cfg = (cfg or Config()).validar(OPCOES_CHAVE_PROPRIA if chave_propria else OPCOES)
+    ia, eventos, t0 = IA(chave), [], time.monotonic()
+    try:
+        async with contextlib.aclosing(_run_cordel(noticia, url, com_imagem, cfg, autor, ia,
+                                                   chave_propria, eventos)) as etapas:
+            async for ev in etapas:
+                eventos.append({**ev, "t": round(time.monotonic() - t0, 1)})
+                yield ev
+    finally:
+        await ia.fechar()
+
+
+async def _run_cordel(
+    noticia: str, url: str, com_imagem: bool, cfg: Config, autor: str, ia: IA,
+    chave_propria: bool, ja_enviados: list,
+) -> AsyncIterator[dict]:
     noticia, url = noticia.strip(), url.strip()
+    teto = TETO_PROPRIA_USD if chave_propria else TETO_USD
+    # só diz de quem foi a chave, nunca a chave
     log: dict = {"inicio": _agora(), "autor": autor or None,
                  "url": url or None, "config": {**asdict(cfg), "com_imagem": com_imagem},
+                 "chave": "propria" if chave_propria else "professor",
                  "chamadas": [], "rodadas": []}
     chamadas = log["chamadas"]
 
@@ -496,14 +580,14 @@ async def run_cordel(
 
     # 1. fato
     yield {"etapa": "fato", "status": "rodando"}
-    fato: Fato = await gerar(prompts.SISTEMA_FATO, noticia, Fato, chamadas, cfg, "fato")
+    fato: Fato = await gerar(prompts.SISTEMA_FATO, noticia, Fato, chamadas, cfg, "fato", ia=ia)
     log["fato"] = fato.model_dump()
     yield {"etapa": "fato", "status": "ok", **fato.model_dump()}
 
     # 5. a xilogravura só depende do fato: roda em paralelo com o laço do texto
     imagem_task = None
     if com_imagem:
-        imagem_task = asyncio.create_task(gerar_xilogravura(fato, chamadas, cfg))
+        imagem_task = asyncio.create_task(gerar_xilogravura(fato, chamadas, cfg, ia))
         yield {"etapa": "xilogravura", "status": "rodando"}
 
     # 2. candidatas: várias sextilhas em paralelo, cada uma por um ângulo
@@ -511,20 +595,27 @@ async def run_cordel(
     angulos = (random.sample(list(prompts.NARRADORES.values()), min(cfg.candidatas, len(prompts.NARRADORES)))
                if cfg.narrador == "sortear" else [prompts.NARRADORES[cfg.narrador]] * cfg.candidatas)
     yield {"etapa": "candidatas", "status": "rodando", "angulos": angulos}
-    sistema_poeta = prompts.sistema_poema(cfg.forma, cfg.estrofes, cfg.encadeamento)
+    # cada candidata vê um sorteio diferente do dicionário, puxado para os termos menos usados
+    usos = dicionario.usos_recentes(_poemas_recentes())
+    sorteios = [dicionario.sortear(usos, random) for _ in angulos]
+    log["dicionario"] = {"mais_usados": dict(sorted(usos.items(), key=lambda x: -x[1])[:12]),
+                         "sorteios": [{k: d[k] for k in ("termos", "evitar")} for d in sorteios]}
+    sistemas = [prompts.sistema_poema(cfg.forma, cfg.estrofes, cfg.encadeamento, cfg.prioridade, d["texto"])
+                for d in sorteios]
     # uma conversa por candidata: quem corrige depois é o mesmo Poeta que escreveu
     conversas = [[] for _ in angulos]
     geradas = await asyncio.gather(*(
-        gerar(sistema_poeta,
-              prompts.usuario_poema(fato.fato, fato.imagens_concretas, a, noticia),
-              Poema, chamadas, cfg, "candidata", conversa=c)
-        for a, c in zip(angulos, conversas)), return_exceptions=True)
-    candidatas, conversas_ok = [], []
-    for a, g, c in zip(angulos, geradas, conversas):
+        gerar(sp,
+              prompts.usuario_poema(fato.fato, fato.essencial, fato.imagens_concretas, a, noticia),
+              Poema, chamadas, cfg, "candidata", conversa=c, ia=ia)
+        for a, c, sp in zip(angulos, conversas, sistemas)), return_exceptions=True)
+    candidatas, conversas_ok, sistemas_ok = [], [], []
+    for a, g, c, sp in zip(angulos, geradas, conversas, sistemas):
         if isinstance(g, BaseException):
             log.setdefault("erros_candidatas", []).append(f"{a}: {g}")
             continue
         conversas_ok.append(c)
+        sistemas_ok.append(sp)
         ests = [[v.strip() for v in e.versos if v.strip()] for e in g.estrofes]
         mp = medir_poema(ests, cfg)
         candidatas.append({"angulo": a, "plano": g.angulo, "finais": [e.finais for e in g.estrofes],
@@ -535,7 +626,7 @@ async def run_cordel(
     log["candidatas"] = candidatas
     yield {"etapa": "candidatas", "status": "ok", "candidatas": candidatas}
 
-    teto_texto = TETO_USD - (RESERVA_IMAGEM_USD if com_imagem else 0)
+    teto_texto = teto - (RESERVA_IMAGEM_USD if com_imagem else 0)
     def estourou() -> bool:
         return custos.resumo(log)["total"] >= teto_texto
 
@@ -558,22 +649,22 @@ async def run_cordel(
             fila.put_nowait({
                 "etapa": "escansao", "candidata": i, "rodada": rodada, "estrofes": [list(vs) for vs in estrofes],
                 "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
-                "deixa": mp["deixa"], "regras": mp["regras"], "entra": mp["entra"], "reprovados": reprovados,
+                "deixa": mp["deixa"], "regras": mp["regras"], "sugestoes": mp["sugestoes"], "entra": mp["entra"], "reprovados": reprovados,
                 "relatorio": mp["relatorio"]})
             if mp["entra"] or rodada >= limite or not mp["forma_ok"] or not reprovados:
                 return
             if estourou():
                 log["parou_no_teto"] = f"correção {rodada + 1}"
                 fila.put_nowait({"etapa": "teto", "onde": f"correção {rodada + 1}",
-                                 "gasto": custos.resumo(log)["total"], "teto": TETO_USD})
+                                 "gasto": custos.resumo(log)["total"], "teto": teto})
                 return
             rodada = res["rodada"] = rodada + 1
             fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "rodando", "rodada": rodada,
                              "reprovados": reprovados})
             corr: Correcao = await gerar(
-                sistema_poeta,
-                prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados, fato.fato),
-                Correcao, chamadas, cfg, "correção", conversa=conversas_ok[i],
+                sistemas_ok[i],
+                prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados, fato.fato, fato.essencial),
+                Correcao, chamadas, cfg, "correção", conversa=conversas_ok[i], ia=ia,
             )
             mudancas = []
             alvo = set(reprovados)
@@ -624,8 +715,9 @@ async def run_cordel(
     async def avaliar(indices: list[int]) -> dict[int, dict]:
         juizo: Juizo = await gerar(
             prompts.SISTEMA_JUIZ,
-            prompts.usuario_juizo(noticia, fato.fato, [(candidatas[i]["angulo"], resultados[i]["estrofes"]) for i in indices]),
-            Juizo, chamadas, cfg, "júri",
+            prompts.usuario_juizo(noticia, fato.fato, fato.essencial,
+                                  [(candidatas[i]["angulo"], resultados[i]["estrofes"]) for i in indices]),
+            Juizo, chamadas, cfg, "júri", ia=ia,
         )
         notas = {}
         for av in juizo.avaliacoes:
@@ -648,7 +740,7 @@ async def run_cordel(
     avaliacoes: dict[int, dict] = {}
     if aprovadas and estourou():
         log["parou_no_teto"] = "júri"
-        yield {"etapa": "teto", "onde": "júri", "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
+        yield {"etapa": "teto", "onde": "júri", "gasto": custos.resumo(log)["total"], "teto": teto}
     elif aprovadas:
         yield {"etapa": "julgamento", "status": "rodando"}
         try:
@@ -656,7 +748,7 @@ async def run_cordel(
         except Exception as e:  # o júri falhar não derruba um folheto já aprovado
             log["erro_juri"] = str(e)
         if avaliacoes:
-            escolhida = min(aprovadas, key=lambda i: chave_juizo(avaliacoes.get(i)))
+            escolhida = min(aprovadas, key=lambda i: chave_juizo(avaliacoes.get(i), cfg.prioridade))
             if escolhida in avaliacoes:
                 justificativa = avaliacoes[escolhida]["comentario"]
     log["escolhida"] = {"indice": escolhida, "justificativa": justificativa}
@@ -671,24 +763,26 @@ async def run_cordel(
     avaliacao = avaliacoes.get(escolhida)
     log["reescritas"] = []
     for volta in range(1, MAX_REESCRITAS + 1):
-        if not avaliacao or not avaliacao["apontados"]:
+        if not avaliacao or not (avaliacao["apontados"] or avaliacao.get("faltando")):
             break
         if estourou():
             log["parou_no_teto"] = f"reescrita {volta}"
-            yield {"etapa": "teto", "onde": f"reescrita {volta}", "gasto": custos.resumo(log)["total"], "teto": TETO_USD}
+            yield {"etapa": "teto", "onde": f"reescrita {volta}", "gasto": custos.resumo(log)["total"], "teto": teto}
             break
-        apontados = avaliacao["apontados"]
+        apontados, faltando = avaliacao["apontados"], avaliacao.get("faltando") or []
         antes = {"estrofes": [list(vs) for vs in res["estrofes"]], "mp": res["mp"], "rodada": res["rodada"],
                  "rodadas": list(res["rodadas"])}
-        yield {"etapa": "sentido", "status": "rodando", "volta": volta, "apontados": apontados}
-        registro = {"volta": volta, "apontados": apontados, "mudancas": [], "aceita": False}
+        yield {"etapa": "sentido", "status": "rodando", "volta": volta, "apontados": apontados, "faltando": faltando}
+        registro = {"volta": volta, "apontados": apontados, "faltando": faltando, "mudancas": [], "aceita": False}
         nova = None
         try:
             corr: Correcao = await gerar(
-                sistema_poeta, prompts.usuario_sentido(res["estrofes"], apontados, fato.fato),
-                Correcao, chamadas, cfg, "sentido", conversa=conversas_ok[escolhida],
+                sistemas_ok[escolhida], prompts.usuario_sentido(res["estrofes"], apontados, faltando, fato.fato, fato.essencial),
+                Correcao, chamadas, cfg, "sentido", conversa=conversas_ok[escolhida], ia=ia,
             )
-            alvo = {(a["estrofe"], a["n"]) for a in apontados}
+            # para contar o que falta, o Poeta pode mexer em qualquer verso; se não, só nos apontados
+            alvo = ({(e, n) for e, vs in enumerate(res["estrofes"], 1) for n in range(1, len(vs) + 1)}
+                    if faltando else {(a["estrofe"], a["n"]) for a in apontados})
             for c in corr.versos:
                 if (c.estrofe, c.n) in alvo and c.verso.strip():
                     registro["mudancas"].append({"estrofe": c.estrofe, "n": c.n, "antes": res["estrofes"][c.estrofe - 1][c.n - 1],
@@ -703,7 +797,7 @@ async def run_cordel(
                     nova = (await avaliar([escolhida])).get(escolhida)
         except Exception as e:  # a reescrita falhar não derruba um folheto já aprovado
             registro["erro"] = str(e)
-        registro["aceita"] = nova is not None and chave_juizo(nova) < chave_juizo(avaliacao)
+        registro["aceita"] = nova is not None and chave_juizo(nova, cfg.prioridade) < chave_juizo(avaliacao, cfg.prioridade)
         registro["avaliacao"], registro["estrofes"] = nova, [list(vs) for vs in res["estrofes"]]
         log["reescritas"].append(registro)
         if registro["aceita"]:
@@ -759,17 +853,30 @@ async def run_cordel(
                rodadas_de_correcao=rodada, arquivos=arquivos)
     custo = custos.resumo(log)
     log["custo_estimado_usd"] = {k: round(v, 5) for k, v in custo.items() if k in ("texto", "imagem", "total")}
+    fim = {"etapa": "fim", "id": slug, "entra": entra, "motivo": motivo, "titulo": fato.titulo, "autor": autor or None,
+           "url": url or None, "fonte": origem["fonte"], "avaliacao": avaliacao,
+           "estrofes": estrofes, "rodadas": rodada, "duvidas": duvidas,
+           "arquivos": {**arquivos, "caderno": f"caderno/{slug}.json"},
+           "custo": log["custo_estimado_usd"]}
+    log["eventos"] = [*ja_enviados, fim]
     (PASTAS["caderno"] / f"{slug}.json").write_text(
         json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
-    arquivos["caderno"] = f"caderno/{slug}.json"
-
-    yield {"etapa": "fim", "entra": entra, "motivo": motivo, "titulo": fato.titulo, "autor": autor or None,
-           "url": url or None, "fonte": origem["fonte"], "avaliacao": avaliacao,
-           "estrofes": estrofes, "rodadas": rodada, "duvidas": duvidas, "arquivos": arquivos,
-           "custo": log["custo_estimado_usd"]}
+    yield fim
 
 
 # ------------------------------------------------------------------- util
+RECENTES = 30
+
+
+def _poemas_recentes() -> list[list[list[str]]]:
+    """Os poemas finais das últimas gerações, para o rodízio do dicionário."""
+    poemas = []
+    for f in sorted(PASTAS["caderno"].glob("*.json"), reverse=True)[:RECENTES]:
+        with contextlib.suppress(OSError, ValueError):
+            poemas.append(json.loads(f.read_text(encoding="utf-8")).get("estrofes_finais") or [])
+    return poemas
+
+
 def _agora() -> str:
     """Hora com fuso (ex.: +00:00 no Railway), para o navegador converter para o
     horário de quem está vendo. Sem fuso, o navegador leria como hora local."""
@@ -786,4 +893,9 @@ def _slug(titulo: str) -> str:
     s = unicodedata.normalize("NFD", titulo.lower())
     s = "".join(c for c in s if unicodedata.category(c) != "Mn")
     s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")[:48] or "folheto"
-    return f"{datetime.now():%Y%m%d-%H%M%S}-{s}"
+    base = f"{datetime.now():%Y%m%d-%H%M%S}-{s}"
+    # duas pessoas gerando a mesma notícia no mesmo segundo não podem sobrescrever uma à outra
+    slug, n = base, 2
+    while (PASTAS["caderno"] / f"{slug}.json").exists():
+        slug, n = f"{base}-{n}", n + 1
+    return slug

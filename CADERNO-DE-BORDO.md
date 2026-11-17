@@ -198,6 +198,21 @@ Observado nos registros e nos experimentos de 28/09 (números em
   "Na feira, caixa dos peito espanta". Isso fere a regra 12, que o código não consegue
   conferir; só o júri pesa, e o júri só roda com 2 ou mais candidatas.
 
+- **A manchete fazendo o trabalho do poema** (conversa com o professor e a turma, 16/11).
+  O Poeta contava com o título do folheto para dar a notícia: os versos ficavam com o clima
+  do fato e sem o fato. A correção só amarrava o poema a uma frase curta (`fato`) e deixava os
+  detalhes escaparem. Resposta: a etapa do fato extrai os pontos `essencial` (quem, o quê,
+  onde/quando, número), o Poeta planeja qual estrofe conta cada um, e o júri lê "como quem não
+  viu a manchete" e lista o que ficou `faltando`, o que dispara a reescrita.
+- **Forma e dicionário à frente da notícia** (16/11). As regras 3 e 7 reprovavam o verso, e
+  em até 10 rodadas o modelo trocava sentido por termo. Foi criada a **prioridade**, ligada por
+  padrão na notícia: o dicionário vira sugestão e o júri escolhe pela fidelidade. A prioridade
+  "forma" mantém o comportamento anterior, para comparação. A métrica continua obrigatória nas
+  duas: é a restrição do eixo.
+- **Sempre os mesmos termos** (16/11). "Terreiro" e "magote" voltavam em quase todo poema.
+  Cada candidata passa a ver só um sorteio do dicionário, puxado para os termos menos usados
+  nas últimas gerações (o sorteio fica no caderno, em `dicionario`).
+
 ✍️ Grupo: acrescentem o que vocês viram nas gerações da coleção.
 
 ---

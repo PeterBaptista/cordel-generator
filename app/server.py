@@ -1,18 +1,26 @@
 """Mini servidor para testar o gerador: uv run uvicorn app.server:app --reload"""
 
 import json
-import os
+import re
+import time
 import traceback
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import cadernos, criacomp, custos, dicionario, prompts
-from .workflow import ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, PASTAS, RAIZ, Config, run_cordel
+from . import cadernos, contas, criacomp, custos, dicionario, linha_do_tempo, prompts
+from .workflow import (CHAVE_PROFESSOR, ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, OPCOES_CHAVE_PROPRIA,
+                       PASTAS, RAIZ, TETO_PROPRIA_USD, TETO_USD, Config, run_cordel)
 
 app = FastAPI(title="Do 7 ao 6")
+contas.iniciar()
+
+
+@app.exception_handler(contas.ErroConta)
+def erro_conta(_request: Request, e: contas.ErroConta):
+    return JSONResponse({"detail": e.mensagem}, status_code=e.status)
 
 # Quantas gerações aparecem no cordão da home; as outras ficam em /sextilhas.
 ULTIMAS = 10
@@ -38,6 +46,113 @@ for nome, pasta in PASTAS.items():
     app.mount(f"/{nome}", StaticFiles(directory=pasta), name=nome)
 
 
+# ------------------------------------------------------------------ contas
+def _ip(request: Request) -> str:
+    # atrás do proxy do Railway, o IP de quem pediu é o primeiro do X-Forwarded-For
+    return (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+
+
+def _https(request: Request) -> bool:
+    return request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+
+
+def usuario_atual(request: Request) -> dict | None:
+    return contas.da_sessao(request.cookies.get(contas.COOKIE))
+
+
+def admin(usuario: dict | None = Depends(usuario_atual)) -> dict:
+    if not usuario or not usuario["admin"]:
+        raise HTTPException(403, "Só o professor (admin) abre esta página.")
+    return usuario
+
+
+def _so_json(request: Request) -> None:
+    """Pedido de outro site não manda JSON sem permissão do navegador (CORS): com isso e o
+    cookie SameSite=Lax, ninguém gera nem muda conta em nome de quem está logado."""
+    if not request.headers.get("content-type", "").startswith("application/json"):
+        raise HTTPException(415, "Mande o pedido em JSON.")
+
+
+def _logar(resposta: Response, request: Request, usuario: dict) -> dict:
+    resposta.set_cookie(contas.COOKIE, contas.abrir_sessao(usuario["id"]), max_age=contas.SESSAO_DIAS * 86400,
+                        httponly=True, samesite="lax", secure=_https(request), path="/")
+    return usuario
+
+
+class Cadastro(BaseModel):
+    convite: str = ""
+    login: str
+    nome: str
+    senha: str
+
+
+class Entrada(BaseModel):
+    login: str
+    senha: str
+
+
+@app.post("/api/cadastro", dependencies=[Depends(_so_json)])
+def cadastro(dados: Cadastro, request: Request, resposta: Response):
+    return _logar(resposta, request, contas.cadastrar(dados.convite, dados.login, dados.nome, dados.senha, _ip(request)))
+
+
+@app.post("/api/entrar", dependencies=[Depends(_so_json)])
+def entrar(dados: Entrada, request: Request, resposta: Response):
+    return _logar(resposta, request, contas.entrar(dados.login, dados.senha, _ip(request)))
+
+
+@app.post("/api/sair")
+def sair(request: Request, resposta: Response):
+    contas.fechar_sessao(request.cookies.get(contas.COOKIE))
+    resposta.delete_cookie(contas.COOKIE, path="/")
+    return {"ok": True}
+
+
+@app.get("/api/eu")
+def eu(usuario: dict | None = Depends(usuario_atual)):
+    """Quem está logado, a cota de hoje, e se o site ainda tem a chave do professor."""
+    base = {"chave_professor": bool(CHAVE_PROFESSOR), "cadastro_aberto": bool(contas.CONVITE)}
+    if not usuario:
+        return {"logado": False, **base}
+    return {"logado": True, **usuario, "usadas_hoje": contas.usadas_hoje(usuario["id"]), **base}
+
+
+@app.get("/admin")
+def admin_pagina():
+    return pagina("admin.html")
+
+
+@app.get("/api/admin/usuarios")
+def admin_usuarios(_: dict = Depends(admin)):
+    return {"usuarios": contas.listar(), "cota_padrao": contas.COTA_DIA, "teto_por_geracao": TETO_USD}
+
+
+class NovoUsuario(BaseModel):
+    login: str
+    nome: str
+    senha: str
+
+
+class Mudanca(BaseModel):
+    bloqueado: bool | None = None
+    cota: int | None = None
+    cota_padrao: bool = False
+    senha: str | None = None
+
+
+@app.post("/api/admin/usuarios", dependencies=[Depends(_so_json)])
+def admin_criar(dados: NovoUsuario, _: dict = Depends(admin)):
+    return contas.criar(dados.login, dados.nome, dados.senha)
+
+
+@app.post("/api/admin/usuarios/{usuario_id}", dependencies=[Depends(_so_json)])
+def admin_alterar(usuario_id: int, dados: Mudanca, quem: dict = Depends(admin)):
+    if usuario_id == quem["id"] and dados.bloqueado:
+        raise HTTPException(422, "Você não pode bloquear a própria conta.")
+    contas.alterar(usuario_id, dados.bloqueado, dados.cota, dados.senha, dados.cota_padrao)
+    return {"ok": True}
+
+
 class Pedido(BaseModel):
     autor: str = ""
     noticia: str = ""
@@ -54,6 +169,23 @@ def home():
 @app.get("/gerador")
 def gerador():
     return pagina("index.html")
+
+
+@app.get("/geracao/{nome}")
+def geracao_pagina(nome: str):
+    return pagina("index.html")
+
+
+@app.get("/api/geracao/{nome}")
+def geracao(nome: str):
+    """Os eventos de uma geração, para a página remontar a linha do tempo."""
+    if not re.fullmatch(r"[\w-]{1,120}", nome) or not (f := PASTAS["caderno"] / f"{nome}.json").is_file():
+        raise HTTPException(404, "Essa geração não está no caderno.")
+    log = json.loads(f.read_text(encoding="utf-8"))
+    evs, reconstruido = linha_do_tempo.eventos(log, nome)
+    cfg, _ = cadernos.config(log)
+    return {"id": nome, "eventos": evs, "reconstruido": reconstruido, "config": cfg,
+            "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor")}
 
 
 @app.get("/sextilhas")
@@ -186,26 +318,72 @@ def historico():
 @app.get("/api/config")
 def config():
     from dataclasses import asdict
-    return {"padrao": asdict(Config()), "economico": ECONOMICO, "opcoes": OPCOES, "max_rodadas": MAX_RODADAS,
+    return {"padrao": asdict(Config()), "economico": ECONOMICO, "opcoes": OPCOES,
+            "opcoes_chave_propria": OPCOES_CHAVE_PROPRIA, "max_rodadas": MAX_RODADAS,
+            "teto": TETO_USD, "teto_propria": TETO_PROPRIA_USD,
             "imagens": {k: {"modelo": m, "qualidade": q} for k, (m, q) in IMAGENS.items()},
             "precos": {m: {"entrada": e, "saida": o} for m, (e, _, o) in custos.PRECOS.items()},
             "formas": {nome: {"esquema": esq, "regra": regra} for nome, (esq, regra) in prompts.FORMAS.items()},
             "narradores": prompts.NARRADORES}
 
 
-@app.post("/api/cordel")
-async def cordel(pedido: Pedido):
-    autor = " ".join(pedido.autor.split())
+CHAVE_OK = re.compile(r"sk-[A-Za-z0-9_\-]{20,300}")
+# uma geração por vez por pessoa: abrir várias abas não multiplica o gasto. A trava vence
+# sozinha: se a página fechar antes do streaming começar, o finally abaixo nem roda.
+gerando: dict[int, float] = {}
+TRAVA_SEGUNDOS = 15 * 60
+
+
+@app.post("/api/cordel", dependencies=[Depends(_so_json)])
+async def cordel(pedido: Pedido, request: Request, usuario: dict | None = Depends(usuario_atual)):
+    """Com a chave do próprio usuário (cabeçalho X-OpenAI-Key), não precisa de conta: o gasto
+    é dele. Sem ela, gera com a chave do professor, e aí precisa entrar e ter cota."""
+    chave_propria = (request.headers.get("x-openai-key") or "").strip()
+    if chave_propria and not CHAVE_OK.fullmatch(chave_propria):
+        raise HTTPException(422, "Essa chave não parece uma chave da OpenAI (começa com sk-).")
+    if not chave_propria:
+        if not CHAVE_PROFESSOR:
+            raise HTTPException(402, "Este site não tem mais a chave do professor. Coloque a sua nas configurações.")
+        if not usuario:
+            raise HTTPException(401, "Entre com sua conta para gerar com a chave do professor.")
+    autor = usuario["nome"] if usuario else " ".join(pedido.autor.split())
     if not autor or len(autor) > 60:
         raise HTTPException(422, "Coloque seu nome (até 60 caracteres) para gerar.")
+    opcoes = OPCOES_CHAVE_PROPRIA if chave_propria else OPCOES
+    try:
+        cfg = Config(**{k: v for k, v in pedido.config.items() if k in opcoes}).validar(opcoes)
+    except (TypeError, ValueError) as e:
+        raise HTTPException(422, f"Configuração inválida: {e}") from None
+    uso = None
+    if not chave_propria:
+        if time.time() - gerando.get(usuario["id"], 0) < TRAVA_SEGUNDOS:
+            raise HTTPException(429, "Você já tem uma geração em andamento. Espere ela terminar.")
+        uso = contas.reservar(usuario)
+        gerando[usuario["id"]] = time.time()
+    chave = chave_propria or CHAVE_PROFESSOR
+
+    def sem_chave(texto: str) -> str:
+        # uma mensagem de erro nunca devolve a chave, nem pedaço dela
+        return texto.replace(chave, "sk-…") if chave else texto
 
     async def eventos():
+        fim, gastou = None, False
         try:
-            cfg = Config(**{k: v for k, v in pedido.config.items() if k in OPCOES})
-            async for ev in run_cordel(pedido.noticia, pedido.url, pedido.com_imagem, cfg, autor):
+            async for ev in run_cordel(pedido.noticia, pedido.url, pedido.com_imagem, cfg, autor,
+                                       chave=chave, chave_propria=bool(chave_propria)):
+                gastou = gastou or ev.get("etapa") != "noticia"  # a notícia não abrir não custa nada
+                if ev.get("etapa") == "fim":
+                    fim = ev
                 yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
         except Exception as e:
             traceback.print_exc()
-            yield f"data: {json.dumps({'etapa': 'erro', 'erro': f'{type(e).__name__}: {e}'})}\n\n"
+            yield f"data: {json.dumps({'etapa': 'erro', 'erro': sem_chave(f'{type(e).__name__}: {e}')})}\n\n"
+        finally:
+            if uso is not None:
+                gerando.pop(usuario["id"], None)
+                if gastou:
+                    contas.concluir(uso, fim and fim["arquivos"].get("caderno"), fim and (fim.get("custo") or {}).get("total"))
+                else:
+                    contas.cancelar(uso)
 
     return StreamingResponse(eventos(), media_type="text/event-stream")

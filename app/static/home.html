@@ -245,7 +245,8 @@ function legenda(f) {
   const forma = `${TIPOS[f.forma.forma] ?? "sextilha"}, ${f.forma.estrofes} ${f.forma.estrofes === 1 ? "estrofe" : "estrofes"}`;
   return `<p class="legenda">Gerado por <b>${esc(autorDe(f))}</b>. ${partes.join("")}${partes.length ? ". " : ""}${esc(dia(f.inicio))}, ${esc(forma)}.
     <button type="button" data-abrir="${esc(f.id)}">Abrir folheto</button> ·
-    <button type="button" data-id="${esc(f.id)}">Baixar em PNG</button></p>`;
+    <button type="button" data-id="${esc(f.id)}">Baixar em PNG</button> ·
+    <a href="/geracao/${esc(f.id)}">Como foi gerada</a></p>`;
 }
 
 function pendurar(colecao) {
@@ -333,6 +334,7 @@ function fichaHTML(f) {
     <p>${esc(dia(f.inicio))}, ${esc(forma)}. ${esc(rodadas)}</p>
     ${f.url ? `<p><a href="${esc(f.url)}" rel="noopener" target="_blank">Ler a notícia original</a> em ${esc(f.fonte || dominio(f.url))}.</p>` : ""}
     <button type="button" class="acao" id="ab-baixar">Baixar em PNG</button>
+    <p><a href="/geracao/${esc(f.id)}">Ver como foi gerada, passo a passo</a></p>
     <div id="ab-termos"></div>`;
 }
 

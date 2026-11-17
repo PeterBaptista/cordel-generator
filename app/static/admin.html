@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do professor — Notícias em Cordel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Courier+Prime&family=Special+Elite&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root { --papel: #efe4cc; --tinta: #151210; --tinta-2: #4a3f35; --vermelho: #a3301f; --verde: #2f5d3a; --linha: #15121033; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta); font: 15px/1.5 "Libre Baskerville", Georgia, serif; }
+  header { border-bottom: 3px double var(--tinta); padding: 18px 16px 12px; text-align: center; }
+  h1 { font: 700 clamp(24px, 5vw, 36px)/1.1 "Oswald", sans-serif; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+  nav { margin-top: 8px; font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+  nav a { color: var(--tinta); margin: 0 8px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+  h2 { font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin: 24px 0 8px; }
+  p.nota { font-size: 13.5px; color: var(--tinta-2); margin: 4px 0; }
+  .tabela { overflow-x: auto; border: 2px solid var(--tinta); background: #fbf6ea; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { padding: 6px 8px; border-bottom: 1px dotted var(--linha); text-align: left; vertical-align: middle; white-space: nowrap; }
+  th { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; }
+  td.num { font-family: "Courier Prime", monospace; text-align: right; }
+  tr.bloqueado td { color: var(--tinta-2); text-decoration: line-through; }
+  tr.bloqueado td.acoes { text-decoration: none; }
+  input { font: 14px "Libre Baskerville", serif; padding: 6px 8px; border: 2px solid var(--tinta); background: #fbf6ea; color: var(--tinta); }
+  input.cota { width: 64px; padding: 3px 6px; }
+  button { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; padding: 4px 10px; cursor: pointer;
+           background: transparent; color: var(--tinta); border: 2px solid var(--tinta); }
+  button.forte { background: var(--tinta); color: var(--papel); font-size: 14px; padding: 7px 16px; }
+  form.novo { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+  form.novo label { display: grid; gap: 2px; font-size: 12.5px; color: var(--tinta-2); }
+  #msg { font-weight: bold; color: var(--vermelho); min-height: 1.4em; margin: 8px 0; }
+  #msg.ok { color: var(--verde); }
+  .acoes { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Painel do professor</h1>
+  <nav><a href="/">Início</a> · <a href="/gerador">Gerador</a> · <a href="/sextilhas">Sextilhas</a> · <a href="/logs">Logs</a></nav>
+</header>
+<main>
+  <div id="msg" role="status"></div>
+  <section id="painel" hidden>
+    <p class="nota" id="resumo"></p>
+    <h2>Contas</h2>
+    <div class="tabela"><table>
+      <thead><tr><th>Usuário</th><th>Nome</th><th>Hoje</th><th>Cota/dia</th><th>Gerações</th><th>Gasto (US$)</th><th>Última</th><th></th></tr></thead>
+      <tbody id="linhas"></tbody>
+    </table></div>
+    <p class="nota">A cota conta só as gerações com a chave do professor. Quem usa a própria chave não aparece aqui. "Nova senha" também encerra as sessões abertas da pessoa.</p>
+    <h2>Criar conta</h2>
+    <form class="novo" id="novo">
+      <label>Usuário <input id="n-login" required autocapitalize="none" spellcheck="false"></label>
+      <label>Nome no folheto <input id="n-nome" required maxlength="60"></label>
+      <label>Senha provisória <input id="n-senha" required minlength="8"></label>
+      <button class="forte" type="submit">Criar</button>
+    </form>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const usd = (v) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(v);
+const msg = (t, ok = false) => { $("msg").textContent = t; $("msg").className = ok ? "ok" : ""; };
+
+async function enviar(url, corpo) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Não deu certo.");
+  return d;
+}
+
+async function carregar() {
+  const r = await fetch("/api/admin/usuarios");
+  if (!r.ok) {
+    msg(r.status === 403 ? "Esta página é só do professor. Entre pelo gerador com uma conta de admin (CORDEL_ADMINS)." : "Não consegui carregar as contas.");
+    $("painel").hidden = true; return;
+  }
+  const { usuarios, cota_padrao, teto_por_geracao } = await r.json();
+  $("painel").hidden = false;
+  const total = usuarios.reduce((s, u) => s + u.gasto, 0), hoje = usuarios.reduce((s, u) => s + u.hoje, 0);
+  $("resumo").textContent = `${usuarios.length} conta(s) · ${hoje} geração(ões) hoje · US$ ${usd(total)} gastos com a chave do professor no total · `
+    + `cota padrão: ${cota_padrao}/dia · teto por geração: US$ ${usd(teto_por_geracao)}`;
+  $("linhas").innerHTML = usuarios.map((u) => `<tr class="${u.bloqueado ? "bloqueado" : ""}">
+    <td>${esc(u.login)}${u.admin ? " (admin)" : ""}</td><td>${esc(u.nome)}</td>
+    <td class="num">${u.hoje}</td>
+    <td><input class="cota" type="number" min="0" max="1000" value="${u.cota}" data-cota="${u.id}" aria-label="cota de ${esc(u.login)}"></td>
+    <td class="num">${u.geracoes}</td><td class="num">${usd(u.gasto)}</td>
+    <td>${u.ultima ? esc(new Date(u.ultima).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })) : "—"}</td>
+    <td class="acoes">
+      <button type="button" data-bloq="${u.id}" data-v="${!u.bloqueado}">${u.bloqueado ? "desbloquear" : "bloquear"}</button>
+      <button type="button" data-senha="${u.id}" data-login="${esc(u.login)}">nova senha</button>
+    </td></tr>`).join("");
+  document.querySelectorAll("[data-cota]").forEach((i) => i.onchange = () => acao(() =>
+    enviar(`/api/admin/usuarios/${i.dataset.cota}`, { cota: Number(i.value) }), "Cota alterada."));
+  document.querySelectorAll("[data-bloq]").forEach((b) => b.onclick = () => acao(() =>
+    enviar(`/api/admin/usuarios/${b.dataset.bloq}`, { bloqueado: b.dataset.v === "true" }), b.dataset.v === "true" ? "Conta bloqueada." : "Conta desbloqueada."));
+  document.querySelectorAll("[data-senha]").forEach((b) => b.onclick = () => {
+    const senha = prompt(`Nova senha para ${b.dataset.login} (mínimo 8 caracteres):`);
+    if (senha) acao(() => enviar(`/api/admin/usuarios/${b.dataset.senha}`, { senha }), "Senha trocada. Passe a nova para a pessoa.");
+  });
+}
+
+async function acao(f, ok) {
+  try { await f(); msg(ok, true); } catch (e) { msg(e.message); }
+  await carregar();
+}
+
+$("novo").onsubmit = (e) => {
+  e.preventDefault();
+  acao(async () => {
+    await enviar("/api/admin/usuarios", { login: $("n-login").value, nome: $("n-nome").value, senha: $("n-senha").value });
+    $("novo").reset();
+  }, "Conta criada.");
+};
+carregar();
+</script>
+</body>
+</html>

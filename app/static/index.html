@@ -13,6 +13,7 @@
     --vermelho: #a3301f; --verde: #2f5d3a; --linha: #15121033;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0; background: var(--papel); color: var(--tinta);
     font-family: "Libre Baskerville", Georgia, serif; font-size: 16px; line-height: 1.5;
@@ -52,7 +53,9 @@
   .config { border: 2px solid var(--tinta); margin: 14px 0 0; padding: 8px 12px 10px; display: flex; flex-wrap: wrap; gap: 10px 16px; }
   .config legend { font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; padding: 0 6px; }
   .config label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--tinta-2); }
-  .config select { font: 14px "Libre Baskerville", serif; color: var(--tinta); background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 5px 6px; min-width: 0; }
+  .config { min-width: 0; }
+  .config label { min-width: 0; max-width: 100%; }
+  .config select { max-width: 100%; font: 14px "Libre Baskerville", serif; color: var(--tinta); background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 5px 6px; min-width: 0; }
   .estimativa { flex-basis: 100%; font: 13px "Courier Prime", monospace; color: var(--tinta-2); }
   /* cartaz enquanto o cordel está sendo gerado: barras onde ainda não há texto;
      texto já gerado translúcido; versos em correção pulsando */
@@ -133,6 +136,41 @@
   @keyframes tremer { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
   #aviso-gerar { color: var(--vermelho); font-weight: bold; font-size: 14px; margin: 10px 0 0; }
   @media (prefers-reduced-motion: reduce) { .bloco-nome.erro { animation: none; } }
+  /* conta: quem gera com a chave do professor precisa entrar */
+  .bloco-conta { border: 3px solid var(--tinta); background: #fbf6ea; padding: 12px 14px; box-shadow: 4px 4px 0 var(--tinta); margin-bottom: 14px; }
+  .bloco-conta.precisa { border-color: var(--vermelho); box-shadow: 4px 4px 0 var(--vermelho); }
+  .bloco-conta h2 { margin: 0 0 4px; }
+  .bloco-conta p { margin: 4px 0; font-size: 13.5px; color: var(--tinta-2); }
+  .bloco-conta .quem { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 14.5px; }
+  .bloco-conta .quem b { font-family: "Oswald", sans-serif; letter-spacing: .3px; }
+  .abas { display: flex; gap: 0; margin: 8px 0 6px; }
+  .abas button { box-shadow: none; font-size: 13px; padding: 5px 14px; background: transparent; color: var(--tinta); }
+  .abas button[aria-selected="true"] { background: var(--tinta); color: var(--papel); }
+  .form-conta { display: grid; gap: 6px; }
+  .form-conta label { font-size: 12.5px; color: var(--tinta-2); display: grid; gap: 2px; }
+  .form-conta input { font-size: 15px; padding: 8px 10px; }
+  .form-conta button { justify-self: start; margin-top: 4px; }
+  input[type=password] { width: 100%; padding: 10px 12px; border: 2px solid var(--tinta); background: #fbf6ea; color: var(--tinta); font: 15px/1.5 "Courier Prime", monospace; }
+  .msg-conta { font-size: 13.5px; color: var(--vermelho); font-weight: bold; min-height: 1em; }
+  .linkbotao { background: none; border: 0; box-shadow: none; padding: 0; font: inherit; font-size: 13.5px; color: var(--tinta); text-decoration: underline; cursor: pointer; text-transform: none; letter-spacing: 0; }
+  .linkbotao:hover { transform: none; box-shadow: none; }
+  details.ajustes { border: 2px solid var(--tinta); margin: 14px 0 0; padding: 8px 12px; }
+  details.ajustes > summary { font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; color: var(--tinta); }
+  details.ajustes p { font-size: 13px; color: var(--tinta-2); margin: 6px 0; }
+  .linha-chave { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .linha-chave input { flex: 1 1 220px; }
+  .selo-chave { font: 12px "Special Elite", monospace; color: var(--verde); }
+  .prioridade-nota { flex-basis: 100%; font-size: 13px; color: var(--tinta-2); }
+  .sug { color: #8a5a00; font-size: 12.5px; }
+  /* /geracao/<id>: a mesma página, sem o formulário, tocando a linha do tempo do caderno */
+  .replay .so-gerar { display: none !important; }
+  .so-replay { display: none; }
+  .replay .so-replay { display: block; }
+  .cab-replay { border: 3px solid var(--tinta); background: #fbf6ea; padding: 12px 14px; box-shadow: 4px 4px 0 var(--tinta); }
+  .cab-replay h2 { margin: 0 0 4px; }
+  .cab-replay p { margin: 4px 0; font-size: 13.5px; color: var(--tinta-2); }
+  .cab-replay .acoes { margin-top: 8px; }
+  .cab-replay a { color: var(--tinta); }
 </style>
 </head>
 <body>
@@ -145,11 +183,23 @@
 
 <main>
   <section>
-    <div class="bloco-nome" id="bloco-nome">
+    <div class="so-replay cab-replay" id="cab-replay">
+      <h2>Como esta peça foi gerada</h2>
+      <p id="replay-meta">carregando o caderno…</p>
+      <p id="replay-nota"></p>
+      <div class="acoes">
+        <button class="sec" id="replay-tocar" type="button">▶ reproduzir passo a passo</button>
+        <button class="sec" id="replay-refazer" type="button">gerar de novo com estes parâmetros</button>
+        <a href="/sextilhas">todas as sextilhas</a>
+      </div>
+    </div>
+    <div class="bloco-conta so-gerar" id="conta" aria-live="polite"></div>
+    <div class="bloco-nome so-gerar" id="bloco-nome" hidden>
       <label for="autor">Seu nome <span class="exigido" id="nome-estado">obrigatório</span></label>
       <input type="text" id="autor" maxlength="60" required autocomplete="name" placeholder="Escreva aqui como quer aparecer" aria-describedby="nome-ajuda">
       <p id="nome-ajuda" role="status">Sem o nome, o folheto não é gerado. Ele sai impresso no folheto e na página de sextilhas.</p>
     </div>
+    <div class="so-gerar">
     <h2 style="margin-top:18px">A notícia</h2>
     <label class="campo" for="url">Link da notícia</label>
     <input type="url" id="url" placeholder="https://…" autocomplete="off">
@@ -158,10 +208,17 @@
     <textarea id="noticia" placeholder="Título e texto (ou um resumo) da notícia…"></textarea>
     <div class="exemplos">Exemplos de texto: <a data-ex="0">robô na feira</a><a data-ex="1">modelo que joga xadrez</a></div>
     <fieldset class="config">
+      <legend>Prioridade</legend>
+      <label>O que vem primeiro <select id="c-prioridade"></select></label>
+      <div class="prioridade-nota" id="prioridade-nota"></div>
+    </fieldset>
+    <fieldset class="config">
       <legend>Modelos</legend>
+      <label id="l-texto" hidden>Texto <select id="c-texto"></select></label>
+      <label id="l-imagem_qualidade" hidden>Xilogravura <select id="c-imagem_qualidade"></select></label>
       <label>Raciocínio <select id="c-raciocinio"></select></label>
       <label>Candidatas <select id="c-candidatas"></select></label>
-      <div class="estimativa">Texto: gpt-6-luna. Xilogravura: gpt-image-1-mini. São os modelos fixos deste site.</div>
+      <div class="estimativa" id="modelos-fixos">Texto: gpt-6-luna. Xilogravura: gpt-image-1-mini. São os modelos fixos com a chave do professor; com a sua chave (em Configurações), dá para escolher outros.</div>
       <div class="estimativa" id="estimativa"></div>
     </fieldset>
     <fieldset class="config">
@@ -172,11 +229,25 @@
       <label>Narrador <select id="c-narrador"></select></label>
       <div class="estimativa" id="regra"></div>
     </fieldset>
+    <details class="ajustes" id="ajustes">
+      <summary>Configurações: usar a sua chave da OpenAI</summary>
+      <p>Com a sua própria chave, a geração não usa a chave do professor: não precisa de conta, não gasta a cota
+        do dia e libera os outros modelos. O gasto vai para a sua conta da OpenAI (teto de <span id="teto-propria">US$ 0,50</span> por geração).</p>
+      <p>A chave fica <b>só neste navegador</b>. Ela vai junto de cada geração e o servidor não a grava em lugar nenhum.</p>
+      <form class="linha-chave" id="form-chave">
+        <input type="text" name="username" autocomplete="off" hidden aria-hidden="true">
+        <input type="password" id="chave" placeholder="sk-…" autocomplete="off" spellcheck="false" aria-label="Sua chave da OpenAI">
+        <button class="sec" type="submit" id="chave-salvar">usar esta chave</button>
+        <button class="sec" type="button" id="chave-remover">remover</button>
+      </form>
+      <p class="selo-chave" id="chave-estado" role="status"></p>
+    </details>
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
       <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
     </div>
     <p id="aviso-gerar" role="alert"></p>
+    </div>
     <ol id="linha"></ol>
   </section>
 
@@ -223,14 +294,28 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 document.querySelectorAll("[data-ex]").forEach((a) => a.onclick = () => { $("noticia").value = EXEMPLOS[a.dataset.ex]; $("url").value = ""; });
 // ---- seletores de modelo
 const NOMES = { low: "baixo", medium: "médio", high: "alto" };
-const CAMPOS = ["raciocinio", "candidatas", "forma", "estrofes", "encadeamento", "narrador"];
+// texto e xilogravura só se escolhem com a chave própria; com a do professor, são fixos
+const CAMPOS_BASE = ["prioridade", "raciocinio", "candidatas", "forma", "estrofes", "encadeamento", "narrador"];
+const CAMPOS_PROPRIA = ["texto", "imagem_qualidade"];
+const CAMPOS = [...CAMPOS_BASE, ...CAMPOS_PROPRIA];
+const campos = () => chave() ? CAMPOS : CAMPOS_BASE;
+const ROTULOS_PRIORIDADE = { noticia: "a notícia (recomendado)", forma: "a forma (métrica e dicionário obrigatórios)" };
+const NOTAS_PRIORIDADE = {
+  noticia: "O poema tem de contar a notícia sozinho, sem contar com a manchete. Métrica e rima continuam conferidas; o dicionário nordestino vira sugestão (não reprova), e o júri escolhe pela fidelidade.",
+  forma: "Como era antes: além da métrica e da rima, um termo do dicionário a cada 2 versos e uma expressão por estrofe reprovam o verso. O poema ainda precisa contar a notícia.",
+};
+const ROTULOS_IMAGEM = { minima: "mínima (gpt-image-1-mini)", low: "rápida (gpt-image-2, low)", medium: "caprichada (gpt-image-2, medium)" };
+let PRECOS = {};
+// ---- a chave própria: fica só neste navegador
+const CHAVE_LS = "cordel-chave-openai";
+const chave = () => { try { return localStorage.getItem(CHAVE_LS) || ""; } catch { return ""; } };
 const ROTULOS_NARRADOR = { observador: "observador em 1ª pessoa (roteiro fixo)", feira: "causo de feira",
   sertanejo: "sertanejo desconfiado", cantador: "cantador", conselho: "conselho de gente velha", sortear: "sortear (um por candidata)" };
 const NUMERICOS = ["candidatas", "estrofes"];
 const ROTULOS_ENCADEAMENTO = { livre: "livre", deixa: "em deixa (cantoria)" };
 let FORMAS = {}, MAX_RODADAS = 10;
 const usd = (v, c = 2) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD", minimumFractionDigits: c, maximumFractionDigits: c }).format(v);
-const lerCfg = () => Object.fromEntries(CAMPOS.map((k) => {
+const lerCfg = () => Object.fromEntries(campos().map((k) => {
   const v = $(`c-${k}`).value;
   return [k, NUMERICOS.includes(k) ? Number(v) : v];
 }));
@@ -240,6 +325,10 @@ function estimativa() {
   $("estimativa").textContent = "O custo real aparece em Logs" + (c.candidatas > 1 ? " · com mais de 1 candidata, um júri escolhe a melhor" : "");
   // sextilha: a regra do tipo escolhido; deixa só faz sentido com 2+ estrofes
   const f = FORMAS[c.forma];
+  $("prioridade-nota").textContent = NOTAS_PRIORIDADE[c.prioridade] || "";
+  const propria = !!chave();
+  for (const k of CAMPOS_PROPRIA) $(`l-${k}`).hidden = !propria;
+  $("modelos-fixos").hidden = propria;
   $("c-encadeamento").disabled = c.estrofes === 1;
   $("regra").textContent = (f ? `${f.esquema}: ${f.regra}` : "")
     + (c.estrofes > 1 ? ` · ${c.estrofes} estrofes = ${c.estrofes * 6} versos, custa uns ${c.estrofes}× o texto` : "")
@@ -249,11 +338,16 @@ function estimativa() {
 
 // ---- aviso de custo: o raciocínio pede confirmação quando sai da configuração mais
 // barata; forma, estrofes e candidatas ficam livres
-const CAROS = ["raciocinio"];
+const CAROS = ["raciocinio", "texto", "imagem_qualidade"];
 let ECONOMICO = {};
-const rotuloDe = (k, v) => NOMES[v] ?? v;
+const rotuloDe = (k, v) => k === "imagem_qualidade" ? ROTULOS_IMAGEM[v] ?? v : k === "texto" ? v.replace("openai:", "") : NOMES[v] ?? v;
+const precoSaida = (m) => PRECOS[m.replace("openai:", "")]?.saida;
 
 function porqueCusta(k, v) {
+  if (k === "texto")
+    return `Modelo de texto <b>${esc(rotuloDe(k, v))}</b>: ${usd(precoSaida(v))} por 1M tokens de saída, contra ${usd(precoSaida(ECONOMICO.texto))} do mais barato. Vai na sua chave.`;
+  if (k === "imagem_qualidade")
+    return `Xilogravura <b>${esc(rotuloDe(k, v))}</b>: custa alguns centavos a mais por imagem. Vai na sua chave.`;
   return `Raciocínio <b>${esc(NOMES[v] ?? v)}</b>: o modelo gasta mais tokens pensando antes de escrever, e eles são cobrados. `
       + `Num teste com o GPT-5.5, 91% do custo do texto foi raciocínio.`;
 }
@@ -284,9 +378,11 @@ async function confirmarOpcaoCara(k, sel) {
 }
 
 try { $("autor").value = localStorage.getItem("cordel-autor") || ""; } catch {}
-fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, formas, economico, max_rodadas }) => {
+const CONFIG = fetch("/api/config").then((r) => r.json());
+CONFIG.then(async ({ padrao, opcoes, opcoes_chave_propria, formas, economico, max_rodadas, precos, teto_propria }) => {
   MAX_RODADAS = max_rodadas;
-  FORMAS = formas; ECONOMICO = economico;
+  FORMAS = formas; ECONOMICO = economico; PRECOS = precos;
+  $("teto-propria").textContent = usd(teto_propria);
   // opções livres voltam como estavam; as de custo sempre abrem no mais barato
   let salvo = {}, refazer = null;
   try { salvo = JSON.parse(localStorage.getItem("cordel-config") || "{}"); } catch {}
@@ -294,17 +390,20 @@ fetch("/api/config").then((r) => r.json()).then(async ({ padrao, opcoes, formas,
   try { refazer = JSON.parse(localStorage.getItem("cordel-refazer") || "null"); localStorage.removeItem("cordel-refazer"); } catch {}
   salvo = { ...salvo, ...(refazer || {}) };
   for (const k of CAMPOS) {
-    const sel = $(`c-${k}`);
-    sel.innerHTML = opcoes[k].map((v) => `<option value="${esc(v)}">${esc(
+    const sel = $(`c-${k}`), lista = (CAMPOS_PROPRIA.includes(k) ? opcoes_chave_propria : opcoes)[k];
+    sel.innerHTML = lista.map((v) => `<option value="${esc(v)}">${esc(
           NUMERICOS.includes(k) ? v
           : k === "forma" ? `${v} (${formas[v].esquema})` : k === "encadeamento" ? ROTULOS_ENCADEAMENTO[v]
           : k === "narrador" ? ROTULOS_NARRADOR[v] ?? v
-          : NOMES[v] ?? v)}${CAROS.includes(k) && v === economico[k] ? " (mais barato)" : ""}</option>`).join("");
-    sel.value = CAROS.includes(k) ? economico[k] : opcoes[k].includes(salvo[k]) ? salvo[k] : padrao[k];
+          : k === "prioridade" ? ROTULOS_PRIORIDADE[v] ?? v
+          : k === "texto" ? `${rotuloDe(k, v)} · ${usd(precoSaida(v))}/1M saída`
+          : rotuloDe(k, v))}${CAROS.includes(k) && v === economico[k] ? " (mais barato)" : ""}</option>`).join("");
+    sel.value = CAROS.includes(k) ? economico[k] : lista.includes(salvo[k]) ? salvo[k] : padrao[k];
     sel.onchange = async () => { await confirmarOpcaoCara(k, sel); estimativa(); };
   }
   estimativa();
-  const carosDoHistorico = refazer ? CAROS.filter((k) => opcoes[k].includes(refazer[k]) && refazer[k] !== economico[k]) : [];
+  const disponivel = (k) => (CAMPOS_PROPRIA.includes(k) && chave() ? opcoes_chave_propria : opcoes)[k];
+  const carosDoHistorico = refazer ? CAROS.filter((k) => disponivel(k).includes(refazer[k]) && refazer[k] !== economico[k]) : [];
   if (carosDoHistorico.length) {
     const usar = await perguntar("Os parâmetros do histórico custam mais",
       `<p>A geração que você quer refazer usou opções acima da configuração mais barata:</p>`
@@ -342,13 +441,15 @@ function tabelaEscansao(ev) {
   const deixa = ev.deixa.map((d) => `<div>deixa estrofe ${d.estrofe}:
     <span class="${d.ok ? "bom" : "mau"}">${esc(d.estado)}</span> <span class="sil">${esc(d.chaves.join(" · "))}</span></div>`).join("");
   const regras = (ev.regras || []).map((r) => `<div class="mau">${rotuloVerso(r.estrofe, r.n, total)} · regra ${r.regra}: ${esc(r.motivo)}</div>`).join("");
-  return ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + regras + `
+  const sugestoes = (ev.sugestoes || []).map((r) => `<div class="sug">sugestão (não reprova) ${rotuloVerso(r.estrofe, r.n, total)} · regra ${r.regra}: ${esc(r.motivo)}</div>`).join("");
+  return ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + regras + sugestoes + `
     <div>${ev.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados: ${listaReprovados(ev.reprovados, total) || "—"}</span>`}</div>
     <details><summary>relatório do escandir.py</summary><pre>${esc(ev.relatorio)}</pre></details>`;
 }
 
 const htmlAvaliacao = (a, prefixo = "") => `<div class="sil">${esc(prefixo)}fidelidade ${esc(a.fidelidade)}/5, coerência ${esc(a.coerencia)}/5, termos ${esc(a.termos)}/5, criatividade ${esc(a.criatividade)}/5</div>`
-  + a.apontados.map((v) => `<div class="mau">${ev2(v.estrofe, v.n)} (${esc(v.tipo)}): ${esc(v.motivo)}</div>`).join("");
+  + a.apontados.map((v) => `<div class="mau">${ev2(v.estrofe, v.n)} (${esc(v.tipo)}): ${esc(v.motivo)}</div>`).join("")
+  + (a.faltando || []).map((f) => `<div class="mau">falta no poema: ${esc(f)}</div>`).join("");
 
 function htmlCandidatas(cs, escolhida = -1) {
   return cs.map((c, i) => `<div class="cand ${i === escolhida ? "escolhida" : ""}">
@@ -382,7 +483,8 @@ function tratar(ev) {
       if (ev.status === "rodando") { statusCartaz("entendendo o fato…"); return passo("fato", "1 · extraindo o fato", "rodando"); }
       $("manchete").textContent = ev.titulo;
       return passo("fato", "1 · o fato", "ok", `<b>${esc(ev.titulo)}</b><br>${esc(ev.fato)}
-        <div class="sil">imagens: ${esc(ev.imagens_concretas.join(" · "))}</div>`);
+        ${(ev.essencial || []).length ? `<div class="sil">o poema tem de contar: ${esc(ev.essencial.join(" · "))}</div>` : ""}
+        <div class="sil">imagens: ${esc((ev.imagens_concretas || []).join(" · "))}</div>`);
     case "candidatas":
       if (ev.status === "rodando") statusCartaz("escrevendo os versos…");
       if (ev.status === "rodando")
@@ -398,8 +500,9 @@ function tratar(ev) {
         esc(ev.justificativa) + ev.avaliacoes.map((a) => htmlAvaliacao(a, ev.avaliacoes.length > 1 ? `Candidata ${a.candidata + 1}: ` : "")).join(""));
     case "sentido":
       if (ev.status === "rodando") {
-        statusCartaz(`reescrevendo ${ev.apontados.length} verso(s) pelo sentido…`);
-        return passo(`sen${ev.volta}`, `4c · reescrita pelo sentido ${ev.volta}: ${ev.apontados.length} verso(s) apontado(s)`, "rodando");
+        const falta = (ev.faltando || []).length;
+        statusCartaz(falta ? `pondo no poema o que faltou da notícia…` : `reescrevendo ${ev.apontados.length} verso(s) pelo sentido…`);
+        return passo(`sen${ev.volta}`, `4c · reescrita pelo sentido ${ev.volta}: ${ev.apontados.length} verso(s) apontado(s)${falta ? `, ${falta} ponto(s) da notícia faltando` : ""}`, "rodando");
       }
       mostrarEstrofes(ev.estrofes);
       return passo(`sen${ev.volta}`, `4c · reescrita ${ev.volta}: ${ev.aceita ? "melhorou e ficou" : "não melhorou, voltou a versão anterior"}`, ev.aceita ? "ok" : "erro",
@@ -439,10 +542,11 @@ function tratar(ev) {
       $("selo").className = "selo " + (ev.entra ? "entra" : "descarte");
       $("selo").textContent = ev.entra ? "Entra na coleção" : "Descarte";
       if (ev.custo) {
-        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/sextilhas">todas as sextilhas</a> · <a href="/logs">logs</a>`;
+        $("custo").innerHTML = `custou ~${usd(ev.custo.total, 3)} (texto ${usd(ev.custo.texto, 3)} · imagem ${usd(ev.custo.imagem, 3)}) · <a href="/sextilhas">todas as sextilhas</a> · <a href="/logs">logs</a>`
+          + (ev.id && !REPLAY ? ` · <a href="/geracao/${esc(ev.id)}">como foi gerada</a>` : "");
       }
       $("motivo").textContent = ev.motivo || (ev.duvidas.length ? `${ev.duvidas.length} ponto(s) marcados com "?" — o grupo decide.` : "");
-      $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${p}" target="_blank">${k}</a>`).join("·")
+      $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${esc(p)}" target="_blank">${esc(k)}</a>`).join("·")
         + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
       $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
       return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
@@ -481,47 +585,157 @@ function faltaNome(mensagem = "Escreva seu nome aqui para gerar o folheto.") {
 $("autor").addEventListener("input", estadoNome);
 estadoNome();
 
+// ---- conta: com a chave do professor precisa entrar; com a própria, só o nome
+let EU = { logado: false, chave_professor: true, cadastro_aberto: false };
+let abaConta = "entrar";
+const precisaNome = () => !!chave() && !EU.logado;
+
+function renderConta() {
+  const c = $("conta"), propria = !!chave();
+  $("bloco-nome").hidden = !precisaNome();
+  c.classList.toggle("precisa", !propria && !EU.logado);
+  $("chave-estado").textContent = propria ? `usando a sua chave (${chave().slice(0, 7)}…${chave().slice(-4)})` : "";
+  if (propria) {
+    c.innerHTML = `<p style="color:var(--tinta);font-size:14.5px">Gerando com a <b>sua chave da OpenAI</b>: não gasta cota, e o nome no folheto vem
+      ${EU.logado ? `da sua conta (<b>${esc(EU.nome)}</b>)` : "do campo abaixo"}.
+      <button class="linkbotao" type="button" id="abrir-ajustes">trocar ou remover a chave</button></p>`;
+    $("abrir-ajustes").onclick = () => { $("ajustes").open = true; $("chave").focus(); };
+    return;
+  }
+  if (EU.logado) {
+    c.innerHTML = `<div class="quem">Gerando como <b>${esc(EU.nome)}</b> <span class="sil">(${esc(EU.login)})</span>
+      <span>${esc(EU.usadas_hoje)} de ${esc(EU.cota)} gerações hoje</span>
+      ${EU.admin ? '<a href="/admin">painel do professor</a>' : ""}
+      <button class="linkbotao" type="button" id="sair">sair</button></div>
+      ${EU.chave_professor ? "" : "<p class=\"msg-conta\">Este site não tem mais a chave do professor: coloque a sua em Configurações.</p>"}`;
+    $("sair").onclick = async () => { await fetch("/api/sair", { method: "POST" }); await carregarEu(); };
+    return;
+  }
+  const cadastro = abaConta === "cadastro";
+  c.innerHTML = `<h2>Entre para gerar</h2>
+    <p>${EU.chave_professor
+      ? "A geração usa a chave do professor, por isso pede uma conta. Ou use a sua própria chave em <button class=\"linkbotao\" type=\"button\" data-ajustes>Configurações</button>."
+      : "Este site não tem mais a chave do professor. Coloque a sua em <button class=\"linkbotao\" type=\"button\" data-ajustes>Configurações</button> para gerar."}</p>
+    <div class="abas" role="tablist">
+      <button type="button" role="tab" aria-selected="${!cadastro}" data-aba="entrar">Entrar</button>
+      <button type="button" role="tab" aria-selected="${cadastro}" data-aba="cadastro">Criar conta</button>
+    </div>
+    <form class="form-conta" id="form-conta" novalidate>
+      ${cadastro ? (EU.cadastro_aberto
+        ? `<label>Código de convite da turma <input id="f-convite" autocomplete="off" required></label>
+           <label>Seu nome (sai impresso no folheto) <input id="f-nome" maxlength="60" autocomplete="name" required></label>` : "") : ""}
+      ${cadastro && !EU.cadastro_aberto ? "<p>O cadastro está fechado. Peça uma conta ao professor.</p>" : `
+      <label>Usuário <input id="f-login" autocomplete="username" autocapitalize="none" spellcheck="false" required
+        ${cadastro ? 'placeholder="3 a 30 letras minúsculas, números, . _ -"' : ""}></label>
+      <label>Senha <input id="f-senha" type="password" autocomplete="${cadastro ? "new-password" : "current-password"}" required
+        ${cadastro ? 'placeholder="pelo menos 8 caracteres"' : ""}></label>
+      <button type="submit">${cadastro ? "Criar conta e entrar" : "Entrar"}</button>`}
+      <div class="msg-conta" id="msg-conta" role="alert"></div>
+    </form>`;
+  c.querySelectorAll("[data-ajustes]").forEach((b) => b.onclick = () => { $("ajustes").open = true; $("chave").focus(); });
+  c.querySelectorAll("[data-aba]").forEach((b) => b.onclick = () => { abaConta = b.dataset.aba; renderConta(); });
+  $("form-conta").onsubmit = async (e) => {
+    e.preventDefault();
+    if (!$("f-login")) return;
+    const corpo = { login: $("f-login").value, senha: $("f-senha").value };
+    if (cadastro) Object.assign(corpo, { convite: $("f-convite").value, nome: $("f-nome").value });
+    const r = await fetch(cadastro ? "/api/cadastro" : "/api/entrar", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
+    if (!r.ok) {
+      const { detail } = await r.json().catch(() => ({}));
+      $("msg-conta").textContent = typeof detail === "string" ? detail : "Confira os campos e tente de novo.";
+      return;
+    }
+    await carregarEu();
+    $("aviso-gerar").textContent = "";
+  };
+}
+
+async function carregarEu() {
+  try { EU = await (await fetch("/api/eu")).json(); } catch {}
+  renderConta();
+}
+
+$("form-chave").onsubmit = (e) => {
+  e.preventDefault();
+  const v = $("chave").value.trim();
+  if (!/^sk-[A-Za-z0-9_\-]{20,}$/.test(v)) { $("chave-estado").textContent = "Isso não parece uma chave da OpenAI (começa com sk-)."; return; }
+  try { localStorage.setItem(CHAVE_LS, v); } catch { $("chave-estado").textContent = "Este navegador não deixou guardar a chave."; return; }
+  $("chave").value = ""; renderConta(); estimativa();
+};
+$("chave-remover").onclick = () => {
+  try { localStorage.removeItem(CHAVE_LS); } catch {}
+  $("chave").value = ""; renderConta(); estimativa();
+};
+
 $("gerar").onclick = async () => {
-  $("autor").value = $("autor").value.trim();
   $("aviso-gerar").textContent = "";
-  if (!$("autor").value) return faltaNome();
-  try { localStorage.setItem("cordel-autor", $("autor").value); } catch {}
+  if (!chave() && !EU.logado) {
+    $("aviso-gerar").textContent = EU.chave_professor ? "Entre com a sua conta (no topo) para gerar." : "Coloque a sua chave da OpenAI em Configurações para gerar.";
+    if (!EU.chave_professor) $("ajustes").open = true;
+    $("conta").scrollIntoView({ block: "center" });
+    return ($("f-login") || $("chave")).focus();
+  }
+  if (precisaNome()) {
+    $("autor").value = $("autor").value.trim();
+    if (!$("autor").value) return faltaNome();
+    try { localStorage.setItem("cordel-autor", $("autor").value); } catch {}
+  }
   const noticia = $("noticia").value.trim(), url = $("url").value.trim();
   if (!noticia && !url) { $("aviso-gerar").textContent = "Falta a notícia: cole um link ou o texto."; return $("url").focus(); }
-  const c = lerCfg(), caros = CAROS.filter((k) => c[k] !== ECONOMICO[k]);
+  const c = lerCfg(), caros = CAROS.filter((k) => k in c && c[k] !== ECONOMICO[k]);
   if (caros.length) {
     const escolha = await perguntar("Esta geração vai custar mais",
       `<p>Estas opções estão acima da configuração mais barata:</p><ul>${caros.map((k) => `<li>${porqueCusta(k, c[k])}</li>`).join("")}</ul>`
-      + `<p>A mais barata é ${CAROS.map((k) => `<b>${esc(rotuloDe(k, ECONOMICO[k]))}</b>`).join(", ")}.</p>`,
+      + `<p>A mais barata é ${caros.map((k) => `<b>${esc(rotuloDe(k, ECONOMICO[k]))}</b>`).join(", ")}.</p>`,
       [{ rotulo: "Gerar tudo no mais barato", valor: "barato", principal: true },
        { rotulo: "Gerar assim mesmo", valor: "assim" }, { rotulo: "Cancelar", valor: null }],
       null);
     if (!escolha) return;
-    if (escolha === "barato") { for (const k of CAROS) $(`c-${k}`).value = ECONOMICO[k]; estimativa(); }
+    if (escolha === "barato") { for (const k of caros) $(`c-${k}`).value = ECONOMICO[k]; estimativa(); }
   }
   await gerar(noticia, url);
 };
 
-async function gerar(noticia, url) {
-  $("gerar").disabled = true;
+function prepararCartaz(estrofes, comImagem) {
   $("linha").innerHTML = ""; for (const k in itens) delete itens[k];
+  window.__cand = []; andamento = {};
   $("veredito").style.display = "none"; $("custo").textContent = "";
   $("folheto").classList.add("gerando");
   $("manchete").innerHTML = '<div class="esqueleto"></div>'; $("autor-folheto").textContent = "";
-  $("versos").innerHTML = esqueletoVersos(lerCfg().estrofes); $("fonte").textContent = "";
+  $("versos").innerHTML = esqueletoVersos(estrofes); $("fonte").textContent = "";
   statusCartaz("começando…");
-  $("xilo").classList.toggle("carregando", $("imagem").checked);
-  $("xilo").innerHTML = $("imagem").checked ? "<span>a xilogravura vem daqui a pouco</span>" : "<span>sem xilogravura nesta rodada</span>";
+  $("imagem").checked = comImagem;
+  $("xilo").classList.toggle("carregando", comImagem);
+  $("xilo").innerHTML = comImagem ? "<span>a xilogravura vem daqui a pouco</span>" : "<span>sem xilogravura nesta rodada</span>";
+}
+
+function fecharCartaz() {
+  // terminou (bem ou mal): tira as animações; se nada foi gerado, volta o cartaz vazio
+  $("folheto").classList.remove("gerando"); $("xilo").classList.remove("carregando");
+  if ($("versos").querySelector(".esqueleto")) $("versos").innerHTML = "";
+  if ($("manchete").querySelector(".esqueleto")) $("manchete").textContent = "A manchete aparece aqui";
+}
+
+async function gerar(noticia, url) {
+  $("gerar").disabled = true;
+  prepararCartaz(lerCfg().estrofes, $("imagem").checked);
+  const headers = { "Content-Type": "application/json" };
+  if (chave()) headers["X-OpenAI-Key"] = chave();
   try {
     const resp = await fetch("/api/cordel", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ autor: $("autor").value, noticia, url, com_imagem: $("imagem").checked, config: lerCfg() }),
+      method: "POST", headers,
+      body: JSON.stringify({ autor: precisaNome() ? $("autor").value : "", noticia, url, com_imagem: $("imagem").checked, config: lerCfg() }),
     });
     if (!resp.ok) {
-      const { detail } = await resp.json();
-      // 422: o servidor recusou o nome (vazio ou comprido demais)
-      if (resp.status === 422 && typeof detail === "string") { faltaNome(detail); return; }
-      throw detail;
+      const { detail } = await resp.json().catch(() => ({}));
+      const msg = typeof detail === "string" ? detail : "O servidor recusou o pedido.";
+      if (resp.status === 422 && precisaNome() && /nome/i.test(msg)) { faltaNome(msg); return; }
+      if (resp.status === 401) await carregarEu();
+      if (resp.status === 402) $("ajustes").open = true;
+      $("aviso-gerar").textContent = msg;
+      passo("erro", "não deu para gerar", "erro", esc(msg));
+      return;
     }
     const reader = resp.body.getReader(), dec = new TextDecoder();
     let buf = "";
@@ -538,12 +752,58 @@ async function gerar(noticia, url) {
   } catch (e) {
     passo("erro", "erro de conexão", "erro", esc(e));
   } finally {
-    // terminou (bem ou mal): tira as animações; se nada foi gerado, volta o cartaz vazio
-    $("folheto").classList.remove("gerando"); $("xilo").classList.remove("carregando");
-    if ($("versos").querySelector(".esqueleto")) $("versos").innerHTML = "";
-    if ($("manchete").querySelector(".esqueleto")) $("manchete").textContent = "A manchete aparece aqui";
+    fecharCartaz();
     $("gerar").disabled = false;
+    if (!chave()) carregarEu();  // atualiza a cota
   }
+}
+
+// ---- /geracao/<id>: a mesma linha do tempo, tocada a partir do caderno
+const REPLAY = location.pathname.startsWith("/geracao/") ? decodeURIComponent(location.pathname.split("/")[2] || "") : null;
+const dormir = (ms) => new Promise((ok) => setTimeout(ok, ms));
+const calmo = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+async function tocar(dados, passoAPasso) {
+  const cfg = dados.config || {};
+  prepararCartaz(cfg.estrofes || 1, cfg.com_imagem !== false);
+  let antes = 0;
+  for (const ev of dados.eventos) {
+    if (passoAPasso && !calmo()) {
+      // o tempo real, acelerado 8×, entre 80 ms e 0,7 s por passo
+      const t = typeof ev.t === "number" ? ev.t : antes + 2;
+      await dormir(Math.min(700, Math.max(80, (t - antes) * 1000 / 8)));
+      antes = t;
+    }
+    try { tratar(ev); } catch (e) { console.warn("evento que não deu para mostrar", ev.etapa, e); }
+  }
+  fecharCartaz();
+}
+
+if (REPLAY) {
+  document.body.classList.add("replay");
+  document.title = "Como foi gerada — Notícias em Cordel";
+  document.querySelector('.nav a[aria-current]')?.removeAttribute("aria-current");
+  fetch(`/api/geracao/${encodeURIComponent(REPLAY)}`).then(async (r) => {
+    if (!r.ok) { $("replay-meta").textContent = "Essa geração não está no caderno."; return; }
+    const dados = await r.json(), cfg = dados.config || {};
+    await CONFIG.catch(() => {});
+    const quando = dados.inicio ? new Date(dados.inicio).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
+    $("replay-meta").innerHTML = [dados.autor ? `gerada por <b>${esc(dados.autor)}</b>` : "gerada pelo grupo", esc(quando),
+      esc(`sextilha ${cfg.forma ?? "?"}, ${cfg.estrofes ?? "?"} estrofe(s)`), cfg.prioridade ? esc(`prioridade: ${ROTULOS_PRIORIDADE[cfg.prioridade] ?? cfg.prioridade}`) : "",
+      `<a href="/caderno/${esc(dados.id)}.json" target="_blank">caderno (JSON)</a>`].filter(Boolean).join(" · ");
+    $("replay-nota").textContent = dados.reconstruido
+      ? "Esta geração é de antes do registro da linha do tempo: os passos foram remontados do caderno e a escansão foi refeita pelo verificador de hoje."
+      : "";
+    $("replay-tocar").onclick = () => tocar(dados, true);
+    $("replay-refazer").onclick = () => {
+      const p = Object.fromEntries(CAMPOS.filter((k) => cfg[k] != null).map((k) => [k, cfg[k]]));
+      try { localStorage.setItem("cordel-refazer", JSON.stringify(p)); } catch {}
+      location.href = "/gerador";
+    };
+    await tocar(dados, false);
+  });
+} else {
+  carregarEu();
 }
 </script>
 </body>

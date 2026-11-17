@@ -72,3 +72,47 @@ def texto_para_prompt() -> str:
         itens = [f"- {t['termo']} — {t['sentido']}" for t in carregar() if t["tipo"] == tipo]
         blocos.append(f"{titulo}:\n" + "\n".join(itens))
     return "\n\n".join(blocos)
+
+
+# ---- rodízio: sem ele, o Poeta voltava sempre aos mesmos termos ("terreiro", "magote").
+# Cada candidata vê no prompt só um sorteio do dicionário, em que quem apareceu muito nas
+# últimas gerações tem menos chance; o verificador continua aceitando o dicionário inteiro.
+SORTEIO = {"palavra": 25, "expressao": 12}
+
+
+def usos_recentes(estrofes_por_geracao) -> dict[str, int]:
+    """Quantas vezes cada termo apareceu nos poemas dados (uma lista de poemas)."""
+    usos: dict[str, int] = {}
+    for estrofes in estrofes_por_geracao:
+        for vs in estrofes or []:
+            for v in vs:
+                for t in termos_no_verso(v):
+                    usos[t] = usos.get(t, 0) + 1
+    return usos
+
+
+def sortear(usos: dict[str, int], rng) -> dict:
+    """Um sorteio sem repetição, com peso 1/(1+usos), por tipo. As fáticas vão todas."""
+    escolhidos = {}
+    for tipo, k in SORTEIO.items():
+        pool = [t for t in carregar() if t["tipo"] == tipo]
+        # amostragem ponderada sem reposição (Efraimidis-Spirakis): chave = u^(1/peso)
+        chave = {t["termo"]: rng.random() ** (1 + usos.get(t["termo"], 0)) for t in pool}
+        escolhidos[tipo] = sorted(pool, key=lambda t: -chave[t["termo"]])[:k]
+    gastos = [t for t, n in sorted(usos.items(), key=lambda x: -x[1]) if n >= 2][:8]
+    return {"termos": [t["termo"] for ts in escolhidos.values() for t in ts], "evitar": gastos,
+            "texto": _texto(escolhidos, gastos)}
+
+
+def _texto(escolhidos: dict, gastos: list[str]) -> str:
+    blocos = []
+    for tipo, titulo in [("palavra", "Palavras"), ("expressao", "Expressões (mais de uma palavra)")]:
+        blocos.append(f"{titulo}:\n" + "\n".join(f"- {t['termo']} — {t['sentido']}" for t in escolhidos[tipo]))
+    faticas = [t for t in carregar() if t["tipo"] == "fatica"]
+    blocos.append("Partículas fáticas (só no início ou no fim do verso):\n"
+                  + "\n".join(f"- {t['termo']} — {t['sentido']}" for t in faticas))
+    texto = ("Para esta geração, foram sorteados estes termos do dicionário. Use os daqui; "
+             "variar é parte do trabalho.\n\n" + "\n\n".join(blocos))
+    if gastos:
+        texto += ("\n\nJá apareceram demais nas últimas gerações, evite: " + ", ".join(gastos) + ".")
+    return texto

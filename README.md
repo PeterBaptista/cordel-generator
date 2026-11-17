@@ -94,11 +94,37 @@ em que ordem.
 O `escandir.py` verifica arquivos com várias estrofes (separadas por linha em branco)
 e lê o esquema de uma linha `# esquema: AABCCB` no arquivo, ou de `--esquema`.
 
-**Páginas.** Todas são públicas, para a turma testar. A home (`/`) é o link da entrega, com as
+**Páginas.** A home (`/`) é o link da entrega, com as
 10 gerações mais recentes que passaram no verificador penduradas no cordão, o descarte do grupo
-com o motivo e os cinco itens do PA 1. O gerador (`/gerador`) exige o nome de quem gera, só usa `gpt-6-luna` e
-`gpt-image-1-mini` e gasta a chave `OPENAI_API_KEY_PROFESSOR`. Em `/sextilhas` ficam todas as
-sextilhas geradas, com o nome de quem gerou.
+com o motivo e os cinco itens do PA 1. Em `/sextilhas` ficam todas as sextilhas geradas, com o
+nome de quem gerou, e cada uma abre em `/geracao/<id>`: a linha do tempo da geração (fato,
+candidatas, escansões, correções com antes/depois, júri, reescritas), que dá para reproduzir
+passo a passo. Desde 16/11 o caderno guarda os eventos que foram à tela; os antigos são remontados.
+
+**Quem gera e com qual chave** (`app/contas.py`):
+
+| | Chave do professor | Chave própria |
+|---|---|---|
+| Precisa de conta | sim (cadastro com `CORDEL_CONVITE`, ou o admin cria em `/admin`) | não; basta o nome |
+| Limite | `CORDEL_COTA_DIA` gerações/dia por pessoa (10), uma por vez, teto `CORDEL_TETO_USD` | teto `CORDEL_TETO_PROPRIA_USD` |
+| Modelos | só `gpt-6-luna` e `gpt-image-1-mini` | todos da tabela de `app/custos.py` |
+
+A chave própria fica em Configurações, no `localStorage` do navegador; vai num cabeçalho
+`X-OpenAI-Key` a cada geração e o servidor não a grava (o caderno só diz `"chave": "propria"`).
+Sem `OPENAI_API_KEY_PROFESSOR`, o site continua no ar e pede a chave própria. O professor
+(`CORDEL_ADMINS`) vê em `/admin` o gasto de cada conta, muda a cota, bloqueia e troca senhas.
+Contas, sessões e usos ficam em `contas.sqlite3`, no volume de dados (`CORDEL_DADOS`).
+
+**Prioridade** (padrão: a notícia). Com "a notícia", o poema tem de contar sozinho os pontos
+essenciais que a etapa do fato extrai (quem, o quê, onde/quando, número), sem contar com a
+manchete; métrica e rima seguem reprovando, mas as regras 3 e 7 do dicionário viram sugestão, e
+o júri escolhe pela fidelidade antes da forma. Com "a forma", o dicionário reprova, como antes.
+Nas duas, o júri lista em `faltando` o ponto essencial que quem lê só o poema não fica sabendo,
+e isso dispara a reescrita pelo sentido.
+
+**Rodízio do dicionário.** Cada candidata recebe no prompt um sorteio de 25 palavras e 12
+expressões, com peso menor para os termos que mais apareceram nas últimas 30 gerações, e a lista
+dos mais gastos como "evite". O verificador continua aceitando o dicionário inteiro.
 
 Em `/historico` ficam todas as sextilhas geradas (as que entraram e as de descarte),
 cada uma no cartaz com a ficha dos parâmetros que a produziram: modelo, raciocínio,

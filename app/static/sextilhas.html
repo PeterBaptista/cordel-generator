@@ -49,6 +49,7 @@
   .selo { display: inline-block; font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; padding: 1px 8px; border: 2px solid currentColor; }
   .selo.entra { color: var(--verde); } .selo.descarte { color: var(--vermelho); }
   .motivo { font-size: 12.5px; color: var(--vermelho); margin-top: 4px; overflow-wrap: anywhere; }
+  .como { display: block; margin-top: 6px; font: 12px "Special Elite", monospace; color: var(--tinta, #151210); }
   .vazio { text-align: center; color: var(--tinta-2); padding: 40px 0; grid-column: 1 / -1; }
   .vazio a { color: var(--tinta); }
 </style>
@@ -89,6 +90,7 @@ const cartao = (i) => `<article class="mini"><div class="moldura">
     <div class="versos">${i.estrofes.map((vs) => `<div class="estrofe">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("")}</div>
     <span class="selo ${i.entra ? "entra" : "descarte"}">${i.entra ? "Passou" : "Descarte"}</span>
     ${i.motivo ? `<div class="motivo">${esc(i.motivo)}</div>` : ""}
+    <a class="como" href="/geracao/${esc(i.id)}">como foi gerada</a>
   </div></article>`;
 
 function render() {
