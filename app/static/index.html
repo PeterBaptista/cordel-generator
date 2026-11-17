@@ -171,6 +171,9 @@
   .cab-replay p { margin: 4px 0; font-size: 13.5px; color: var(--tinta-2); }
   .cab-replay .acoes { margin-top: 8px; }
   .cab-replay a { color: var(--tinta); }
+  .narracao { margin-top: 12px; display: grid; gap: 8px; justify-items: center; }
+  .narracao audio { width: 100%; }
+  .nota-narracao { font-size: 13px; color: var(--tinta-2); }
 </style>
 </head>
 <body>
@@ -241,6 +244,15 @@
         <button class="sec" type="button" id="chave-remover">remover</button>
       </form>
       <p class="selo-chave" id="chave-estado" role="status"></p>
+      <p style="margin-top:14px"><b>Narração (ElevenLabs).</b> A narração com sotaque nordestino usa a chave do professor só
+        na conta dele. Para ouvir a sua sextilha narrada, coloque aqui a sua chave da ElevenLabs: ela também fica só neste navegador.</p>
+      <form class="linha-chave" id="form-eleven">
+        <input type="text" name="username" autocomplete="off" hidden aria-hidden="true">
+        <input type="password" id="chave-eleven" placeholder="chave da ElevenLabs" autocomplete="off" spellcheck="false" aria-label="Sua chave da ElevenLabs">
+        <button class="sec" type="submit">usar esta chave</button>
+        <button class="sec" type="button" id="eleven-remover">remover</button>
+      </form>
+      <p class="selo-chave" id="eleven-estado" role="status"></p>
     </details>
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
@@ -272,6 +284,12 @@
       <div class="motivo" id="motivo"></div>
       <div class="custo" id="custo"></div>
       <div class="arqs" id="arqs"></div>
+      <div class="narracao" id="narracao" hidden>
+        <button class="sec" type="button" id="narrar">🔊 ouvir narração</button>
+        <button class="sec" type="button" id="renarrar" hidden>refazer narração</button>
+        <audio id="audio-narracao" controls preload="none" hidden></audio>
+        <div class="nota-narracao" id="nota-narracao" role="status"></div>
+      </div>
     </div>
   </section>
 </main>
@@ -309,6 +327,8 @@ let PRECOS = {};
 // ---- a chave própria: fica só neste navegador
 const CHAVE_LS = "cordel-chave-openai";
 const chave = () => { try { return localStorage.getItem(CHAVE_LS) || ""; } catch { return ""; } };
+const ELEVEN_LS = "cordel-chave-elevenlabs";
+const chaveEleven = () => { try { return localStorage.getItem(ELEVEN_LS) || ""; } catch { return ""; } };
 const ROTULOS_NARRADOR = { observador: "observador em 1ª pessoa (roteiro fixo)", feira: "causo de feira",
   sertanejo: "sertanejo desconfiado", cantador: "cantador", conselho: "conselho de gente velha", sortear: "sortear (um por candidata)" };
 const NUMERICOS = ["candidatas", "estrofes"];
@@ -551,6 +571,7 @@ function tratar(ev) {
       $("arqs").innerHTML = Object.entries(ev.arquivos).map(([k, p]) => `<a href="/${esc(p)}" target="_blank">${esc(k)}</a>`).join("·")
         + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
       $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
+      prepararNarracao(ev.id || REPLAY, REPLAY_NARRACAO);
       return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
     }
     case "teto":
@@ -656,6 +677,7 @@ function renderConta() {
 async function carregarEu() {
   try { EU = await (await fetch("/api/eu")).json(); } catch {}
   renderConta();
+  if (NARRACAO.id) prepararNarracao(NARRACAO.id, NARRACAO.url);
 }
 
 $("form-chave").onsubmit = (e) => {
@@ -665,6 +687,55 @@ $("form-chave").onsubmit = (e) => {
   try { localStorage.setItem(CHAVE_LS, v); } catch { $("chave-estado").textContent = "Este navegador não deixou guardar a chave."; return; }
   $("chave").value = ""; renderConta(); estimativa();
 };
+function estadoEleven() {
+  const k = chaveEleven();
+  $("eleven-estado").textContent = k ? `usando a sua chave da ElevenLabs (${k.slice(0, 4)}…${k.slice(-4)})` : "";
+}
+$("form-eleven").onsubmit = (e) => {
+  e.preventDefault();
+  const v = $("chave-eleven").value.trim();
+  if (!/^[A-Za-z0-9_\-]{20,}$/.test(v)) { $("eleven-estado").textContent = "Isso não parece uma chave da ElevenLabs."; return; }
+  try { localStorage.setItem(ELEVEN_LS, v); } catch { $("eleven-estado").textContent = "Este navegador não deixou guardar a chave."; return; }
+  $("chave-eleven").value = ""; estadoEleven(); prepararNarracao(NARRACAO.id, NARRACAO.url);
+};
+$("eleven-remover").onclick = () => {
+  try { localStorage.removeItem(ELEVEN_LS); } catch {}
+  estadoEleven(); prepararNarracao(NARRACAO.id, NARRACAO.url);
+};
+estadoEleven();
+
+// ---- narração: já gerada, qualquer um ouve; gerar pede a chave própria ou a conta do professor
+let NARRACAO = { id: null, url: null };
+const podeNarrar = () => !!chaveEleven() || (EU.admin && EU.narracao_professor);
+function prepararNarracao(id, url) {
+  NARRACAO = { id, url };
+  if (!id) { $("narracao").hidden = true; return; }
+  $("narracao").hidden = false;
+  $("audio-narracao").hidden = !url;
+  if (url) $("audio-narracao").src = `/${url}`;
+  $("narrar").hidden = !!url;
+  $("narrar").disabled = !url && !podeNarrar();
+  $("renarrar").hidden = !(url && EU.admin);
+  $("nota-narracao").textContent = url || podeNarrar() ? ""
+    : "Para narrar, coloque a sua chave da ElevenLabs em Configurações (a do site é só do professor).";
+}
+async function narrar(refazer = false) {
+  const botao = refazer ? $("renarrar") : $("narrar");
+  botao.disabled = true; $("nota-narracao").textContent = "gravando a narração…";
+  const headers = { "Content-Type": "application/json" };
+  if (chaveEleven()) headers["X-ElevenLabs-Key"] = chaveEleven();
+  try {
+    const r = await fetch(`/api/narracao/${encodeURIComponent(NARRACAO.id)}`, { method: "POST", headers, body: JSON.stringify({ refazer }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $("nota-narracao").textContent = typeof d.detail === "string" ? d.detail : "A narração falhou."; return; }
+    prepararNarracao(NARRACAO.id, `${d.url}?v=${Date.now()}`);
+    $("nota-narracao").textContent = d.nova ? `narração gravada (${d.creditos} créditos da ElevenLabs)` : "";
+    $("audio-narracao").play().catch(() => {});
+  } finally { botao.disabled = false; }
+}
+$("narrar").onclick = () => narrar(false);
+$("renarrar").onclick = () => narrar(true);
+
 $("chave-remover").onclick = () => {
   try { localStorage.removeItem(CHAVE_LS); } catch {}
   $("chave").value = ""; renderConta(); estimativa();
@@ -761,6 +832,7 @@ async function gerar(noticia, url) {
 }
 
 // ---- /geracao/<id>: a mesma linha do tempo, tocada a partir do caderno
+let REPLAY_NARRACAO = null;
 const REPLAY = location.pathname.startsWith("/geracao/") ? decodeURIComponent(location.pathname.split("/")[2] || "") : null;
 const dormir = (ms) => new Promise((ok) => setTimeout(ok, ms));
 const calmo = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -788,6 +860,7 @@ if (REPLAY) {
   fetch(`/api/geracao/${encodeURIComponent(REPLAY)}`).then(async (r) => {
     if (!r.ok) { $("replay-meta").textContent = "Essa geração não está no caderno."; return; }
     const dados = await r.json(), cfg = dados.config || {};
+    REPLAY_NARRACAO = dados.narracao;
     await CONFIG.catch(() => {});
     const quando = dados.inicio ? new Date(dados.inicio).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
     $("replay-meta").innerHTML = [dados.autor ? `gerada por <b>${esc(dados.autor)}</b>` : "gerada pelo grupo", esc(quando),
@@ -802,6 +875,7 @@ if (REPLAY) {
       try { localStorage.setItem("cordel-refazer", JSON.stringify(p)); } catch {}
       location.href = "/gerador";
     };
+    await carregarEu();  // o admin pode narrar e refazer daqui
     await tocar(dados, false);
   });
 } else {

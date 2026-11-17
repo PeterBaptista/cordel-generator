@@ -119,6 +119,16 @@ Sem `OPENAI_API_KEY_PROFESSOR`, o site continua no ar e pede a chave própria. O
 (`CORDEL_ADMINS`) vê em `/admin` o gasto de cada conta, muda a cota, bloqueia e troca senhas.
 Contas, sessões e usos ficam em `contas.sqlite3`, no volume de dados (`CORDEL_DADOS`).
 
+**Narração** (`app/narracao.py`). Cada sextilha pode ser narrada pela ElevenLabs, com voz de
+sotaque nordestino (padrão: Cicero, modelo `eleven_v4`, com a marcação `[strong Northeastern
+Brazilian accent, cordel reciter, rhythmic]`; troca-se por `CORDEL_VOZ`, `CORDEL_VOZ_MODELO` e
+`CORDEL_VOZ_MARCACAO`). A chave do professor (`ELEVENLABS_API_KEY`) só serve às contas de admin,
+que também podem refazer uma narração; os outros põem a própria chave em Configurações (fica no
+navegador e vai no cabeçalho `X-ElevenLabs-Key`, sem ser gravada). O MP3 fica em `narracao/`, no
+volume: gerado uma vez, qualquer um ouve de graça, e sobrevive aos deploys. Os créditos de cada
+narração ficam no caderno (`narracoes`) e aparecem em `/logs`, convertidos em dólar por
+`CORDEL_ELEVEN_USD_POR_1K`.
+
 **Prioridade** (padrão: a notícia). Com "a notícia", o poema tem de contar sozinho os pontos
 essenciais que a etapa do fato extrai, sem contar com a manchete. Desde 17/11 são 2 pontos
 (1 estrofe), 3 (2 estrofes) ou 4 (3 ou mais), cada um com até 6 palavras, número arredondado e

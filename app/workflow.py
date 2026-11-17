@@ -182,7 +182,7 @@ def chave_juizo(av: dict | None, prioridade: str = "noticia") -> tuple:
 # No Railway, CORDEL_DADOS aponta para o volume montado (/data), que sobrevive
 # aos deploys. Local, as pastas ficam na raiz do projeto.
 DADOS = Path(os.getenv("CORDEL_DADOS") or RAIZ)
-PASTAS = {nome: DADOS / nome for nome in ("folhetos", "descarte", "caderno")}
+PASTAS = {nome: DADOS / nome for nome in ("folhetos", "descarte", "caderno", "narracao")}
 
 
 # ------------------------------------------------------------------ esquemas

@@ -49,6 +49,7 @@
   .selo { display: inline-block; font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; padding: 1px 8px; border: 2px solid currentColor; }
   .selo.entra { color: var(--verde); } .selo.descarte { color: var(--vermelho); }
   .motivo { font-size: 12.5px; color: var(--vermelho); margin-top: 4px; overflow-wrap: anywhere; }
+  .ouvir { width: 100%; margin-top: 8px; height: 32px; }
   .como { display: block; margin-top: 6px; font: 12px "Special Elite", monospace; color: var(--tinta, #151210); }
   .vazio { text-align: center; color: var(--tinta-2); padding: 40px 0; grid-column: 1 / -1; }
   .vazio a { color: var(--tinta); }
@@ -90,7 +91,8 @@ const cartao = (i) => `<article class="mini"><div class="moldura">
     <div class="versos">${i.estrofes.map((vs) => `<div class="estrofe">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("")}</div>
     <span class="selo ${i.entra ? "entra" : "descarte"}">${i.entra ? "Passou" : "Descarte"}</span>
     ${i.motivo ? `<div class="motivo">${esc(i.motivo)}</div>` : ""}
-    <a class="como" href="/geracao/${esc(i.id)}">como foi gerada</a>
+    ${i.narracao ? `<audio class="ouvir" controls preload="none" src="/${esc(i.narracao)}" aria-label="narração: ${esc(i.manchete)}"></audio>` : ""}
+    <a class="como" href="/geracao/${esc(i.id)}">${i.narracao ? "como foi gerada" : "como foi gerada · narrar"}</a>
   </div></article>`;
 
 function render() {

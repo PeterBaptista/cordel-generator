@@ -1,8 +1,10 @@
 """Mini servidor para testar o gerador: uv run uvicorn app.server:app --reload"""
 
+import asyncio
 import json
 import re
 import time
+from datetime import datetime
 import traceback
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -10,7 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import cadernos, contas, criacomp, custos, dicionario, linha_do_tempo, prompts
+from . import cadernos, contas, criacomp, custos, dicionario, linha_do_tempo, narracao, prompts
 from .workflow import (CHAVE_PROFESSOR, ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, OPCOES_CHAVE_PROPRIA,
                        PASTAS, RAIZ, TETO_PROPRIA_USD, TETO_USD, Config, run_cordel)
 
@@ -19,8 +21,14 @@ contas.iniciar()
 
 
 @app.exception_handler(contas.ErroConta)
-def erro_conta(_request: Request, e: contas.ErroConta):
+@app.exception_handler(narracao.ErroNarracao)
+def erro_conta(_request: Request, e):
     return JSONResponse({"detail": e.mensagem}, status_code=e.status)
+
+
+def _narracao(nome: str) -> str | None:
+    """O link do áudio da narração, se já foi gerado."""
+    return f"narracao/{nome}.mp3" if (PASTAS["narracao"] / f"{nome}.mp3").is_file() else None
 
 # Quantas gerações aparecem no cordão da home; as outras ficam em /sextilhas.
 ULTIMAS = 10
@@ -111,7 +119,8 @@ def sair(request: Request, resposta: Response):
 @app.get("/api/eu")
 def eu(usuario: dict | None = Depends(usuario_atual)):
     """Quem está logado, a cota de hoje, e se o site ainda tem a chave do professor."""
-    base = {"chave_professor": bool(CHAVE_PROFESSOR), "cadastro_aberto": bool(contas.CONVITE)}
+    base = {"chave_professor": bool(CHAVE_PROFESSOR), "cadastro_aberto": bool(contas.CONVITE),
+            "narracao_professor": bool(narracao.CHAVE_PROFESSOR)}
     if not usuario:
         return {"logado": False, **base}
     return {"logado": True, **usuario, "usadas_hoje": contas.usadas_hoje(usuario["id"]), **base}
@@ -185,7 +194,61 @@ def geracao(nome: str):
     evs, reconstruido = linha_do_tempo.eventos(log, nome)
     cfg, _ = cadernos.config(log)
     return {"id": nome, "eventos": evs, "reconstruido": reconstruido, "config": cfg,
-            "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor")}
+            "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor"), "narracao": _narracao(nome)}
+
+
+_narrando: dict[str, asyncio.Lock] = {}
+
+
+class PedidoNarracao(BaseModel):
+    refazer: bool = False  # só admin: gera de novo por cima (por exemplo, depois de trocar a voz)
+
+
+@app.post("/api/narracao/{nome}", dependencies=[Depends(_so_json)])
+async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = None,
+                 usuario: dict | None = Depends(usuario_atual)):
+    """Gera (uma vez) a narração da sextilha. Já gerada, devolve o link sem gastar nada.
+    Com a chave do professor, só para admin; os outros mandam a própria no X-ElevenLabs-Key."""
+    if not re.fullmatch(r"[\w-]{1,120}", nome) or not (f := PASTAS["caderno"] / f"{nome}.json").is_file():
+        raise HTTPException(404, "Essa geração não está no caderno.")
+    refazer = bool(pedido and pedido.refazer)
+    if refazer and not (usuario and usuario["admin"]):
+        raise HTTPException(403, "Só o professor pode refazer uma narração.")
+    if (url := _narracao(nome)) and not refazer:
+        return {"url": url, "nova": False}
+    chave = (request.headers.get("x-elevenlabs-key") or "").strip()
+    if chave and not narracao.CHAVE_OK.fullmatch(chave):
+        raise HTTPException(422, "Essa chave não parece uma chave da ElevenLabs.")
+    if not chave:
+        if not narracao.CHAVE_PROFESSOR:
+            raise HTTPException(402, "Este site não tem chave da ElevenLabs. Coloque a sua em Configurações.")
+        if not usuario or not usuario["admin"]:
+            raise HTTPException(403, "A narração com a chave do professor é só para o professor. "
+                                     "Coloque a sua chave da ElevenLabs em Configurações para ouvir.")
+        chave = narracao.CHAVE_PROFESSOR
+    estrofes = cadernos.estrofes(json.loads(f.read_text(encoding="utf-8")), "estrofes_finais")
+    if not estrofes:
+        raise HTTPException(422, "Essa geração não tem versos para narrar.")
+    trava = _narrando.setdefault(nome, asyncio.Lock())
+    async with trava:  # dois cliques ao mesmo tempo não pagam duas vezes
+        if (url := _narracao(nome)) and not refazer:
+            return {"url": url, "nova": False}
+        audio, creditos = await narracao.sintetizar(estrofes, chave)
+        PASTAS["narracao"].mkdir(parents=True, exist_ok=True)
+        tmp = PASTAS["narracao"] / f"{nome}.mp3.tmp"
+        tmp.write_bytes(audio)
+        tmp.replace(PASTAS["narracao"] / f"{nome}.mp3")
+        # o caderno registra a narração, para o custo dela aparecer em /logs (nunca a chave)
+        log = json.loads(f.read_text(encoding="utf-8"))
+        log.setdefault("narracoes", []).append({
+            "quando": datetime.now().astimezone().isoformat(timespec="seconds"), "creditos": creditos,
+            "modelo": narracao.MODELO, "voz": narracao.VOZ,
+            "chave": "professor" if chave == narracao.CHAVE_PROFESSOR else "propria",
+            "por": usuario["login"] if usuario else None})
+        tmp = f.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(f)
+    return {"url": _narracao(nome), "nova": True, "creditos": creditos}
 
 
 @app.get("/sextilhas")
@@ -223,7 +286,7 @@ def colecao():
             "manchete": fato.get("titulo") or f.stem,
             "estrofes": cadernos.estrofes(log, "estrofes_finais"),
             "imagem": arq.get("imagem"), "texto": arq.get("texto"),
-            "url": log.get("url"), "fonte": log.get("fonte"),
+            "url": log.get("url"), "fonte": log.get("fonte"), "narracao": _narracao(f.stem),
             "motivo": log.get("motivo"), "rodadas": log.get("rodadas_de_correcao"),
             "forma": {k: cfg.get(k) for k in ("forma", "estrofes", "encadeamento", "narrador")},
         })
@@ -277,11 +340,14 @@ def logs():
             "rodadas": log.get("rodadas_de_correcao"),
             "candidatas": len(log.get("candidatas") or []) or 1,
             "texto": custo["texto"], "imagem": custo["imagem"], "total": custo["total"],
+            "narracao": custo["narracao"], "creditos_narracao": custo["creditos_narracao"],
+            "narracoes": [{k: n.get(k) for k in ("quando", "creditos", "modelo", "chave")} for n in log.get("narracoes", [])],
             "imagem_medida": custo["imagem_medida"], "tem_imagem": custo["tem_imagem"],
             "chamadas": chamadas,
             "arquivos": _arquivos(f, log),
         })
-    return {"geracoes": geracoes, "precos_conferidos_em": "28/09/2026"}
+    return {"geracoes": geracoes, "precos_conferidos_em": "28/09/2026",
+            "eleven_usd_por_1k": custos.ELEVEN_USD_POR_1K_CREDITOS}
 
 
 @app.get("/historico")
@@ -309,7 +375,7 @@ def historico():
             "rodadas": log.get("rodadas_de_correcao"), "duvidas": log.get("duvidas_para_o_grupo") or [],
             "angulo": candidatas[escolhida]["angulo"] if escolhida is not None and escolhida < len(candidatas) else None,
             "justificativa": (log.get("escolhida") or {}).get("justificativa"),
-            "custo": custos.resumo(log)["total"],
+            "custo": custos.resumo(log)["total"], "narracao": _narracao(f.stem),
             "arquivos": _arquivos(f, log),
         })
     return {"itens": itens}

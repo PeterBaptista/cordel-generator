@@ -27,6 +27,12 @@ PRECOS_IMAGEM = {
     "gpt-image-1-mini": (2.00, 2.50, 8.00),
 }
 
+# ElevenLabs cobra em créditos (1 por caractere; 0,5 nos modelos turbo/flash). O dólar por
+# crédito depende do plano: Starter = US$ 5 por mês por 40 mil créditos (conta do professor, 17/11).
+import os  # noqa: E402
+
+ELEVEN_USD_POR_1K_CREDITOS = float(os.getenv("CORDEL_ELEVEN_USD_POR_1K", "0.125"))
+
 ETAPAS = {
     "Você lê notícias": "fato",
     "Você é um poeta": "candidata",
@@ -76,11 +82,15 @@ def resumo(log: dict) -> dict:
     chamadas = [custo_chamada(c) for c in log.get("chamadas", [])]
     # a chamada da xilogravura (hospedeiro + imagem) conta inteira como imagem
     xilo = [c for c in chamadas if c["etapa"] == "xilogravura"]
+    # a narração é feita depois, sob pedido; só a do professor sai da conta dele, mas as duas contam
+    creditos = sum(n.get("creditos") or 0 for n in log.get("narracoes", []))
+    narracao = creditos * ELEVEN_USD_POR_1K_CREDITOS / 1000
     return {
         "texto": sum(c["total"] for c in chamadas if c["etapa"] != "xilogravura"),
         "imagem": sum(c["total"] for c in xilo),
         "tem_imagem": bool(xilo),
-        "total": sum(c["total"] for c in chamadas),
+        "narracao": narracao, "creditos_narracao": creditos,
+        "total": sum(c["total"] for c in chamadas) + narracao,
         "imagem_medida": all(c["imagem_medida"] for c in chamadas),
         "chamadas": chamadas,
     }
