@@ -160,9 +160,13 @@ RESERVA_IMAGEM_USD = 0.01
 MAX_REESCRITAS = 2
 RODADAS_POR_REESCRITA = 4
 GRAVES = {"contradiz", "inventa"}
-# a partir desta rodada de correção, o Poeta pensa mais (raciocínio médio): no baixo, a métrica
-# ficava oscilando entre as rodadas sem fechar
-RODADA_PENSAR_MAIS = 4
+# A partir desta rodada de correção, o Poeta pensaria mais (raciocínio médio). Desligado desde
+# 19/11 (0 = nunca): nas gerações reais, cada correção no médio levava 2 a 3 vezes mais (28 s
+# contra 9,5 s) e as gerações passaram de ~1 min para 4 a 6 min, sem passar mais no verificador.
+RODADA_PENSAR_MAIS = int(os.getenv("CORDEL_RODADA_PENSAR_MAIS", "0"))
+# Com várias candidatas, quando uma passa no verificador, as outras ganham só mais estas rodadas
+# para também chegarem ao júri; depois param. Antes, todas corrigiam até o fim e o júri esperava.
+RODADAS_DEPOIS_DA_PRIMEIRA = 1
 
 
 def chave_juizo(av: dict | None, prioridade: str = "noticia") -> tuple:
@@ -720,9 +724,10 @@ async def _run_cordel(
     resultados: list[dict] = [{"estrofes": [list(vs) for vs in c["estrofes"]], "rodada": 0, "rodadas": []}
                               for c in candidatas]
 
-    async def corrigir(i: int, limite: int) -> None:
+    async def corrigir(i: int, limite: int, primeira: asyncio.Event | None = None) -> None:
         res = resultados[i]
         estrofes = res["estrofes"]
+        extras = 0
         while True:
             rodada = res["rodada"]
             mp = res["mp"] = medir_poema(estrofes, cfg)
@@ -734,8 +739,15 @@ async def _run_cordel(
                 "medidas": [{k: m[k] for k in ("linhas", "rimas", "extras", "entra")} for m in mp["medidas"]],
                 "deixa": mp["deixa"], "regras": mp["regras"], "sugestoes": mp["sugestoes"], "entra": mp["entra"], "reprovados": reprovados,
                 "relatorio": mp["relatorio"]})
+            if mp["entra"] and primeira is not None:
+                primeira.set()  # as outras candidatas já podem parar
             if mp["entra"] or rodada >= limite or not mp["forma_ok"] or not reprovados:
                 return
+            if primeira is not None and primeira.is_set():
+                extras += 1
+                if extras > RODADAS_DEPOIS_DA_PRIMEIRA:
+                    log.setdefault("paradas_cedo", []).append({"candidata": i, "rodada": rodada})
+                    return
             if estourou():
                 log["parou_no_teto"] = f"correção {rodada + 1}"
                 fila.put_nowait({"etapa": "teto", "onde": f"correção {rodada + 1}",
@@ -745,7 +757,7 @@ async def _run_cordel(
             fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "rodando", "rodada": rodada,
                              "reprovados": reprovados})
             cfg_rodada = (replace(cfg, raciocinio="medium")
-                          if rodada >= RODADA_PENSAR_MAIS and cfg.raciocinio == "low" else cfg)
+                          if RODADA_PENSAR_MAIS and rodada >= RODADA_PENSAR_MAIS and cfg.raciocinio == "low" else cfg)
             corr: Correcao = await gerar(
                 sistemas_ok[i],
                 prompts.usuario_correcao(estrofes, mp["relatorio"], reprovados, fato.fato, fato.essencial),
@@ -756,17 +768,18 @@ async def _run_cordel(
             fila.put_nowait({"etapa": "correcao", "candidata": i, "status": "ok", "rodada": rodada,
                              "mudancas": mudancas})
 
-    async def rodar(i: int, limite: int) -> None:
+    async def rodar(i: int, limite: int, primeira: asyncio.Event | None) -> None:
         try:
-            await corrigir(i, limite)
+            await corrigir(i, limite, primeira)
         except Exception as e:  # uma candidata falhar não derruba as outras
             resultados[i]["erro"] = str(e)
             log.setdefault("erros_correcao", []).append(f"candidata {i + 1}: {e}")
         finally:
             fila.put_nowait(None)
 
-    async def corrigindo(limites: dict[int, int]) -> AsyncIterator[dict]:
-        tarefas = [asyncio.create_task(rodar(i, limite)) for i, limite in limites.items()]
+    async def corrigindo(limites: dict[int, int], parar_na_primeira: bool = False) -> AsyncIterator[dict]:
+        primeira = asyncio.Event() if parar_na_primeira and len(limites) > 1 else None
+        tarefas = [asyncio.create_task(rodar(i, limite, primeira)) for i, limite in limites.items()]
         try:
             abertas = len(tarefas)
             while abertas:
@@ -779,7 +792,7 @@ async def _run_cordel(
             for t in tarefas:
                 t.cancel()
 
-    async with contextlib.aclosing(corrigindo({i: rodadas_para(cfg) for i in range(len(candidatas))})) as eventos:
+    async with contextlib.aclosing(corrigindo({i: rodadas_para(cfg) for i in range(len(candidatas))}, parar_na_primeira=True)) as eventos:
         async for ev in eventos:
             yield ev
 

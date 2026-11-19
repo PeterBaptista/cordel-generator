@@ -235,6 +235,14 @@ Observado nos registros e nos experimentos de 28/09 (números em
     foi 4 estrofes com 1 candidata, rima da 3ª estrofe que não fechou em 16 rodadas. A de 6
     estrofes passou, mas levou 10 minutos. Gasto total dos testes: US$ 0,41.
 
+- **Geração lenta** (19/11). Desde 17/11 as gerações levavam de 4 a 6 minutos (antes, de 1 a 1,5).
+  Nos cadernos, a correção da métrica era mais de 90% do tempo, por dois motivos: o raciocínio
+  médio a partir da 4ª rodada deixava cada correção 2 a 3 vezes mais lenta (28 s contra 9,5 s),
+  sem passar mais; e, com várias candidatas, todas corrigiam até o fim mesmo depois de uma ter
+  passado. O raciocínio médio saiu (fica como opção, `CORDEL_RODADA_PENSAR_MAIS`), e quando uma
+  candidata passa as outras ganham só mais 1 rodada. Refeitas com a mesma notícia e configuração:
+  "Três líderes" de 366 s para 87 s, "GTA 6" de 294 s (descarte) para 90 s (passou).
+
 ✍️ Grupo: acrescentem o que vocês viram nas gerações da coleção.
 
 ---
