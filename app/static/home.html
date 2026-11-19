@@ -339,6 +339,7 @@ function fichaHTML(f) {
     ${f.url ? `<p><a href="${esc(f.url)}" rel="noopener" target="_blank">Ler a notícia original</a> em ${esc(f.fonte || dominio(f.url))}.</p>` : ""}
     ${f.narracao ? `<div class="ab-narracao"><p class="rotulo">Ouça a sextilha narrada</p>
       <audio id="ab-audio" controls preload="none" src="/${esc(f.narracao)}"></audio>
+      ${f.musica ? `<audio id="ab-musica" preload="none" src="/${esc(f.musica)}"></audio><p class="nota">com música de fundo</p>` : ""}
       <p class="nota">Os versos se acendem no folheto enquanto o cantador fala.</p></div>` : ""}
     <button type="button" class="acao" id="ab-baixar">Baixar em PNG</button>
     <p><a href="/geracao/${esc(f.id)}">Ver como foi gerada, passo a passo</a></p>
@@ -357,6 +358,7 @@ async function abrir(fig, gatilho, tocar = false) {
     // a narração acende o verso e a palavra ditos no cartaz aberto
     acompanharNarracao($("ab-audio"), poster.querySelector(".versos"),
       f.narracao_tempos ? () => fetch(`/${f.narracao_tempos}`).then((r) => r.ok ? r.json() : null) : null);
+    if ($("ab-musica")) { $("ab-musica").volume = 0.25; sincronizarMusica($("ab-audio"), $("ab-musica")); }
     if (tocar) $("ab-audio").play().catch(() => {});
   }
   $("ab-baixar").onclick = async (e) => {
@@ -387,6 +389,7 @@ async function fechar() {
   atual.fechando = true;
   const { fig, gatilho } = atual, poster = $("ab-folheto").firstElementChild;
   dicaTermo.esconder();
+  $("ab-musica")?.pause();
   if ($("ab-audio")) { $("ab-audio").pause(); if (typeof CSS !== "undefined" && CSS.highlights) CSS.highlights.delete("narrada"); }
   if (!parado.matches) {
     aberto.classList.add("saindo");

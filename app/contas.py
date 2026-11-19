@@ -74,7 +74,44 @@ def iniciar() -> None:
             caderno TEXT, custo REAL
         );
         CREATE INDEX IF NOT EXISTS usos_por_usuario ON usos (usuario, quando);
+        CREATE TABLE IF NOT EXISTS config (chave TEXT PRIMARY KEY, valor TEXT NOT NULL);
         """)
+        colunas = {r["name"] for r in con.execute("PRAGMA table_info(usos)")}
+        if "ip" not in colunas:  # gerações sem conta (OpenAI liberada para todos) contam por IP
+            con.execute("ALTER TABLE usos ADD COLUMN ip TEXT")
+
+
+# ------------------------------------------------------- configurações do site
+# Só admin muda. O professor (admin) continua com acesso a tudo, ligado ou não.
+CONFIG_PADRAO = {
+    "cadastro_livre": False,   # qualquer um cria conta, sem o código de convite
+    "openai_publica": False,   # gerar folheto com a chave do professor sem conta (limite por IP)
+    "eleven_publica": False,   # a chave da ElevenLabs do professor para todos...
+    "eleven_voz": False,       # ...na narração
+    "eleven_musica": False,    # ...na música de fundo
+}
+
+
+def config() -> dict:
+    with _db() as con:
+        salvo = {r["chave"]: r["valor"] == "1" for r in con.execute("SELECT chave, valor FROM config")}
+    return {k: salvo.get(k, v) for k, v in CONFIG_PADRAO.items()}
+
+
+def mudar_config(mudancas: dict) -> dict:
+    with _db() as con:
+        for k, v in mudancas.items():
+            if k in CONFIG_PADRAO and isinstance(v, bool):
+                con.execute("INSERT INTO config VALUES (?, ?) ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor",
+                            (k, "1" if v else "0"))
+    return config()
+
+
+def publico() -> dict:
+    """O que está liberado para quem não é admin."""
+    c = config()
+    return {"cadastro": c["cadastro_livre"], "openai": c["openai_publica"],
+            "voz": c["eleven_publica"] and c["eleven_voz"], "musica": c["eleven_publica"] and c["eleven_musica"]}
 
 
 # ------------------------------------------------------------------ senha
@@ -147,10 +184,13 @@ def criar(login: str, nome: str, senha: str) -> dict:
 
 
 def cadastrar(convite: str, login: str, nome: str, senha: str, ip: str) -> dict:
-    if not CONVITE:
+    livre = config()["cadastro_livre"]
+    if not CONVITE and not livre:
         raise ErroConta(403, "O cadastro está fechado. Peça uma conta ao professor.")
     if _bloqueado(f"ip:{ip}"):
         raise ErroConta(429, "Muitas tentativas. Espere uns minutos e tente de novo.")
+    if livre:  # o professor abriu o cadastro: o convite não é pedido
+        return criar(login, nome, senha)
     if not hmac.compare_digest(convite.strip().encode(), CONVITE.encode()):
         _errou(f"ip:{ip}")
         raise ErroConta(403, "Código de convite errado. Ele é passado pelo professor na aula.")
@@ -219,6 +259,17 @@ def reservar(usuario: dict) -> int:
                                  f"professor. A cota volta em {amanha}, ou use a sua própria chave nas configurações.")
         return con.execute("INSERT INTO usos (usuario, quando) VALUES (?, ?)",
                            (usuario["id"], time.time())).lastrowid
+
+
+def reservar_ip(ip: str) -> int:
+    """Gerações sem conta (OpenAI liberada para todos): a mesma cota diária, por IP."""
+    with _db() as con:
+        usadas = con.execute("SELECT COUNT(*) FROM usos WHERE usuario = 0 AND ip = ? AND quando >= ?",
+                             (ip, _inicio_do_dia())).fetchone()[0]
+        if usadas >= COTA_DIA:
+            raise ErroConta(429, f"Este endereço já usou as {COTA_DIA} gerações de hoje sem conta. "
+                                 "Entre com uma conta ou use a sua própria chave nas configurações.")
+        return con.execute("INSERT INTO usos (usuario, quando, ip) VALUES (0, ?, ?)", (time.time(), ip)).lastrowid
 
 
 def concluir(uso_id: int, caderno: str | None, custo: float | None) -> None:

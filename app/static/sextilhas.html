@@ -91,7 +91,7 @@ const cartao = (i) => `<article class="mini"><div class="moldura">
     <div class="versos">${i.estrofes.map((vs) => `<div class="estrofe">${vs.map((v) => `<div>${esc(v)}</div>`).join("")}</div>`).join("")}</div>
     <span class="selo ${i.entra ? "entra" : "descarte"}">${i.entra ? "Passou" : "Descarte"}</span>
     ${i.motivo ? `<div class="motivo">${esc(i.motivo)}</div>` : ""}
-    ${i.narracao ? `<audio class="ouvir" controls preload="none" data-id="${esc(i.id)}" src="/${esc(i.narracao)}" aria-label="narração: ${esc(i.manchete)}"></audio>` : ""}
+    ${i.narracao ? `${i.musica ? `<audio class="fundo" preload="none" src="/${esc(i.musica)}"></audio>` : ""}<audio class="ouvir" controls preload="none" data-id="${esc(i.id)}" src="/${esc(i.narracao)}" aria-label="narração: ${esc(i.manchete)}"></audio>` : ""}
     <a class="como" href="/geracao/${esc(i.id)}">${i.narracao ? "como foi gerada" : "como foi gerada · narrar"}</a>
   </div></article>`;
 
@@ -109,6 +109,8 @@ function render() {
     const versos = a.closest(".moldura").querySelector(".versos");
     acompanharNarracao(a, versos, i?.narracao_tempos ? () => fetch(`/${i.narracao_tempos}`).then((r) => r.ok ? r.json() : null) : null);
     a.addEventListener("play", () => document.querySelectorAll("#grade audio.ouvir").forEach((o) => o !== a && o.pause()));
+    const fundo = a.parentElement.querySelector("audio.fundo");
+    if (fundo) { fundo.volume = 0.25; sincronizarMusica(a, fundo); }
   });
 }
 

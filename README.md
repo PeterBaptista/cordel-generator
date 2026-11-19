@@ -133,6 +133,22 @@ volume: gerado uma vez, qualquer um ouve de graça, e sobrevive aos deploys. Os 
 narração ficam no caderno (`narracoes`) e aparecem em `/logs`, convertidos em dólar por
 `CORDEL_ELEVEN_USD_POR_1K`.
 
+**Música de fundo** (`app/musica.py`). Depois da narração, dá para criar uma música instrumental
+pela Eleven Music, do tamanho da narração (até `CORDEL_MUSICA_MAX_SEGUNDOS`, 120 s), que toca
+junto com ela a 25% do volume. Quem gera escolhe estilo, clima, andamento e instrumentos, ou deixa
+"a IA escolhe" e o modelo decide pelo assunto. Custa ~15 créditos por segundo. As mesmas regras de
+chave da narração valem aqui. Narração ou música refeitas não somem: vão para
+`narracao/arquivo/` e aparecem em "gravações anteriores"; todas entram no custo em `/logs`.
+
+**Configurações do site** (`/admin`, só admin): cadastro livre (sem convite), OpenAI para todos
+(gerar sem conta, com a cota diária por IP), e ElevenLabs para todos, separada em voz e música.
+Ficam no `contas.sqlite3`; o professor e os admins continuam podendo tudo.
+
+**O gerador** mostra, durante a geração, uma barra fixa no topo com as etapas na horizontal, o que
+a IA está fazendo e a porcentagem; o cartaz destaca a etapa atual. As etapas têm modo simplificado
+e avançado, e a opção "seguir" rola sozinha para o que está acontecendo. No celular, o cartaz vem
+antes e as etapas abrem por cima da página.
+
 **Prioridade** (padrão: a notícia). Com "a notícia", o poema tem de contar sozinho os pontos
 essenciais que a etapa do fato extrai, sem contar com a manchete. Desde 17/11 são 2 pontos
 (1 estrofe), 3 (2 estrofes) ou 4 (3 ou mais), cada um com até 6 palavras, número arredondado e

@@ -238,3 +238,20 @@ function acompanharNarracao(audio, versosEl, tempos) {
   audio.addEventListener("seeked", () => { atual = null; passo(); }, opt);
   return limpar;
 }
+
+// ---- música de fundo: acompanha a narração (começa, pausa e pula junto), mais baixa
+function sincronizarMusica(narr, mus, ligado = () => true) {
+  narr._musica?.abort();
+  const fim = new AbortController(), opt = { signal: fim.signal };
+  narr._musica = fim;
+  const tem = () => !!mus.getAttribute("src") && ligado();
+  const alinhar = () => {
+    if (!tem()) return;
+    const t = Math.max(0, Math.min(narr.currentTime, (mus.duration || Infinity) - 0.05));
+    if (Math.abs(mus.currentTime - t) > 0.3) mus.currentTime = t;
+  };
+  narr.addEventListener("play", () => { if (!tem()) return; alinhar(); mus.play().catch(() => {}); }, opt);
+  narr.addEventListener("pause", () => { if (!narr.ended) mus.pause(); }, opt);  // no fim, a música termina sozinha (tem folga)
+  narr.addEventListener("seeked", alinhar, opt);
+  return () => fim.abort();
+}

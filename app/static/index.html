@@ -28,10 +28,99 @@
   .custo { font: 13px "Courier Prime", monospace; color: var(--tinta-2); margin-top: 6px; }
   .custo a { color: var(--tinta); }
   .cfg { font-family: "Special Elite", monospace; font-size: 12px; color: var(--tinta-2); margin-top: 6px; }
-  main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 28px;
-         grid-template-columns: minmax(0, 1fr) minmax(0, 440px); align-items: start; }
-  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  main { max-width: 1160px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 22px 28px;
+         grid-template-columns: minmax(0, 1fr) minmax(0, 440px); align-items: start;
+         grid-template-areas: "form cartaz" "logs cartaz"; }
   main > section { min-width: 0; }
+  .area-form { grid-area: form; } .area-cartaz { grid-area: cartaz; position: sticky; top: calc(var(--barra-h, 0px) + 12px); }
+  .area-logs { grid-area: logs; }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; grid-template-areas: "form" "cartaz"; }
+    .area-cartaz { position: static; }
+    /* no celular, as etapas abrem por cima, como uma janela */
+    .area-logs { display: none; }
+    .area-logs.aberto { display: block; position: fixed; inset: 0; z-index: 60; background: var(--papel); overflow-y: auto;
+                        padding: 14px 16px 40px; }
+  }
+  @media (min-width: 861px) { #abrir-logs, .fechar-logs { display: none; } }
+
+  /* barra fixa de progresso: as etapas na horizontal e o que a IA está fazendo agora */
+  .barra { position: sticky; top: 0; z-index: 40; background: var(--tinta); color: var(--papel); border-bottom: 3px solid var(--vermelho); }
+  .barra-in { max-width: 1160px; margin: 0 auto; padding: 8px 16px 0; }
+  .etapas { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .etapas li { flex: 1 0 auto; display: flex; align-items: center; gap: 6px; font: 600 12px "Oswald", sans-serif; text-transform: uppercase;
+               letter-spacing: .6px; padding: 4px 8px; border: 1.5px solid #efe4cc55; color: #efe4cc99; white-space: nowrap; }
+  .etapas li::before { content: ""; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid currentColor; flex: none; }
+  .etapas li.ativa { color: var(--tinta); background: var(--papel); border-color: var(--papel); }
+  .etapas li.ativa::before { background: var(--vermelho); border-color: var(--vermelho); animation: pulsa-ponto 1s infinite alternate; }
+  .etapas li.feita { color: var(--papel); border-color: #efe4cc99; }
+  .etapas li.feita::before { background: var(--papel); }
+  .etapas li.erro { color: #ffb4a6; border-color: #ffb4a6; }
+  .etapas li.erro::before { background: #ffb4a6; }
+  @keyframes pulsa-ponto { to { opacity: .35; } }
+  .barra-linha { display: flex; align-items: center; gap: 12px; padding: 6px 0; flex-wrap: wrap; }
+  .barra-acao { flex: 1 1 200px; font: 15px "Special Elite", monospace; min-width: 0; }
+  .barra-pct { font: 700 14px "Oswald", sans-serif; }
+  .progresso { height: 4px; background: #efe4cc33; margin: 0 -16px; }
+  .progresso span { display: block; height: 100%; width: 0; background: var(--vermelho); transition: width .6s ease; }
+  .barra .mini-switch { color: var(--papel); }
+  .barra button.sec { color: var(--papel); border-color: var(--papel); box-shadow: 2px 2px 0 var(--vermelho); }
+  button.mini { font-size: 12px; padding: 4px 10px; }
+  @media (prefers-reduced-motion: reduce) { .etapas li.ativa::before { animation: none; } .progresso span { transition: none; } }
+
+  /* chaves liga/desliga em preto e branco */
+  .switch { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 2px solid var(--tinta); background: #fbf6ea;
+            cursor: pointer; margin-top: 8px; }
+  .switch:has(input:checked) { box-shadow: 4px 4px 0 var(--tinta); }
+  .switch input, .mini-switch input { appearance: none; flex: none; position: relative; cursor: pointer; margin: 0;
+            border: 2px solid currentColor; border-radius: 999px; background: transparent; transition: background .2s; }
+  .switch input { width: 50px; height: 28px; color: var(--tinta); }
+  .switch input::before, .mini-switch input::before { content: ""; position: absolute; border-radius: 50%; background: currentColor;
+            transition: transform .2s; }
+  .switch input::before { width: 18px; height: 18px; top: 3px; left: 3px; }
+  .switch input:checked { background: var(--tinta); }
+  .switch input:checked::before { transform: translateX(22px); background: var(--papel); }
+  .switch input:focus-visible, .mini-switch input:focus-visible { outline: 3px solid var(--vermelho); outline-offset: 2px; }
+  .switch .t { display: block; font: 700 17px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .6px; }
+  .switch .d { display: block; font-size: 12.5px; color: var(--tinta-2); }
+  .mini-switch { display: inline-flex; align-items: center; gap: 7px; font: 600 12.5px "Oswald", sans-serif; text-transform: uppercase;
+                 letter-spacing: .5px; cursor: pointer; }
+  .mini-switch input { width: 34px; height: 19px; }
+  .mini-switch input::before { width: 11px; height: 11px; top: 2px; left: 2px; }
+  .mini-switch input:checked { background: currentColor; }
+  .mini-switch input:checked::before { transform: translateX(15px); background: var(--tinta); }
+  .barra .mini-switch input:checked::before { background: var(--tinta); }
+  .extras { border: 2px solid var(--tinta); margin: 14px 0 0; padding: 4px 12px 12px; }
+  .extras legend { font: 700 13px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: 1px; padding: 0 6px; }
+  .musica-params { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 10px 12px; border: 1.5px dashed var(--tinta); margin-top: 8px; }
+  .musica-params label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--tinta-2); }
+  .musica-params select { font: 14px "Libre Baskerville", serif; background: #fbf6ea; border: 1.5px solid var(--tinta); padding: 4px 6px; }
+  .musica-params .estimativa { flex-basis: 100%; margin: 0; }
+  .musica-box { width: 100%; display: grid; gap: 6px; justify-items: center; }
+  .volume { font-size: 12px; color: var(--tinta-2); display: flex; align-items: center; gap: 8px; }
+  .anteriores { width: 100%; text-align: left; }
+  .anteriores summary { font-size: 13px; color: var(--tinta-2); text-align: center; }
+  .anteriores .item { font-size: 12.5px; color: var(--tinta-2); margin-top: 8px; }
+  .anteriores audio { width: 100%; height: 32px; }
+
+  /* painel das etapas */
+  .logs-cab { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; border-bottom: 2px solid var(--tinta); padding-bottom: 8px; }
+  .logs-cab h2 { margin: 0; flex: 1 0 auto; }
+  .segmentado { display: inline-flex; border: 2px solid var(--tinta); }
+  .segmentado button { box-shadow: none; font-size: 12px; padding: 4px 10px; background: transparent; color: var(--tinta); border: 0; }
+  .segmentado button[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+  .segmentado button:hover { transform: none; box-shadow: none; }
+  .logs-vazio { font-size: 13.5px; color: var(--tinta-2); }
+  @media (min-width: 861px) { #linha { max-height: 70vh; overflow-y: auto; padding-right: 6px; } }
+  /* simplificado: só o que dá para ler de relance; o avançado mostra tabelas, relatórios e candidatas */
+  #linha.simples .corpo table, #linha.simples .corpo details, #linha.simples .corpo pre,
+  #linha.simples .corpo .sil, #linha.simples .corpo .cand, #linha.simples .corpo .sub-est, #linha.simples .corpo .detalhe { display: none; }
+  @media (max-width: 860px) {
+    .area-logs.aberto .logs-cab { position: sticky; top: -14px; background: var(--papel); z-index: 2; padding-top: 10px; padding-right: 48px; }
+    .area-logs.aberto .fechar-logs { position: absolute; top: 8px; right: 0; }
+    .barra-acao { flex-basis: 100%; font-size: 13.5px; }
+    .etapas li { font-size: 11px; padding: 3px 6px; }
+  }
   h2 { font: 700 18px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 10px; }
   .campo { display: block; font-size: 13px; color: var(--tinta-2); margin: 10px 0 4px; }
   input[type=url], input[type=text], textarea {
@@ -71,10 +160,17 @@
   .folheto .xilo.carregando { background: linear-gradient(90deg, #ddd5c3 25%, #e9e2d2 50%, #ddd5c3 75%) 0 0 / 200% 100%;
     animation: brilho 1.8s linear infinite; }
   .folheto .status-geracao { display: none; }
-  .folheto.gerando .status-geracao { display: block; text-align: center; font: 12px "Special Elite", monospace;
-    color: var(--tinta-2); margin: 2px 0 6px; }
+  .folheto.gerando .status-geracao { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+    background: var(--tinta); color: var(--papel); font: 14px "Special Elite", monospace; padding: 8px 10px; margin: 8px 0 6px;
+    box-shadow: 3px 3px 0 var(--vermelho); }
+  .folheto.gerando { outline: 3px solid var(--vermelho); outline-offset: 4px; transition: outline-color .3s; }
+  .status-geracao .etapa-num { font: 700 12px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .8px;
+    background: var(--vermelho); padding: 1px 7px; }
+  .status-geracao .giro { width: 13px; height: 13px; border: 2px solid var(--papel); border-right-color: transparent; border-radius: 50%;
+    animation: gira .8s linear infinite; }
+  @keyframes gira { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) {
-    .folheto .esqueleto, .folheto .xilo.carregando, .folheto.gerando .versos .v.pendente { animation: none; }
+    .folheto .esqueleto, .folheto .xilo.carregando, .folheto.gerando .versos .v.pendente, .status-geracao .giro { animation: none; }
     .folheto.gerando .versos .v.pendente { opacity: .35; }
   }
   dialog#aviso { max-width: min(480px, calc(100vw - 32px)); background: var(--papel); color: var(--tinta);
@@ -87,7 +183,10 @@
   .exemplos { margin-top: 6px; font-size: 13px; }
   .exemplos a { color: var(--vermelho); cursor: pointer; margin-right: 10px; }
 
-  #linha { list-style: none; margin: 20px 0 0; padding: 0; border-left: 2px solid var(--tinta); }
+  .travado-logs { overflow: hidden; }
+  .area-logs { scroll-margin-top: calc(var(--barra-h, 0px) + 10px); }
+  .area-cartaz { scroll-margin-top: calc(var(--barra-h, 0px) + 10px); }
+  #linha { position: relative; list-style: none; margin: 14px 0 0; padding: 0; border-left: 2px solid var(--tinta); }
   #linha li { position: relative; padding: 4px 0 14px 18px; }
   #linha li::before { content: ""; position: absolute; left: -7px; top: 10px; width: 12px; height: 12px;
                       background: var(--papel); border: 2px solid var(--tinta); border-radius: 50%; }
@@ -195,8 +294,21 @@
   <nav class="nav"><a href="/">Início</a> · <a href="/gerador" aria-current="page">Gerador</a> · <a href="/sextilhas">Sextilhas</a> · <a href="/historico">Histórico</a> · <a href="/logs">Logs</a></nav>
 </header>
 
-<main>
-  <section>
+<div class="barra" id="barra" hidden>
+  <div class="barra-in">
+    <ol class="etapas" id="etapas" aria-label="Etapas da geração"></ol>
+    <div class="barra-linha">
+      <span class="barra-acao" id="barra-acao" aria-live="polite">esperando</span>
+      <span class="barra-pct" id="barra-pct"></span>
+      <label class="mini-switch" title="rola sozinho para o que a IA está fazendo agora"><input type="checkbox" role="switch" id="seguir" checked> seguir</label>
+      <button class="sec mini" type="button" id="abrir-logs">ver etapas</button>
+    </div>
+    <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
+  </div>
+</div>
+
+<main class="gerador">
+  <section class="area-form">
     <div class="so-replay cab-replay" id="cab-replay">
       <h2>Como esta peça foi gerada</h2>
       <p id="replay-meta">carregando o caderno…</p>
@@ -208,6 +320,33 @@
       </div>
     </div>
     <div class="bloco-conta so-gerar" id="conta" aria-live="polite"></div>
+    <div class="so-gerar">
+    <details class="ajustes" id="ajustes">
+      <summary>⚙ Configurações · chaves (OpenAI e ElevenLabs) e voz da narração</summary>
+      <p>Com a sua própria chave, a geração não usa a chave do professor: não precisa de conta, não gasta a cota
+        do dia e libera os outros modelos. O gasto vai para a sua conta da OpenAI (teto de <span id="teto-propria">US$ 0,50</span> por geração).</p>
+      <p>A chave fica <b>só neste navegador</b>. Ela vai junto de cada geração e o servidor não a grava em lugar nenhum.</p>
+      <form class="linha-chave" id="form-chave">
+        <input type="text" name="username" autocomplete="off" hidden aria-hidden="true">
+        <input type="password" id="chave" placeholder="sk-…" autocomplete="off" spellcheck="false" aria-label="Sua chave da OpenAI">
+        <button class="sec" type="submit" id="chave-salvar">usar esta chave</button>
+        <button class="sec" type="button" id="chave-remover">remover</button>
+      </form>
+      <p class="selo-chave" id="chave-estado" role="status"></p>
+      <p style="margin-top:14px"><b>Narração (ElevenLabs).</b> A narração com sotaque nordestino usa a chave do professor só
+        na conta dele. Para ouvir a sua sextilha narrada, coloque aqui a sua chave da ElevenLabs: ela também fica só neste navegador.</p>
+      <form class="linha-chave" id="form-eleven">
+        <input type="text" name="username" autocomplete="off" hidden aria-hidden="true">
+        <input type="password" id="chave-eleven" placeholder="chave da ElevenLabs" autocomplete="off" spellcheck="false" aria-label="Sua chave da ElevenLabs">
+        <button class="sec" type="submit">usar esta chave</button>
+        <button class="sec" type="button" id="eleven-remover">remover</button>
+      </form>
+      <p class="selo-chave" id="eleven-estado" role="status"></p>
+      <p style="margin-top:14px"><b>Voz da narração.</b> Ouça a amostra (a mesma estrofe em todas) e escolha.
+        Vale para as próximas narrações; a que já foi gravada fica com a voz dela.</p>
+      <div class="vozes" id="vozes-config" role="radiogroup" aria-label="Voz da narração"></div>
+    </details>
+    </div>
     <div class="bloco-nome so-gerar" id="bloco-nome" hidden>
       <label for="autor">Seu nome <span class="exigido" id="nome-estado">obrigatório</span></label>
       <input type="text" id="autor" maxlength="60" required autocomplete="name" placeholder="Escreva aqui como quer aparecer" aria-describedby="nome-ajuda">
@@ -243,42 +382,37 @@
       <label>Narrador <select id="c-narrador"></select></label>
       <div class="estimativa" id="regra"></div>
     </fieldset>
-    <details class="ajustes" id="ajustes">
-      <summary>Configurações: usar a sua chave da OpenAI</summary>
-      <p>Com a sua própria chave, a geração não usa a chave do professor: não precisa de conta, não gasta a cota
-        do dia e libera os outros modelos. O gasto vai para a sua conta da OpenAI (teto de <span id="teto-propria">US$ 0,50</span> por geração).</p>
-      <p>A chave fica <b>só neste navegador</b>. Ela vai junto de cada geração e o servidor não a grava em lugar nenhum.</p>
-      <form class="linha-chave" id="form-chave">
-        <input type="text" name="username" autocomplete="off" hidden aria-hidden="true">
-        <input type="password" id="chave" placeholder="sk-…" autocomplete="off" spellcheck="false" aria-label="Sua chave da OpenAI">
-        <button class="sec" type="submit" id="chave-salvar">usar esta chave</button>
-        <button class="sec" type="button" id="chave-remover">remover</button>
-      </form>
-      <p class="selo-chave" id="chave-estado" role="status"></p>
-      <p style="margin-top:14px"><b>Narração (ElevenLabs).</b> A narração com sotaque nordestino usa a chave do professor só
-        na conta dele. Para ouvir a sua sextilha narrada, coloque aqui a sua chave da ElevenLabs: ela também fica só neste navegador.</p>
-      <form class="linha-chave" id="form-eleven">
-        <input type="text" name="username" autocomplete="off" hidden aria-hidden="true">
-        <input type="password" id="chave-eleven" placeholder="chave da ElevenLabs" autocomplete="off" spellcheck="false" aria-label="Sua chave da ElevenLabs">
-        <button class="sec" type="submit">usar esta chave</button>
-        <button class="sec" type="button" id="eleven-remover">remover</button>
-      </form>
-      <p class="selo-chave" id="eleven-estado" role="status"></p>
-      <p style="margin-top:14px"><b>Voz da narração.</b> Ouça a amostra (a mesma estrofe em todas) e escolha.
-        Vale para as próximas narrações; a que já foi gravada fica com a voz dela.</p>
-      <div class="vozes" id="vozes-config" role="radiogroup" aria-label="Voz da narração"></div>
-    </details>
+    <fieldset class="extras">
+      <legend>Extras</legend>
+      <label class="switch">
+        <input type="checkbox" role="switch" id="imagem" checked>
+        <span><span class="t">Xilogravura</span><span class="d">a ilustração em preto e branco do folheto</span></span>
+      </label>
+      <label class="switch" id="l-narrar-fim" hidden>
+        <input type="checkbox" role="switch" id="narrar-fim">
+        <span><span class="t">Narração</span><span class="d">voz nordestina ao terminar (ElevenLabs) · <span id="voz-resumo">voz padrão</span></span></span>
+      </label>
+      <label class="switch" id="l-musica-fim" hidden>
+        <input type="checkbox" role="switch" id="musica-fim">
+        <span><span class="t">Música de fundo</span><span class="d">instrumental por trás do narrador · ~15 créditos por segundo</span></span>
+      </label>
+      <div class="musica-params" id="musica-params" hidden>
+        <label>Estilo <select id="m-estilo"></select></label>
+        <label>Clima <select id="m-clima"></select></label>
+        <label>Andamento <select id="m-andamento"></select></label>
+        <label>Instrumentos <select id="m-instrumentos"></select></label>
+        <p class="estimativa">Deixe em "a IA escolhe" para ela decidir pelo assunto da notícia.</p>
+      </div>
+      <p class="estimativa" id="extras-nota" hidden>Narração e música pedem a sua chave da ElevenLabs (em Configurações) ou a conta do professor.</p>
+    </fieldset>
     <div class="acoes">
       <button id="gerar">Gerar folheto</button>
-      <label><input type="checkbox" id="imagem" checked> gerar xilogravura</label>
-      <label id="l-narrar-fim" hidden title="usa créditos da ElevenLabs"><input type="checkbox" id="narrar-fim"> narrar ao terminar</label>
     </div>
     <p id="aviso-gerar" role="alert"></p>
     </div>
-    <ol id="linha"></ol>
   </section>
 
-  <section>
+  <section class="area-cartaz">
     <div class="folheto" id="folheto">
       <div class="moldura">
         <div class="cab">Notícias em Cordel</div>
@@ -288,7 +422,7 @@
         <div class="div" style="margin-top:0"><span class="estrela">✸</span></div>
         <div class="xilo" id="xilo"><span>a xilogravura aparece aqui</span></div>
         <div class="versos" id="versos"></div>
-        <div class="status-geracao" id="status-geracao" aria-live="polite"></div>
+        <div class="status-geracao" id="status-geracao" aria-live="polite"><span class="giro" aria-hidden="true"></span><span class="etapa-num" id="etapa-num"></span><span id="status-texto"></span></div>
         <div class="rodape"><svg class="seta" viewBox="0 0 22 10" style="transform:scaleX(-1)"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg><span class="estrela">✸</span><svg class="seta" viewBox="0 0 22 10"><path d="M0 5 L8 0 L6 5 L8 10 Z M9 5 L17 0 L15 5 L17 10 Z" fill="currentColor"/></svg></div>
         <div class="autor" id="autor-folheto"></div>
         <div class="fonte" id="fonte"></div>
@@ -304,12 +438,42 @@
         <button class="sec" type="button" id="renarrar" hidden>refazer narração</button>
         <audio id="audio-narracao" controls preload="none" hidden></audio>
         <div class="nota-narracao" id="nota-narracao" role="status"></div>
+        <div class="musica-box" id="musica-box" hidden>
+          <label class="mini-switch"><input type="checkbox" role="switch" id="tocar-musica" checked> tocar com a música de fundo</label>
+          <label class="volume">volume da música <input type="range" id="volume-musica" min="0" max="1" step="0.05" value="0.25"></label>
+          <audio id="audio-musica" preload="none"></audio>
+        </div>
+        <button class="sec" type="button" id="musicar" hidden>🎵 criar música de fundo</button>
+        <button class="sec" type="button" id="remusicar" hidden>refazer a música</button>
+        <div class="nota-narracao" id="nota-musica" role="status"></div>
         <details class="trocar-voz" id="trocar-voz">
           <summary>voz escolhida: <b id="voz-atual">…</b> · trocar</summary>
           <div class="vozes" id="vozes-narracao" role="radiogroup" aria-label="Voz da narração"></div>
         </details>
+        <details class="trocar-voz" id="musica-opcoes-box" hidden>
+          <summary>parâmetros da música · trocar</summary>
+          <div class="musica-params" id="musica-params-2"></div>
+        </details>
+        <details class="anteriores" id="anteriores" hidden>
+          <summary>gravações anteriores (<span id="anteriores-n">0</span>)</summary>
+          <div id="anteriores-lista"></div>
+        </details>
       </div>
     </div>
+  </section>
+
+  <section class="area-logs" id="painel-logs" aria-label="Etapas da geração">
+    <div class="logs-cab">
+      <h2>Etapas</h2>
+      <div class="segmentado" role="group" aria-label="Detalhe dos logs">
+        <button type="button" id="modo-simples" aria-pressed="true">simplificado</button>
+        <button type="button" id="modo-avancado" aria-pressed="false">avançado</button>
+      </div>
+      <label class="mini-switch"><input type="checkbox" role="switch" id="seguir-logs" checked> seguir</label>
+      <button class="sec mini fechar-logs" type="button" id="fechar-logs" aria-label="fechar as etapas">✕</button>
+    </div>
+    <p class="logs-vazio" id="logs-vazio">As etapas aparecem aqui quando você gerar: a notícia lida, o fato, os versos, cada correção da métrica, o júri e a xilogravura.</p>
+    <ol id="linha" class="simples"></ol>
   </section>
 </main>
 
@@ -338,7 +502,7 @@ const CAMPOS = [...CAMPOS_BASE, ...CAMPOS_PROPRIA];
 const campos = () => chave() ? CAMPOS : CAMPOS_BASE;
 const ROTULOS_PRIORIDADE = { noticia: "a notícia (recomendado)", forma: "a forma (métrica e dicionário obrigatórios)" };
 const NOTAS_PRIORIDADE = {
-  noticia: "O poema tem de contar a notícia sozinho, sem contar com a manchete. Métrica e rima continuam conferidas; o dicionário nordestino vira sugestão (não reprova), e o júri escolhe pela fidelidade.",
+  noticia: "O poema tem de contar a notícia sozinho, sem contar com a manchete. Métrica e rima continuam conferidas; cada estrofe pede 2 termos do dicionário nordestino, em qualquer verso, e o júri escolhe pela fidelidade.",
   forma: "Como era antes: além da métrica e da rima, um termo do dicionário a cada 2 versos e uma expressão por estrofe reprovam o verso. O poema ainda precisa contar a notícia.",
 };
 const ROTULOS_IMAGEM = { minima: "mínima (gpt-image-1-mini)", low: "rápida (gpt-image-2, low)", medium: "caprichada (gpt-image-2, medium)" };
@@ -460,6 +624,8 @@ function passo(chave, rotulo, status, html = "") {
   if (!li) { li = itens[chave] = document.createElement("li"); $("linha").appendChild(li); }
   li.className = status;
   li.innerHTML = `<div class="etq">${esc(rotulo)}</div>${html ? `<div class="corpo">${html}</div>` : ""}`;
+  $("logs-vazio").hidden = true;
+  rolarLogs(li);
 }
 
 const ev2 = (e, n) => `E${e}.${n}`;
@@ -482,7 +648,7 @@ function tabelaEscansao(ev) {
     <span class="${d.ok ? "bom" : "mau"}">${esc(d.estado)}</span> <span class="sil">${esc(d.chaves.join(" · "))}</span></div>`).join("");
   const regras = (ev.regras || []).map((r) => `<div class="mau">${rotuloVerso(r.estrofe, r.n, total)} · regra ${r.regra}: ${esc(r.motivo)}</div>`).join("");
   const sugestoes = (ev.sugestoes || []).map((r) => `<div class="sug">sugestão (não reprova) ${rotuloVerso(r.estrofe, r.n, total)} · regra ${r.regra}: ${esc(r.motivo)}</div>`).join("");
-  return ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + regras + sugestoes + `
+  return `<div class="detalhe">${ev.medidas.map((m, i) => tabelaEstrofe(m, i + 1, total)).join("") + deixa + regras + sugestoes}</div>` + `
     <div>${ev.entra ? '<span class="bom">passou</span>' : `<span class="mau">reprovados: ${listaReprovados(ev.reprovados, total) || "—"}</span>`}</div>
     <details><summary>relatório do escandir.py</summary><pre>${esc(ev.relatorio)}</pre></details>`;
 }
@@ -507,11 +673,99 @@ function mostrarEstrofes(estrofes, pendentes = []) {
 }
 const esqueletoVersos = (estrofes) => Array.from({ length: estrofes }, () =>
   `<div class="estrofe-c">${[1, 0, 1, 0, 1, 0].map((curto) => `<div class="esqueleto${curto ? " curto" : ""}"></div>`).join("")}</div>`).join("");
-const statusCartaz = (t) => { $("status-geracao").textContent = t; };
+const statusCartaz = (t) => { $("status-texto").textContent = t; $("barra-acao").textContent = t; };
+
+// ---- barra de etapas: na horizontal, fixa no topo, com o que a IA está fazendo agora
+const ETAPAS = [["noticia", "Notícia"], ["fato", "Fato"], ["versos", "Versos"], ["metrica", "Métrica"], ["juri", "Júri"],
+  ["xilo", "Xilogravura"], ["fim", "Folheto"], ["narracao", "Narração"], ["musica", "Música"]];
+let ETAPAS_ATIVAS = [], ESTADO = {};
+const temEtapa = (k) => ETAPAS_ATIVAS.some(([x]) => x === k);
+function iniciarEtapas({ imagem = true, narrar = false, musica = false } = {}) {
+  ETAPAS_ATIVAS = ETAPAS.filter(([k]) => (k !== "xilo" || imagem) && (k !== "narracao" || narrar) && (k !== "musica" || musica));
+  ESTADO = {};
+  $("barra").hidden = false;
+  desenharEtapas();
+}
+function incluirEtapa(k) {
+  if (temEtapa(k) || $("barra").hidden) return;
+  const ks = new Set([...ETAPAS_ATIVAS.map(([x]) => x), k]);
+  ETAPAS_ATIVAS = ETAPAS.filter(([x]) => ks.has(x));
+}
+function etapa(k, estado) { if (!temEtapa(k)) return; ESTADO[k] = estado; desenharEtapas(); }
+function desenharEtapas() {
+  $("etapas").innerHTML = ETAPAS_ATIVAS.map(([k, r]) =>
+    `<li class="${ESTADO[k] || ""}"${ESTADO[k] === "ativa" ? ' aria-current="step"' : ""}>${esc(r)}</li>`).join("");
+  const feitas = ETAPAS_ATIVAS.filter(([k]) => ESTADO[k] === "feita").length;
+  const pct = ETAPAS_ATIVAS.length ? Math.round(feitas / ETAPAS_ATIVAS.length * 100) : 0;
+  $("progresso").style.width = `${pct}%`; $("barra-pct").textContent = `${pct}%`;
+  const i = ETAPAS_ATIVAS.findIndex(([k]) => ESTADO[k] === "ativa");
+  $("etapa-num").textContent = i >= 0 ? `etapa ${i + 1} de ${ETAPAS_ATIVAS.length} · ${ETAPAS_ATIVAS[i][1]}` : "";
+  // a etapa ativa fica à vista na faixa (rolagem só dentro dela, sem mexer na página)
+  const c = $("etapas"), li = c.querySelector(".ativa");
+  if (li) c.scrollTo({ left: li.offsetLeft - c.clientWidth / 2 + li.clientWidth / 2, behavior: calmo() ? "auto" : "smooth" });
+}
+function marcarEtapa(ev) {
+  const r = ev.status === "rodando";
+  switch (ev.etapa) {
+    case "noticia": etapa("noticia", ev.status === "erro" ? "erro" : r ? "ativa" : "feita"); break;
+    case "fato": etapa("noticia", "feita"); etapa("fato", r ? "ativa" : "feita"); if (!r) etapa("versos", "ativa"); break;
+    case "candidatas": etapa("fato", "feita"); etapa("versos", r ? "ativa" : "feita"); if (!r) etapa("metrica", "ativa"); break;
+    case "escansao": case "correcao": etapa("versos", "feita"); if (ESTADO.juri !== "ativa") etapa("metrica", "ativa"); break;
+    case "julgamento": etapa("metrica", "feita"); etapa("juri", r ? "ativa" : "feita"); break;
+    case "sentido": etapa("juri", r ? "ativa" : "feita"); break;
+    case "xilogravura": etapa("xilo", r ? "ativa" : ev.url ? "feita" : "erro"); break;
+    case "fim": for (const k of ["noticia", "fato", "versos", "metrica", "juri"]) etapa(k, "feita"); etapa("fim", "feita");
+      if (!ESTADO.narracao) statusCartaz(ev.entra ? "pronto: entrou na coleção" : "pronto: foi para o descarte"); break;
+    case "erro": etapa(ETAPAS_ATIVAS.map(([k]) => k).find((k) => ESTADO[k] === "ativa") || "fim", "erro"); break;
+  }
+}
+// a altura da barra empurra o cartaz fixo e a rolagem para baixo dela
+new ResizeObserver(() => document.documentElement.style.setProperty("--barra-h", `${$("barra").hidden ? 0 : $("barra").offsetHeight}px`))
+  .observe($("barra"));
+
+// ---- seguir: a página e as etapas acompanham o que a IA está fazendo, com rolagem suave
+const SEGUIR_LS = "cordel-seguir", MODO_LS = "cordel-logs-modo";
+let SEGUIR = true;
+try { SEGUIR = localStorage.getItem(SEGUIR_LS) !== "0"; } catch {}
+const celular = () => matchMedia("(max-width: 860px)").matches;
+function ajustarSeguir(v) {
+  SEGUIR = v; $("seguir").checked = v; $("seguir-logs").checked = v;
+  try { localStorage.setItem(SEGUIR_LS, v ? "1" : "0"); } catch {}
+  if (v) rolarParaAgora();
+}
+$("seguir").onchange = (e) => ajustarSeguir(e.target.checked);
+$("seguir-logs").onchange = (e) => ajustarSeguir(e.target.checked);
+ajustarSeguir(SEGUIR);
+function rolarLogs(li) {
+  if (!SEGUIR || !li) return;
+  const caixa = celular() ? $("painel-logs") : $("linha");
+  caixa.scrollTo({ top: li.offsetTop - caixa.clientHeight / 3, behavior: calmo() ? "auto" : "smooth" });
+}
+function rolarParaAgora() {
+  if (!SEGUIR || $("barra").hidden) return;
+  const alvo = celular() ? document.querySelector(".area-cartaz") : $("painel-logs");
+  alvo.scrollIntoView({ block: "start", behavior: calmo() ? "auto" : "smooth" });
+}
+
+// ---- etapas simplificadas (de relance) ou avançadas (tabelas, relatórios, candidatas)
+function modoLogs(m) {
+  $("linha").classList.toggle("simples", m !== "avancado");
+  $("modo-simples").setAttribute("aria-pressed", String(m !== "avancado"));
+  $("modo-avancado").setAttribute("aria-pressed", String(m === "avancado"));
+  try { localStorage.setItem(MODO_LS, m); } catch {}
+}
+$("modo-simples").onclick = () => modoLogs("simples");
+$("modo-avancado").onclick = () => modoLogs("avancado");
+try { modoLogs(localStorage.getItem(MODO_LS) || "simples"); } catch { modoLogs("simples"); }
+// no celular, as etapas abrem por cima da página
+$("abrir-logs").onclick = () => { $("painel-logs").classList.add("aberto"); document.documentElement.classList.add("travado-logs"); $("fechar-logs").focus(); };
+$("fechar-logs").onclick = () => { $("painel-logs").classList.remove("aberto"); document.documentElement.classList.remove("travado-logs"); $("abrir-logs").focus(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("painel-logs").classList.contains("aberto")) $("fechar-logs").click(); });
 const dominio = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
 
 let andamento = {};
 function tratar(ev) {
+  marcarEtapa(ev);
   switch (ev.etapa) {
     case "noticia":
       if (ev.status === "rodando") { statusCartaz("lendo a notícia…"); return passo("noticia", "0 · buscando a notícia no link", "rodando", esc(ev.url)); }
@@ -591,7 +845,9 @@ function tratar(ev) {
         + ` <button class="sec" id="baixar">baixar folheto (PNG)</button>`;
       $("baixar").onclick = () => baixar(ev.arquivos.texto.split("/").pop().replace(/\.txt$/, ""));
       prepararNarracao(ev.id || REPLAY, REPLAY_NARRACAO, REPLAY_TEMPOS, REPLAY_VOZ);
-      if (!REPLAY && $("narrar-fim").checked && podeNarrar()) narrar(false);
+      prepararMusica(REPLAY_MUSICA);
+      if (!REPLAY && $("narrar-fim").checked && podeNarrar())
+        narrar(false).then((ok) => { if (ok && $("musica-fim").checked && podeMusica()) musicar(false).then(() => $("audio-narracao").play().catch(() => {})); });
       return passo("fim", `6 · registrado em ${ev.entra ? "folhetos/" : "descarte/"} após ${ev.rodadas} rodada(s)`, ev.entra ? "ok" : "erro");
     }
     case "teto":
@@ -631,7 +887,9 @@ estadoNome();
 // ---- conta: com a chave do professor precisa entrar; com a própria, só o nome
 let EU = { logado: false, chave_professor: true, cadastro_aberto: false };
 let abaConta = "entrar";
-const precisaNome = () => !!chave() && !EU.logado;
+// gera sem conta quem tem a própria chave, ou quando o professor libera a chave dele para todos
+const semConta = () => !!chave() || (!!EU.publico?.openai && !!EU.chave_professor);
+const precisaNome = () => semConta() && !EU.logado;
 
 function renderConta() {
   const c = $("conta"), propria = !!chave();
@@ -645,6 +903,10 @@ function renderConta() {
     $("abrir-ajustes").onclick = () => { $("ajustes").open = true; $("chave").focus(); };
     return;
   }
+  if (!EU.logado && EU.publico?.openai && EU.chave_professor) {
+    c.classList.remove("precisa");
+    $("bloco-nome").hidden = false;
+  }
   if (EU.logado) {
     c.innerHTML = `<div class="quem">Gerando como <b>${esc(EU.nome)}</b> <span class="sil">(${esc(EU.login)})</span>
       <span>${esc(EU.usadas_hoje)} de ${esc(EU.cota)} gerações hoje</span>
@@ -655,7 +917,9 @@ function renderConta() {
     return;
   }
   const cadastro = abaConta === "cadastro";
-  c.innerHTML = `<h2>Entre para gerar</h2>
+  const livre = EU.publico?.openai && EU.chave_professor;
+  c.innerHTML = `<h2>${livre ? "Pode gerar sem conta" : "Entre para gerar"}</h2>
+    ${livre ? "<p><b>O professor liberou a geração para todos:</b> é só escrever seu nome abaixo. Com uma conta, o folheto sai no seu login.</p>" : ""}
     <p>${EU.chave_professor
       ? "A geração usa a chave do professor, por isso pede uma conta. Ou use a sua própria chave em <button class=\"linkbotao\" type=\"button\" data-ajustes>Configurações</button>."
       : "Este site não tem mais a chave do professor. Coloque a sua em <button class=\"linkbotao\" type=\"button\" data-ajustes>Configurações</button> para gerar."}</p>
@@ -665,7 +929,7 @@ function renderConta() {
     </div>
     <form class="form-conta" id="form-conta" novalidate>
       ${cadastro ? (EU.cadastro_aberto
-        ? `<label>Código de convite da turma <input id="f-convite" autocomplete="off" required></label>
+        ? `${EU.cadastro_livre ? "" : '<label>Código de convite da turma <input id="f-convite" autocomplete="off" required></label>'}
            <label>Seu nome (sai impresso no folheto) <input id="f-nome" maxlength="60" autocomplete="name" required></label>` : "") : ""}
       ${cadastro && !EU.cadastro_aberto ? "<p>O cadastro está fechado. Peça uma conta ao professor.</p>" : `
       <label>E-mail ou usuário <input id="f-login" autocomplete="username" autocapitalize="none" spellcheck="false" required
@@ -681,7 +945,7 @@ function renderConta() {
     e.preventDefault();
     if (!$("f-login")) return;
     const corpo = { login: $("f-login").value, senha: $("f-senha").value };
-    if (cadastro) Object.assign(corpo, { convite: $("f-convite").value, nome: $("f-nome").value });
+    if (cadastro) Object.assign(corpo, { convite: $("f-convite")?.value || "", nome: $("f-nome").value });
     const r = await fetch(cadastro ? "/api/cadastro" : "/api/entrar", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
     if (!r.ok) {
@@ -698,6 +962,7 @@ async function carregarEu() {
   try { EU = await (await fetch("/api/eu")).json(); } catch {}
   renderConta();
   opcaoNarrarFim();
+  renderMusicaParams();
   if (NARRACAO.id) prepararNarracao(NARRACAO.id, NARRACAO.url, NARRACAO.tempos, NARRACAO.voz);
 }
 
@@ -745,14 +1010,110 @@ function renderVozes() {
       document.querySelectorAll(".vozes audio").forEach((o) => o !== a && o.pause())));
   }
   $("voz-atual").textContent = VOZES.find((v) => v.id === atual)?.nome || "…";
+  if (typeof opcaoNarrarFim === "function" && VOZES.length) $("voz-resumo").textContent = VOZES.find((v) => v.id === atual)?.nome || "voz padrão";
 }
-fetch("/api/vozes").then((r) => r.json()).then((d) => { VOZES = d.vozes; VOZ_PADRAO = d.padrao; renderVozes(); }).catch(() => {});
-const podeNarrar = () => !!chaveEleven() || (EU.admin && EU.narracao_professor);
+fetch("/api/vozes").then((r) => r.json()).then((d) => {
+  VOZES = d.vozes; VOZ_PADRAO = d.padrao; MUSICA_OPCOES = d.musica; renderVozes(); renderMusicaParams(); opcaoNarrarFim();
+}).catch(() => {});
 // destaca o verso e a palavra narrados no cartaz enquanto o áudio toca
 const buscarTempos = () => NARRACAO.tempos ? fetch(`/${NARRACAO.tempos}`).then((r) => r.ok ? r.json() : null) : Promise.resolve(null);
 acompanharNarracao($("audio-narracao"), $("versos"), buscarTempos);
-// narrar ao terminar: desligado por padrão; só aparece para quem pode narrar
-function opcaoNarrarFim() { $("l-narrar-fim").hidden = REPLAY || !podeNarrar(); if ($("l-narrar-fim").hidden) $("narrar-fim").checked = false; }
+// ---- extras: narração e música só aparecem para quem pode gravar (chave própria, professor,
+// ou quando o professor libera para todos)
+const podeNarrar = () => !!chaveEleven() || (EU.admin && EU.narracao_professor) || !!EU.publico?.voz;
+const podeMusica = () => !!chaveEleven() || (EU.admin && EU.narracao_professor) || !!EU.publico?.musica;
+function opcaoNarrarFim() {
+  $("l-narrar-fim").hidden = !!REPLAY || !podeNarrar();
+  $("l-musica-fim").hidden = !!REPLAY || !podeMusica();
+  if ($("l-narrar-fim").hidden) $("narrar-fim").checked = false;
+  if ($("l-musica-fim").hidden) $("musica-fim").checked = false;
+  $("musica-params").hidden = $("l-musica-fim").hidden || !$("musica-fim").checked;
+  $("extras-nota").hidden = !!REPLAY || (podeNarrar() && podeMusica());
+  $("voz-resumo").textContent = VOZES.find((v) => v.id === vozEscolhida())?.nome || "voz padrão";
+}
+// música toca por trás do narrador: ligar a música liga a narração; desligar a narração desliga a música
+$("narrar-fim").onchange = () => { if (!$("narrar-fim").checked) $("musica-fim").checked = false; opcaoNarrarFim(); };
+$("musica-fim").onchange = () => { if ($("musica-fim").checked && !$("l-narrar-fim").hidden) $("narrar-fim").checked = true; opcaoNarrarFim(); };
+
+// ---- parâmetros da música: os mesmos em dois lugares (extras e caixa da narração), lembrados no navegador
+const ROT_MUSICA = {
+  estilo: { ia: "a IA escolhe", baiao: "baião", forro: "forró pé-de-serra", xote: "xote", repente: "repente / viola", aboio: "aboio", maracatu: "maracatu" },
+  clima: { ia: "a IA escolhe", alegre: "alegre", epico: "épico", melancolico: "melancólico", tenso: "tenso", calmo: "calmo" },
+  andamento: { ia: "a IA escolhe", lento: "lento", medio: "médio", rapido: "rápido" },
+  instrumentos: { ia: "a IA escolhe", sanfona: "sanfona, zabumba e triângulo", viola: "viola e pandeiro", rabeca: "rabeca e pífano", percussao: "só percussão" },
+};
+const MUSICA_LS = "cordel-musica";
+let MUSICA_OPCOES = null;
+function lerMusica() { let v = {}; try { v = JSON.parse(localStorage.getItem(MUSICA_LS) || "{}"); } catch {} return v; }
+function renderMusicaParams() {
+  if (!MUSICA_OPCOES) return;
+  const salvo = lerMusica();
+  $("musica-params-2").innerHTML = Object.keys(ROT_MUSICA).map((k) =>
+    `<label>${k[0].toUpperCase() + k.slice(1)} <select data-musica="${k}"></select></label>`).join("");
+  for (const sel of [...document.querySelectorAll("#musica-params select, #musica-params-2 select")]) {
+    const k = sel.dataset.musica || sel.id.replace("m-", "");
+    sel.dataset.musica = k;
+    sel.innerHTML = (MUSICA_OPCOES[k] || ["ia"]).map((v) => `<option value="${esc(v)}">${esc(ROT_MUSICA[k]?.[v] ?? v)}</option>`).join("");
+    sel.value = (MUSICA_OPCOES[k] || []).includes(salvo[k]) ? salvo[k] : "ia";
+    sel.onchange = () => {
+      const novo = { ...lerMusica(), [k]: sel.value };
+      try { localStorage.setItem(MUSICA_LS, JSON.stringify(novo)); } catch {}
+      document.querySelectorAll(`select[data-musica="${k}"]`).forEach((o) => { o.value = sel.value; });
+    };
+  }
+}
+const escolhaMusica = () => Object.fromEntries(Object.keys(ROT_MUSICA).map((k) => [k, lerMusica()[k] || "ia"]));
+
+// ---- música de fundo: toca junto com a narração, mais baixa
+let MUSICA = { url: null };
+sincronizarMusica($("audio-narracao"), $("audio-musica"), () => $("tocar-musica").checked);
+$("volume-musica").oninput = (e) => { $("audio-musica").volume = Number(e.target.value); };
+$("audio-musica").volume = 0.25;
+$("tocar-musica").onchange = (e) => { if (!e.target.checked) $("audio-musica").pause(); else if (!$("audio-narracao").paused) $("audio-narracao").play(); };
+function prepararMusica(url) {
+  MUSICA = { url };
+  const narrada = !!NARRACAO.url;
+  $("musica-box").hidden = !url;
+  if (url) $("audio-musica").src = `/${url}`; else $("audio-musica").removeAttribute("src");
+  $("musicar").hidden = !(narrada && !url && podeMusica());
+  $("remusicar").hidden = !(url && EU.admin);
+  $("musica-opcoes-box").hidden = !(narrada && podeMusica() && (!url || EU.admin));
+}
+async function musicar(refazer = false) {
+  const botao = refazer ? $("remusicar") : $("musicar");
+  botao.disabled = true;
+  $("nota-musica").textContent = "compondo a música de fundo (pode levar um minuto)…";
+  incluirEtapa("musica"); etapa("musica", "ativa"); if (!$("barra").hidden) $("barra-acao").textContent = "compondo a música de fundo…";
+  const headers = { "Content-Type": "application/json" };
+  if (chaveEleven()) headers["X-ElevenLabs-Key"] = chaveEleven();
+  try {
+    const r = await fetch(`/api/musica/${encodeURIComponent(NARRACAO.id)}`, { method: "POST", headers, body: JSON.stringify({ refazer, ...escolhaMusica() }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $("nota-musica").textContent = typeof d.detail === "string" ? d.detail : "A música falhou."; etapa("musica", "erro"); return false; }
+    prepararMusica(`${d.url}?v=${Date.now()}`);
+    $("nota-musica").textContent = d.nova ? `música de fundo pronta: ${d.resumo}, ${d.segundos}s (${d.creditos} créditos)` : "";
+    etapa("musica", "feita"); if (!$("barra").hidden) $("barra-acao").textContent = "pronto: folheto, narração e música";
+    carregarAnteriores(NARRACAO.id);
+    return true;
+  } finally { botao.disabled = false; }
+}
+$("musicar").onclick = () => musicar(false);
+$("remusicar").onclick = () => musicar(true);
+
+// ---- gravações refeitas continuam no histórico, ouvíveis
+function renderAnteriores(ant) {
+  const itensAnt = [...(ant?.narracoes || []).map((a) => ({ ...a, tipo: "narração" })), ...(ant?.musicas || []).map((a) => ({ ...a, tipo: "música" }))]
+    .sort((a, b) => String(b.quando).localeCompare(String(a.quando)));
+  $("anteriores").hidden = !itensAnt.length;
+  $("anteriores-n").textContent = itensAnt.length;
+  $("anteriores-lista").innerHTML = itensAnt.map((a) => `<div class="item">${esc(a.tipo)} · ${esc(a.descricao)} ·
+    ${a.quando ? esc(new Date(a.quando).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })) : ""}
+    ${a.creditos ? `· ${esc(a.creditos)} créditos` : ""}<audio controls preload="none" src="/${esc(a.url)}"></audio></div>`).join("");
+}
+async function carregarAnteriores(id) {
+  if (!id) return;
+  try { const d = await (await fetch(`/api/geracao/${encodeURIComponent(id)}`)).json(); renderAnteriores(d.anteriores); } catch {}
+}
 function prepararNarracao(id, url, tempos = null, vozGravada = null) {
   if (id !== NARRACAO.id || url !== NARRACAO.url) acompanharNarracao($("audio-narracao"), $("versos"), buscarTempos);
   NARRACAO = { id, url, tempos, voz: vozGravada };
@@ -768,20 +1129,26 @@ function prepararNarracao(id, url, tempos = null, vozGravada = null) {
   $("trocar-voz").hidden = !podeNarrar() || (!!url && !EU.admin);
   $("nota-narracao").textContent = url ? (vozGravada ? `narrada com ${vozGravada}` : "")
     : podeNarrar() ? "" : "Para narrar, coloque a sua chave da ElevenLabs em Configurações (a do site é só do professor).";
+  prepararMusica(MUSICA.url);
 }
 async function narrar(refazer = false) {
   const botao = refazer ? $("renarrar") : $("narrar");
   botao.disabled = true; $("nota-narracao").textContent = "gravando a narração…";
+  incluirEtapa("narracao"); etapa("narracao", "ativa"); if (!$("barra").hidden) $("barra-acao").textContent = "gravando a narração com a voz nordestina…";
   const headers = { "Content-Type": "application/json" };
   if (chaveEleven()) headers["X-ElevenLabs-Key"] = chaveEleven();
   try {
     const r = await fetch(`/api/narracao/${encodeURIComponent(NARRACAO.id)}`, { method: "POST", headers, body: JSON.stringify({ refazer, voz: vozEscolhida() }) });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok) { $("nota-narracao").textContent = typeof d.detail === "string" ? d.detail : "A narração falhou."; return; }
+    if (!r.ok) { $("nota-narracao").textContent = typeof d.detail === "string" ? d.detail : "A narração falhou."; etapa("narracao", "erro"); return false; }
     prepararNarracao(NARRACAO.id, `${d.url}?v=${Date.now()}`, d.tempos ? `${d.tempos}?v=${Date.now()}` : null, d.voz);
     $("nota-narracao").textContent = d.nova ? `narração gravada com ${d.voz} (${d.creditos} créditos da ElevenLabs)`
       : d.voz ? `já estava narrada com ${d.voz}` : "";
-    $("audio-narracao").play().catch(() => {});
+    etapa("narracao", "feita"); if (!$("barra").hidden && !temEtapa("musica")) $("barra-acao").textContent = "pronto: folheto e narração";
+    prepararMusica(MUSICA.url);
+    carregarAnteriores(NARRACAO.id);
+    if (!temEtapa("musica") || MUSICA.url) $("audio-narracao").play().catch(() => {});
+    return true;
   } finally { botao.disabled = false; }
 }
 $("narrar").onclick = () => narrar(false);
@@ -794,7 +1161,7 @@ $("chave-remover").onclick = () => {
 
 $("gerar").onclick = async () => {
   $("aviso-gerar").textContent = "";
-  if (!chave() && !EU.logado) {
+  if (!semConta() && !EU.logado) {
     $("aviso-gerar").textContent = EU.chave_professor ? "Entre com a sua conta (no topo) para gerar." : "Coloque a sua chave da OpenAI em Configurações para gerar.";
     if (!EU.chave_professor) $("ajustes").open = true;
     $("conta").scrollIntoView({ block: "center" });
@@ -843,7 +1210,11 @@ function fecharCartaz() {
 
 async function gerar(noticia, url) {
   $("gerar").disabled = true;
+  MUSICA = { url: null }; REPLAY_MUSICA = null; renderAnteriores(null);
+  iniciarEtapas({ imagem: $("imagem").checked, narrar: $("narrar-fim").checked && podeNarrar(), musica: $("musica-fim").checked && podeMusica() });
   prepararCartaz(lerCfg().estrofes, $("imagem").checked);
+  etapa("noticia", "ativa");
+  requestAnimationFrame(rolarParaAgora);
   const headers = { "Content-Type": "application/json" };
   if (chave()) headers["X-OpenAI-Key"] = chave();
   try {
@@ -883,13 +1254,14 @@ async function gerar(noticia, url) {
 }
 
 // ---- /geracao/<id>: a mesma linha do tempo, tocada a partir do caderno
-let REPLAY_NARRACAO = null, REPLAY_TEMPOS = null, REPLAY_VOZ = null;
+let REPLAY_NARRACAO = null, REPLAY_TEMPOS = null, REPLAY_VOZ = null, REPLAY_MUSICA = null;
 const REPLAY = location.pathname.startsWith("/geracao/") ? decodeURIComponent(location.pathname.split("/")[2] || "") : null;
 const dormir = (ms) => new Promise((ok) => setTimeout(ok, ms));
 const calmo = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 async function tocar(dados, passoAPasso) {
   const cfg = dados.config || {};
+  iniciarEtapas({ imagem: cfg.com_imagem !== false });
   prepararCartaz(cfg.estrofes || 1, cfg.com_imagem !== false);
   let antes = 0;
   for (const ev of dados.eventos) {
@@ -912,6 +1284,7 @@ if (REPLAY) {
     if (!r.ok) { $("replay-meta").textContent = "Essa geração não está no caderno."; return; }
     const dados = await r.json(), cfg = dados.config || {};
     REPLAY_NARRACAO = dados.narracao; REPLAY_TEMPOS = dados.narracao_tempos; REPLAY_VOZ = dados.narracao_voz;
+    REPLAY_MUSICA = dados.musica; renderAnteriores(dados.anteriores);
     await CONFIG.catch(() => {});
     const quando = dados.inicio ? new Date(dados.inicio).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
     $("replay-meta").innerHTML = [dados.autor ? `gerada por <b>${esc(dados.autor)}</b>` : "gerada pelo grupo", esc(quando),

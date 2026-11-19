@@ -5,6 +5,7 @@ import json
 import re
 import time
 from datetime import datetime
+from pathlib import Path
 import traceback
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -12,7 +13,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import cadernos, contas, criacomp, custos, dicionario, linha_do_tempo, narracao, prompts
+from . import cadernos, contas, criacomp, custos, dicionario, linha_do_tempo, musica, narracao, prompts
 from .workflow import (CHAVE_PROFESSOR, ECONOMICO, IMAGENS, MAX_RODADAS, OPCOES, OPCOES_CHAVE_PROPRIA,
                        PASTAS, RAIZ, TETO_PROPRIA_USD, TETO_USD, Config, run_cordel)
 
@@ -124,7 +125,9 @@ def sair(request: Request, resposta: Response):
 @app.get("/api/eu")
 def eu(usuario: dict | None = Depends(usuario_atual)):
     """Quem está logado, a cota de hoje, e se o site ainda tem a chave do professor."""
-    base = {"chave_professor": bool(CHAVE_PROFESSOR), "cadastro_aberto": bool(contas.CONVITE),
+    pub = contas.publico()
+    base = {"chave_professor": bool(CHAVE_PROFESSOR), "cadastro_aberto": bool(contas.CONVITE) or pub["cadastro"],
+            "cadastro_livre": pub["cadastro"], "publico": pub,
             "narracao_professor": bool(narracao.CHAVE_PROFESSOR)}
     if not usuario:
         return {"logado": False, **base}
@@ -134,6 +137,25 @@ def eu(usuario: dict | None = Depends(usuario_atual)):
 @app.get("/admin")
 def admin_pagina():
     return pagina("admin.html")
+
+
+class ConfigSite(BaseModel):
+    cadastro_livre: bool | None = None
+    openai_publica: bool | None = None
+    eleven_publica: bool | None = None
+    eleven_voz: bool | None = None
+    eleven_musica: bool | None = None
+
+
+@app.get("/api/admin/config")
+def admin_config(_: dict = Depends(admin)):
+    return {"config": contas.config(), "tem_openai": bool(CHAVE_PROFESSOR), "tem_eleven": bool(narracao.CHAVE_PROFESSOR),
+            "tem_convite": bool(contas.CONVITE)}
+
+
+@app.post("/api/admin/config", dependencies=[Depends(_so_json)])
+def admin_mudar_config(dados: ConfigSite, _: dict = Depends(admin)):
+    return {"config": contas.mudar_config({k: v for k, v in dados.model_dump().items() if v is not None})}
 
 
 @app.get("/api/admin/usuarios")
@@ -200,21 +222,30 @@ def geracao(nome: str):
     cfg, _ = cadernos.config(log)
     return {"id": nome, "eventos": evs, "reconstruido": reconstruido, "config": cfg,
             "inicio": cadernos.hora(log.get("inicio")), "autor": log.get("autor"), "narracao": _narracao(nome),
-            "narracao_tempos": _tempos(nome), "narracao_voz": _voz_da_narracao(log)}
+            "narracao_tempos": _tempos(nome), "narracao_voz": _voz_da_narracao(log),
+            "musica": _musica(nome), "anteriores": _anteriores(log)}
 
 
 _narrando: dict[str, asyncio.Lock] = {}
 
 
 class PedidoNarracao(BaseModel):
-    refazer: bool = False  # só admin: gera de novo por cima (por exemplo, com outra voz)
+    refazer: bool = False  # só admin: gera de novo; a anterior vai para o histórico
     voz: str | None = None  # uma das narracao.VOZES; sem ela, a padrão
+
+
+class PedidoMusica(BaseModel):
+    refazer: bool = False
+    estilo: str = "ia"
+    clima: str = "ia"
+    andamento: str = "ia"
+    instrumentos: str = "ia"
 
 
 @app.get("/api/vozes")
 def vozes():
-    """As vozes de narração, com a amostra de cada uma (a mesma estrofe)."""
-    return {"vozes": narracao.catalogo(), "padrao": narracao.PADRAO}
+    """As vozes de narração, com a amostra de cada uma (a mesma estrofe), e as opções da música."""
+    return {"vozes": narracao.catalogo(), "padrao": narracao.PADRAO, "musica": musica.opcoes()}
 
 
 def _voz_da_narracao(log: dict) -> str | None:
@@ -224,60 +255,153 @@ def _voz_da_narracao(log: dict) -> str | None:
     return narracao.VOZES[k]["nome"] if k in narracao.VOZES else None
 
 
+def _musica(nome: str) -> str | None:
+    return f"narracao/{nome}.musica.mp3" if (PASTAS["narracao"] / f"{nome}.musica.mp3").is_file() else None
+
+
+def _anteriores(log: dict) -> dict:
+    """Narrações e músicas que foram refeitas: continuam ouvíveis, no histórico."""
+    def lista(chave, rotulo):
+        return [{"url": n["arquivo"], "quando": n.get("quando"), "creditos": n.get("creditos"),
+                 "descricao": rotulo(n)} for n in log.get(chave) or [] if n.get("arquivo")]
+    return {"narracoes": lista("narracoes", lambda n: narracao.VOZES.get(n.get("preset"), {}).get("nome") or "voz antiga"),
+            "musicas": lista("musicas", lambda n: n.get("resumo") or "música")}
+
+
+def _caderno(nome: str) -> Path:
+    if not re.fullmatch(r"[\w-]{1,120}", nome) or not (f := PASTAS["caderno"] / f"{nome}.json").is_file():
+        raise HTTPException(404, "Essa geração não está no caderno.")
+    return f
+
+
+def _chave_eleven(request: Request, usuario: dict | None, o_que: str) -> str:
+    """A chave da ElevenLabs desta chamada: a da pessoa (cabeçalho) ou, só para admin, a do professor."""
+    chave = (request.headers.get("x-elevenlabs-key") or "").strip()
+    if chave and not narracao.CHAVE_OK.fullmatch(chave):
+        raise HTTPException(422, "Essa chave não parece uma chave da ElevenLabs.")
+    if chave:
+        return chave
+    if not narracao.CHAVE_PROFESSOR:
+        raise HTTPException(402, "Este site não tem chave da ElevenLabs. Coloque a sua em Configurações.")
+    pub = contas.publico()
+    liberado = pub["voz"] if o_que == "narração" else pub["musica"]
+    if (not usuario or not usuario["admin"]) and not liberado:
+        raise HTTPException(403, f"A {o_que} com a chave do professor é só para o professor. "
+                                 "Coloque a sua chave da ElevenLabs em Configurações.")
+    return narracao.CHAVE_PROFESSOR
+
+
+def _arquivar(atual: Path, rotulo: str) -> str | None:
+    """Tira a versão atual do caminho (sem apagar): vai para narracao/arquivo/, com a hora."""
+    if not atual.is_file():
+        return None
+    pasta = PASTAS["narracao"] / "arquivo"
+    pasta.mkdir(parents=True, exist_ok=True)
+    destino = pasta / f"{rotulo}-{datetime.now():%Y%m%d-%H%M%S-%f}.mp3"
+    atual.replace(destino)
+    return f"narracao/arquivo/{destino.name}"
+
+
+def _registrar(f: Path, chave_lista: str, entrada: dict, arquivo_anterior: str | None) -> None:
+    """Acrescenta a gravação ao caderno (para o custo ir a /logs) e marca onde a anterior foi parar."""
+    log = json.loads(f.read_text(encoding="utf-8"))
+    lista = log.setdefault(chave_lista, [])
+    if arquivo_anterior:
+        for antiga in reversed(lista):
+            if not antiga.get("arquivo"):
+                antiga["arquivo"] = arquivo_anterior
+                break
+    lista.append(entrada)
+    tmp = f.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(f)
+
+
 @app.post("/api/narracao/{nome}", dependencies=[Depends(_so_json)])
 async def narrar(nome: str, request: Request, pedido: PedidoNarracao | None = None,
                  usuario: dict | None = Depends(usuario_atual)):
-    """Gera (uma vez) a narração da sextilha. Já gerada, devolve o link sem gastar nada.
-    Com a chave do professor, só para admin; os outros mandam a própria no X-ElevenLabs-Key."""
-    if not re.fullmatch(r"[\w-]{1,120}", nome) or not (f := PASTAS["caderno"] / f"{nome}.json").is_file():
-        raise HTTPException(404, "Essa geração não está no caderno.")
+    """Gera a narração da sextilha. Já gerada, devolve o link sem gastar nada. O admin pode
+    refazer: a anterior não é apagada, vai para o histórico."""
+    f = _caderno(nome)
     refazer = bool(pedido and pedido.refazer)
     if refazer and not (usuario and usuario["admin"]):
         raise HTTPException(403, "Só o professor pode refazer uma narração.")
     if (url := _narracao(nome)) and not refazer:
         return {"url": url, "tempos": _tempos(nome), "nova": False,
                 "voz": _voz_da_narracao(json.loads(f.read_text(encoding="utf-8")))}
-    chave = (request.headers.get("x-elevenlabs-key") or "").strip()
-    if chave and not narracao.CHAVE_OK.fullmatch(chave):
-        raise HTTPException(422, "Essa chave não parece uma chave da ElevenLabs.")
-    if not chave:
-        if not narracao.CHAVE_PROFESSOR:
-            raise HTTPException(402, "Este site não tem chave da ElevenLabs. Coloque a sua em Configurações.")
-        if not usuario or not usuario["admin"]:
-            raise HTTPException(403, "A narração com a chave do professor é só para o professor. "
-                                     "Coloque a sua chave da ElevenLabs em Configurações para ouvir.")
-        chave = narracao.CHAVE_PROFESSOR
+    chave = _chave_eleven(request, usuario, "narração")
     estrofes = cadernos.estrofes(json.loads(f.read_text(encoding="utf-8")), "estrofes_finais")
     if not estrofes:
         raise HTTPException(422, "Essa geração não tem versos para narrar.")
-    trava = _narrando.setdefault(nome, asyncio.Lock())
-    async with trava:  # dois cliques ao mesmo tempo não pagam duas vezes
+    async with _narrando.setdefault(nome, asyncio.Lock()):  # dois cliques não pagam duas vezes
         if (url := _narracao(nome)) and not refazer:
             return {"url": url, "tempos": _tempos(nome), "nova": False,
                     "voz": _voz_da_narracao(json.loads(f.read_text(encoding="utf-8")))}
         k_voz, preset = narracao.voz(pedido.voz if pedido else None)
         audio, creditos, tempos = await narracao.sintetizar(estrofes, chave, preset)
         PASTAS["narracao"].mkdir(parents=True, exist_ok=True)
+        anterior = _arquivar(PASTAS["narracao"] / f"{nome}.mp3", nome)
+        velho = PASTAS["narracao"] / f"{nome}.json"
+        if anterior and velho.is_file():  # os tempos da anterior vão junto, com o mesmo nome
+            velho.replace(PASTAS["narracao"] / anterior.removeprefix("narracao/").replace(".mp3", ".json"))
         tmp = PASTAS["narracao"] / f"{nome}.mp3.tmp"
         tmp.write_bytes(audio)
         tmp.replace(PASTAS["narracao"] / f"{nome}.mp3")
-        arq_tempos = PASTAS["narracao"] / f"{nome}.json"
         if tempos:
-            arq_tempos.write_text(json.dumps(tempos, ensure_ascii=False), encoding="utf-8")
-        else:  # sem tempos novos, os velhos (de outro áudio) não servem
-            arq_tempos.unlink(missing_ok=True)
+            (PASTAS["narracao"] / f"{nome}.json").write_text(json.dumps(tempos, ensure_ascii=False), encoding="utf-8")
+        else:
+            velho.unlink(missing_ok=True)
         # o caderno registra a narração, para o custo dela aparecer em /logs (nunca a chave)
-        log = json.loads(f.read_text(encoding="utf-8"))
-        log.setdefault("narracoes", []).append({
+        _registrar(f, "narracoes", {
             "quando": datetime.now().astimezone().isoformat(timespec="seconds"), "creditos": creditos,
             "modelo": preset["modelo"], "voz": preset["voz"], "preset": k_voz,
+            "duracao": (tempos or {}).get("duracao"),
             "chave": "professor" if chave == narracao.CHAVE_PROFESSOR else "propria",
-            "por": usuario["login"] if usuario else None})
-        tmp = f.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp.replace(f)
+            "por": usuario["login"] if usuario else None}, anterior)
     return {"url": _narracao(nome), "tempos": _tempos(nome), "nova": True, "creditos": creditos,
             "voz": preset["nome"]}
+
+
+@app.post("/api/musica/{nome}", dependencies=[Depends(_so_json)])
+async def musicar(nome: str, request: Request, pedido: PedidoMusica | None = None,
+                  usuario: dict | None = Depends(usuario_atual)):
+    """A música de fundo da narração: instrumental, do tamanho dela. Precisa da narração antes."""
+    f = _caderno(nome)
+    pedido = pedido or PedidoMusica()
+    for campo, valores in (("estilo", musica.ESTILOS), ("clima", musica.CLIMAS),
+                           ("andamento", musica.ANDAMENTOS), ("instrumentos", musica.INSTRUMENTOS)):
+        if getattr(pedido, campo) not in valores:
+            raise HTTPException(422, f"{campo} inválido.")
+    if pedido.refazer and not (usuario and usuario["admin"]):
+        raise HTTPException(403, "Só o professor pode refazer a música.")
+    if (url := _musica(nome)) and not pedido.refazer:
+        return {"url": url, "nova": False}
+    if not _narracao(nome):
+        raise HTTPException(409, "Narre a sextilha antes: a música toca por trás do narrador.")
+    chave = _chave_eleven(request, usuario, "música")
+    log = json.loads(f.read_text(encoding="utf-8"))
+    duracao = next((n.get("duracao") for n in reversed(log.get("narracoes") or []) if n.get("duracao")), None)
+    if not duracao and (t := PASTAS["narracao"] / f"{nome}.json").is_file():
+        duracao = json.loads(t.read_text(encoding="utf-8")).get("duracao")
+    duracao = duracao or 15 * max(1, len(cadernos.estrofes(log, "estrofes_finais")))
+    titulo = (log.get("fato") or {}).get("titulo") or nome
+    async with _narrando.setdefault(f"{nome}:musica", asyncio.Lock()):
+        if (url := _musica(nome)) and not pedido.refazer:
+            return {"url": url, "nova": False}
+        escolha = pedido.model_dump(exclude={"refazer"})
+        audio, creditos, segundos, texto = await musica.compor(titulo, escolha, duracao, chave)
+        PASTAS["narracao"].mkdir(parents=True, exist_ok=True)
+        anterior = _arquivar(PASTAS["narracao"] / f"{nome}.musica.mp3", f"{nome}-musica")
+        tmp = PASTAS["narracao"] / f"{nome}.musica.mp3.tmp"
+        tmp.write_bytes(audio)
+        tmp.replace(PASTAS["narracao"] / f"{nome}.musica.mp3")
+        resumo = ", ".join(v for v in escolha.values() if v != "ia") or "a IA escolheu"
+        _registrar(f, "musicas", {
+            "quando": datetime.now().astimezone().isoformat(timespec="seconds"), "creditos": creditos,
+            "segundos": segundos, "modelo": musica.MODELO, "escolha": escolha, "resumo": resumo, "prompt": texto,
+            "chave": "professor" if chave == narracao.CHAVE_PROFESSOR else "propria",
+            "por": usuario["login"] if usuario else None}, anterior)
+    return {"url": _musica(nome), "nova": True, "creditos": creditos, "segundos": segundos, "resumo": resumo}
 
 
 @app.get("/sextilhas")
@@ -316,7 +440,7 @@ def colecao():
             "estrofes": cadernos.estrofes(log, "estrofes_finais"),
             "imagem": arq.get("imagem"), "texto": arq.get("texto"),
             "url": log.get("url"), "fonte": log.get("fonte"), "narracao": _narracao(f.stem),
-            "narracao_tempos": _tempos(f.stem),
+            "narracao_tempos": _tempos(f.stem), "musica": _musica(f.stem),
             "motivo": log.get("motivo"), "rodadas": log.get("rodadas_de_correcao"),
             "forma": {k: cfg.get(k) for k in ("forma", "estrofes", "encadeamento", "narrador")},
         })
@@ -372,6 +496,7 @@ def logs():
             "texto": custo["texto"], "imagem": custo["imagem"], "total": custo["total"],
             "narracao": custo["narracao"], "creditos_narracao": custo["creditos_narracao"],
             "narracoes": [{k: n.get(k) for k in ("quando", "creditos", "modelo", "chave")} for n in log.get("narracoes", [])],
+            "musicas": [{k: n.get(k) for k in ("quando", "creditos", "segundos", "resumo", "chave")} for n in log.get("musicas", [])],
             "imagem_medida": custo["imagem_medida"], "tem_imagem": custo["tem_imagem"],
             "chamadas": chamadas,
             "arquivos": _arquivos(f, log),
@@ -405,7 +530,7 @@ def historico():
             "rodadas": log.get("rodadas_de_correcao"), "duvidas": log.get("duvidas_para_o_grupo") or [],
             "angulo": candidatas[escolhida]["angulo"] if escolhida is not None and escolhida < len(candidatas) else None,
             "justificativa": (log.get("escolhida") or {}).get("justificativa"),
-            "custo": custos.resumo(log)["total"], "narracao": _narracao(f.stem), "narracao_tempos": _tempos(f.stem),
+            "custo": custos.resumo(log)["total"], "narracao": _narracao(f.stem), "narracao_tempos": _tempos(f.stem), "musica": _musica(f.stem),
             "arquivos": _arquivos(f, log),
         })
     return {"itens": itens}
@@ -426,7 +551,7 @@ def config():
 CHAVE_OK = re.compile(r"sk-[A-Za-z0-9_\-]{20,300}")
 # uma geração por vez por pessoa: abrir várias abas não multiplica o gasto. A trava vence
 # sozinha: se a página fechar antes do streaming começar, o finally abaixo nem roda.
-gerando: dict[int, float] = {}
+gerando: dict = {}
 TRAVA_SEGUNDOS = 15 * 60
 
 
@@ -437,11 +562,14 @@ async def cordel(pedido: Pedido, request: Request, usuario: dict | None = Depend
     chave_propria = (request.headers.get("x-openai-key") or "").strip()
     if chave_propria and not CHAVE_OK.fullmatch(chave_propria):
         raise HTTPException(422, "Essa chave não parece uma chave da OpenAI (começa com sk-).")
+    anonimo = False
     if not chave_propria:
         if not CHAVE_PROFESSOR:
             raise HTTPException(402, "Este site não tem mais a chave do professor. Coloque a sua nas configurações.")
         if not usuario:
-            raise HTTPException(401, "Entre com sua conta para gerar com a chave do professor.")
+            if not contas.config()["openai_publica"]:
+                raise HTTPException(401, "Entre com sua conta para gerar com a chave do professor.")
+            anonimo = True  # o professor liberou a chave para todos: conta por IP
     autor = usuario["nome"] if usuario else " ".join(pedido.autor.split())
     if not autor or len(autor) > 60:
         raise HTTPException(422, "Coloque seu nome (até 60 caracteres) para gerar.")
@@ -450,12 +578,13 @@ async def cordel(pedido: Pedido, request: Request, usuario: dict | None = Depend
         cfg = Config(**{k: v for k, v in pedido.config.items() if k in opcoes}).validar(opcoes)
     except (TypeError, ValueError) as e:
         raise HTTPException(422, f"Configuração inválida: {e}") from None
-    uso = None
+    uso, trava = None, None
     if not chave_propria:
-        if time.time() - gerando.get(usuario["id"], 0) < TRAVA_SEGUNDOS:
+        trava = f"ip:{_ip(request)}" if anonimo else usuario["id"]
+        if time.time() - gerando.get(trava, 0) < TRAVA_SEGUNDOS:
             raise HTTPException(429, "Você já tem uma geração em andamento. Espere ela terminar.")
-        uso = contas.reservar(usuario)
-        gerando[usuario["id"]] = time.time()
+        uso = contas.reservar_ip(_ip(request)) if anonimo else contas.reservar(usuario)
+        gerando[trava] = time.time()
     chave = chave_propria or CHAVE_PROFESSOR
 
     def sem_chave(texto: str) -> str:
@@ -476,7 +605,7 @@ async def cordel(pedido: Pedido, request: Request, usuario: dict | None = Depend
             yield f"data: {json.dumps({'etapa': 'erro', 'erro': sem_chave(f'{type(e).__name__}: {e}')})}\n\n"
         finally:
             if uso is not None:
-                gerando.pop(usuario["id"], None)
+                gerando.pop(trava, None)
                 if gastou:
                     contas.concluir(uso, fim and fim["arquivos"].get("caderno"), fim and (fim.get("custo") or {}).get("total"))
                 else:

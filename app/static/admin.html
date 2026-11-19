@@ -34,6 +34,19 @@
   #msg { font-weight: bold; color: var(--vermelho); min-height: 1.4em; margin: 8px 0; }
   #msg.ok { color: var(--verde); }
   .acoes { display: flex; gap: 6px; }
+  .config-site { display: grid; gap: 8px; }
+  .chave-site { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 2px solid var(--tinta); background: #fbf6ea; cursor: pointer; }
+  .chave-site.filha { margin-left: 28px; border-style: dashed; }
+  .chave-site:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+  .chave-site input { appearance: none; flex: none; width: 50px; height: 28px; border: 2px solid var(--tinta); border-radius: 999px;
+                      position: relative; cursor: inherit; margin: 0; transition: background .2s; }
+  .chave-site input::before { content: ""; position: absolute; width: 18px; height: 18px; top: 3px; left: 3px; border-radius: 50%;
+                              background: var(--tinta); transition: transform .2s; }
+  .chave-site input:checked { background: var(--tinta); }
+  .chave-site input:checked::before { transform: translateX(22px); background: var(--papel); }
+  .chave-site input:focus-visible { outline: 3px solid var(--vermelho); outline-offset: 2px; }
+  .chave-site b { display: block; font: 700 15px "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .5px; }
+  .chave-site span span { font-size: 12.5px; color: var(--tinta-2); }
 </style>
 </head>
 <body>
@@ -45,6 +58,9 @@
   <div id="msg" role="status"></div>
   <section id="painel" hidden>
     <p class="nota" id="resumo"></p>
+    <h2>Configurações do site</h2>
+    <div class="config-site" id="config-site"></div>
+    <p class="nota">Só admin muda isto. O professor e os admins continuam podendo tudo, com as chaves ligadas ou não.</p>
     <h2>Contas</h2>
     <div class="tabela"><table>
       <thead><tr><th>Usuário</th><th>Nome</th><th>Hoje</th><th>Cota/dia</th><th>Gerações</th><th>Gasto (US$)</th><th>Última</th><th></th></tr></thead>
@@ -104,6 +120,27 @@ async function carregar() {
   });
 }
 
+const CHAVES_SITE = [
+  ["cadastro_livre", "Cadastro livre", "qualquer pessoa cria conta, sem o código de convite"],
+  ["openai_publica", "OpenAI para todos", "gera folheto com a chave do professor sem conta (limite diário por IP)"],
+  ["eleven_publica", "ElevenLabs para todos", "libera a chave da ElevenLabs do professor (escolha abaixo para quê)"],
+  ["eleven_voz", "Voz", "narração com a voz nordestina", "eleven_publica"],
+  ["eleven_musica", "Música", "música de fundo da narração (~15 créditos por segundo)", "eleven_publica"],
+];
+async function carregarConfig() {
+  const r = await fetch("/api/admin/config");
+  if (!r.ok) return;
+  const { config, tem_openai, tem_eleven } = await r.json();
+  const falta = { openai_publica: !tem_openai && "o site não tem a chave da OpenAI do professor",
+                  eleven_publica: !tem_eleven && "o site não tem a chave da ElevenLabs do professor" };
+  $("config-site").innerHTML = CHAVES_SITE.map(([k, t, d, mae]) => `<label class="chave-site${mae ? " filha" : ""}">
+    <input type="checkbox" role="switch" data-k="${k}"${config[k] ? " checked" : ""}${mae && !config[mae] ? " disabled" : ""}>
+    <span><b>${esc(t)}</b><span>${esc(falta[k] || d)}</span></span></label>`).join("");
+  $("config-site").querySelectorAll("input").forEach((i) => i.onchange = () => acao(async () => {
+    await enviar("/api/admin/config", { [i.dataset.k]: i.checked }); await carregarConfig();
+  }, "Configuração salva."));
+}
+
 async function acao(f, ok) {
   try { await f(); msg(ok, true); } catch (e) { msg(e.message); }
   await carregar();
@@ -116,7 +153,7 @@ $("novo").onsubmit = (e) => {
     $("novo").reset();
   }, "Conta criada.");
 };
-carregar();
+carregar().then(carregarConfig);
 </script>
 </body>
 </html>

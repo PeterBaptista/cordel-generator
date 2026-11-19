@@ -83,7 +83,8 @@ def resumo(log: dict) -> dict:
     # a chamada da xilogravura (hospedeiro + imagem) conta inteira como imagem
     xilo = [c for c in chamadas if c["etapa"] == "xilogravura"]
     # a narração é feita depois, sob pedido; só a do professor sai da conta dele, mas as duas contam
-    creditos = sum(n.get("creditos") or 0 for n in log.get("narracoes", []))
+    # todas as gravações contam, inclusive as refeitas (estão no histórico e foram pagas)
+    creditos = sum(n.get("creditos") or 0 for n in [*log.get("narracoes", []), *log.get("musicas", [])])
     narracao = creditos * ELEVEN_USD_POR_1K_CREDITOS / 1000
     return {
         "texto": sum(c["total"] for c in chamadas if c["etapa"] != "xilogravura"),
